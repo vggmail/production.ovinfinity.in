@@ -95,7 +95,7 @@ class DynamicDataTable {
     }
 
     fetch() {
-        this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; padding: 2rem;">Loading data...</td></tr>';
+        this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; padding: 0.75rem 1rem;">Loading data...</td></tr>';
         
         const params = new URLSearchParams({
             page: this.state.page,
@@ -116,7 +116,7 @@ class DynamicDataTable {
         })
         .catch(err => {
             console.error('DataTable fetch error:', err);
-            this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; color: var(--error); padding: 2rem;">Failed to load data. Please refresh.</td></tr>';
+            this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; color: var(--error); padding: 0.75rem 1rem;">Failed to load data. Please refresh.</td></tr>';
         });
     }
 
@@ -125,7 +125,7 @@ class DynamicDataTable {
         this.tbody.innerHTML = '';
 
         if (data.length === 0) {
-            this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; padding: 2rem;">No matching records found.</td></tr>';
+            this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; padding: 0.75rem 1rem;">No matching records found.</td></tr>';
             if (this.infoText) this.infoText.textContent = 'Showing 0 to 0 of 0 entries';
             if (this.paginationContainer) this.paginationContainer.innerHTML = '';
             return;

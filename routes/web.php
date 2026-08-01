@@ -19,6 +19,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\RollSizeController;
 use App\Http\Controllers\LoomNumberController;
 use App\Http\Controllers\FabricColorController;
+use App\Http\Controllers\ProductionController;
+use App\Http\Controllers\PurchaseController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -38,6 +40,31 @@ Route::middleware(['auth'])->group(function () {
             'colorsCount' => \App\Models\FabricColor::count(),
         ]);
     })->name('dashboard');
+
+    // Profile Settings
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    // Inventories Prefix
+    Route::prefix('inventories')->name('inventories.')->group(function () {
+        // Production (table: intransaction, TransactionType = 1)
+        Route::get('/production', [ProductionController::class, 'index'])->name('production.index');
+        Route::get('/production/data', [ProductionController::class, 'data'])->name('production.data');
+        Route::get('/production/create', [ProductionController::class, 'create'])->name('production.create');
+        Route::post('/production', [ProductionController::class, 'store'])->name('production.store');
+        Route::get('/production/{id}/edit', [ProductionController::class, 'edit'])->name('production.edit');
+        Route::put('/production/{id}', [ProductionController::class, 'update'])->name('production.update');
+        Route::delete('/production/{id}', [ProductionController::class, 'destroy'])->name('production.destroy');
+
+        // Purchase (table: intransaction, TransactionType = 2)
+        Route::get('/purchase', [PurchaseController::class, 'index'])->name('purchase.index');
+        Route::get('/purchase/data', [PurchaseController::class, 'data'])->name('purchase.data');
+        Route::get('/purchase/create', [PurchaseController::class, 'create'])->name('purchase.create');
+        Route::post('/purchase', [PurchaseController::class, 'store'])->name('purchase.store');
+        Route::get('/purchase/{id}/edit', [PurchaseController::class, 'edit'])->name('purchase.edit');
+        Route::put('/purchase/{id}', [PurchaseController::class, 'update'])->name('purchase.update');
+        Route::delete('/purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
+    });
 
     // Masters Prefix
     Route::prefix('masters')->name('masters.')->group(function () {

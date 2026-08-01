@@ -74,7 +74,14 @@
             defaultSortCol: 'ID',
             defaultSortDir: 'desc',
             columns: [
-                { name: 'ID', sortable: true },
+                { 
+                    name: 'ID', 
+                    sortable: true,
+                    render: (val, row) => {
+                        const editUrl = "{{ route('masters.loomnumber.edit', ':id') }}".replace(':id', row.ID);
+                        return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
+                    }
+                },
                 { name: 'LoomNumber', sortable: true },
                 { name: 'LoomTypeName', sortable: true },
                 { 

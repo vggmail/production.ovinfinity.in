@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Fabric Color Master')
+@section('title', 'Production List')
 
 @section('content')
 <div class="content-header">
     <div class="content-title">
-        <h1>Fabric Color List</h1>
-        <p>Manage standard fabric dye and yarn colors</p>
+        <h1>Production List</h1>
+        <p>Manage fabric production inventory transactions</p>
     </div>
-    <a href="{{ route('masters.fabriccolor.create') }}" class="btn-circle-add" title="Add New Fabric Color">
+    <a href="{{ route('inventories.production.create') }}" class="btn-circle-add" title="Add New Production">
         +
     </a>
 </div>
@@ -26,16 +26,27 @@
             <span>entries</span>
         </div>
         <div class="datatable-search">
-            <input type="text" id="dt-search" placeholder="Search colors...">
+            <input type="text" id="dt-search" placeholder="Search production...">
         </div>
     </div>
 
     <div class="table-container">
-        <table class="datatable" id="fabriccolor-table">
+        <table class="datatable" id="production-table">
             <thead>
                 <tr>
-                    <th data-column="ID" style="width: 60px;">ID</th>
+                    <th data-column="ID" style="width: 50px;">ID</th>
+                    <th data-column="EntryDate">Entry Date</th>
+                    <th data-column="RollSize">Roll Size</th>
                     <th data-column="FabricColor">Fabric Color</th>
+                    <th data-column="LoomNumber">Loom Number</th>
+                    <th data-column="RequiredGramMeter">Required Gram Meter</th>
+                    <th data-column="ClosingMeter">Closing Meter</th>
+                    <th data-column="ActualMeter">Actual Meter</th>
+                    <th data-column="GrossWeight">Gross Weight</th>
+                    <th data-column="CoreWeight">Core Weight</th>
+                    <th data-column="NetWeight">Net Weight</th>
+                    <th data-column="ActualMeterWeight">Actual Meter Weight</th>
+                    <th data-column="Variation">Variation</th>
                     <th data-column="CreatedOn">Created On</th>
                     <th data-column="UpdatedOn">Updated On</th>
                     <th style="width: 140px;">Update | Delete</th>
@@ -68,8 +79,8 @@
             return `${day}-${month}-${year}`;
         }
 
-        const table = new DynamicDataTable('fabriccolor-table', {
-            url: "{{ route('masters.fabriccolor.data') }}",
+        const table = new DynamicDataTable('production-table', {
+            url: "{{ route('inventories.production.data') }}",
             defaultSortCol: 'ID',
             defaultSortDir: 'desc',
             columns: [
@@ -77,11 +88,22 @@
                     name: 'ID', 
                     sortable: true,
                     render: (val, row) => {
-                        const editUrl = "{{ route('masters.fabriccolor.edit', ':id') }}".replace(':id', row.ID);
+                        const editUrl = "{{ route('inventories.production.edit', ':id') }}".replace(':id', row.ID);
                         return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
                     }
                 },
-                { name: 'FabricColor', sortable: true },
+                { name: 'EntryDateFormatted', sortable: true },
+                { name: 'RollSizeName', sortable: true },
+                { name: 'FabricColorName', sortable: true },
+                { name: 'LoomNumberValue', sortable: true },
+                { name: 'RequiredGramMeter', sortable: true },
+                { name: 'ClosingMeter', sortable: true },
+                { name: 'ActualMeter', sortable: true },
+                { name: 'GrossWeight', sortable: true },
+                { name: 'CoreWeight', sortable: true },
+                { name: 'NetWeight', sortable: true },
+                { name: 'ActualMeterWeight', sortable: true },
+                { name: 'Variation', sortable: true },
                 { 
                     name: 'CreatedOn', 
                     sortable: true,
@@ -94,7 +116,7 @@
                 }
             ],
             actions: (row) => {
-                const editUrl = "{{ route('masters.fabriccolor.edit', ':id') }}".replace(':id', row.ID);
+                const editUrl = "{{ route('inventories.production.edit', ':id') }}".replace(':id', row.ID);
                 return `
                     <a href="${editUrl}" class="datatable-action-btn btn-edit" title="Edit">✏️</a>
                     <span style="opacity: 0.3; margin: 0 0.25rem;">|</span>
@@ -105,8 +127,8 @@
 
         // Global delete function
         window.deleteRecord = (id) => {
-            if (confirm('Are you sure you want to delete this fabric color?')) {
-                fetch("{{ route('masters.fabriccolor.destroy', ':id') }}".replace(':id', id), {
+            if (confirm('Are you sure you want to delete this production record?')) {
+                fetch("{{ route('inventories.production.destroy', ':id') }}".replace(':id', id), {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
