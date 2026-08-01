@@ -1,0 +1,3 @@
+ <connectionStrings>
+    <add name="xkehgfgdhd123ksnva543pqi" connectionString="Data Source=ovinfinity.in;Initial Catalog=humckbre_ProductionDB;User ID=Ovidata;Password=0cG9_3c1l;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False" providerName="System.Data.SqlClient" />
+  </connectionStrings>
