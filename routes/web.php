@@ -23,6 +23,7 @@ use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\DispatchController;
+use App\Http\Controllers\SummaryReportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -46,6 +47,11 @@ Route::middleware(['auth'])->group(function () {
     // Profile Settings
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    // Reports Prefix
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/summary', [SummaryReportController::class, 'index'])->name('summary.index');
+    });
 
     // Inventories Prefix
     Route::prefix('inventories')->name('inventories.')->group(function () {

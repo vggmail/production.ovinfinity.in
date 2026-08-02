@@ -106,6 +106,22 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item has-submenu {{ request()->routeIs('reports.*') ? 'open' : '' }}">
+                    <a href="#" onclick="toggleSubmenu(event)" class="submenu-toggle" title="Reports">
+                        <span style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span>📈</span> <span class="menu-text">Reports</span>
+                        </span>
+                        <span class="submenu-arrow">{{ request()->routeIs('reports.*') ? '▼' : '▶' }}</span>
+                    </a>
+                    <ul class="sidebar-submenu" style="display: {{ request()->routeIs('reports.*') ? 'flex' : 'none' }};">
+                        <li class="sidebar-subitem {{ request()->routeIs('reports.summary.*') ? 'active' : '' }}">
+                            <a href="{{ route('reports.summary.index') }}" title="Summary Report">
+                                <span>📊</span> <span class="menu-text">Summary Report</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="sidebar-item {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                     <a href="{{ route('profile.edit') }}" title="Profile Settings">
                         <span>👤</span> <span class="menu-text">Profile Settings</span>
@@ -174,6 +190,19 @@
                     localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
                 });
             }
+
+            // Auto-hide success alerts after 5 seconds
+            const successAlerts = document.querySelectorAll('.alert-success');
+            successAlerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease, margin-bottom 0.5s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 500);
+                }, 5000);
+            });
         });
 
         function toggleSubmenu(event) {
