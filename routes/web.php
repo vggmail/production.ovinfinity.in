@@ -22,6 +22,7 @@ use App\Http\Controllers\FabricColorController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\DispatchController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -75,6 +76,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transfer/{id}/edit', [TransferController::class, 'edit'])->name('transfer.edit');
         Route::put('/transfer/{id}', [TransferController::class, 'update'])->name('transfer.update');
         Route::delete('/transfer/{id}', [TransferController::class, 'destroy'])->name('transfer.destroy');
+
+        // Dispatch (table: indispatch)
+        Route::get('/dispatch', [DispatchController::class, 'index'])->name('dispatch.index');
+        Route::get('/dispatch/data', [DispatchController::class, 'data'])->name('dispatch.data');
+        Route::get('/dispatch/options', [DispatchController::class, 'getOptions'])->name('dispatch.options');
+        Route::get('/dispatch/create', [DispatchController::class, 'create'])->name('dispatch.create');
+        Route::post('/dispatch', [DispatchController::class, 'store'])->name('dispatch.store');
+        Route::get('/dispatch/{id}/edit', [DispatchController::class, 'edit'])->name('dispatch.edit');
+        Route::put('/dispatch/{id}', [DispatchController::class, 'update'])->name('dispatch.update');
+        Route::delete('/dispatch/{id}', [DispatchController::class, 'destroy'])->name('dispatch.destroy');
     });
 
     // Masters Prefix
