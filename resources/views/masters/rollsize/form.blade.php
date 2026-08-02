@@ -24,7 +24,7 @@
             <!-- ID (Read-only/Disabled) -->
             <div class="form-group">
                 <label for="ID">ID</label>
-                <input type="text" id="ID" name="ID" value="{{ $rollsize->exists ? $rollsize->ID : 'Auto-Increment' }}" disabled style="background-color: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);">
+                <input type="text" id="ID" name="ID" value="{{ $rollsize->exists ? $rollsize->ID : 'Auto-Increment' }}" disabled style="background-color: rgba(0,0,0,0.03); color: var(--text-secondary);">
             </div>
 
             <!-- Roll Size Input -->

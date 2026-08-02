@@ -346,8 +346,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 input:disabled,
 select:disabled {
-    opacity: 0.6;
+    opacity: 0.8;
     cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: var(--text-primary) !important;
 }
 
 .form-actions {

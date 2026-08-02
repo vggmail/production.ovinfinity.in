@@ -25,9 +25,9 @@
         <aside class="sidebar">
             <!-- Brand Wrapper matching mockups -->
             <div style="padding: 0.5rem 0.5rem 1.5rem 0.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--card-border); margin-bottom: 1rem;">
-                <div style="width: 38px; height: 38px; background: var(--accent-primary); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); flex-shrink: 0;">OP</div>
+                <div style="width: 38px; height: 38px; background: var(--accent-primary); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); flex-shrink: 0;">PRD</div>
                 <div class="brand-details">
-                    <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); line-height: 1.2;">Orient Prod</div>
+                    <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); line-height: 1.2;">Production</div>
                     <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Admin Panel</div>
                 </div>
             </div>
@@ -91,6 +91,11 @@
                         <li class="sidebar-subitem {{ request()->routeIs('inventories.purchase.*') ? 'active' : '' }}">
                             <a href="{{ route('inventories.purchase.index') }}" title="Purchase">
                                 <span>🛍️</span> <span class="menu-text">Purchase</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-subitem {{ request()->routeIs('inventories.transfer.*') ? 'active' : '' }}">
+                            <a href="{{ route('inventories.transfer.index') }}" title="Transfer">
+                                <span>🔄</span> <span class="menu-text">Transfer</span>
                             </a>
                         </li>
                     </ul>

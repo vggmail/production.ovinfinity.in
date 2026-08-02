@@ -21,6 +21,7 @@ use App\Http\Controllers\LoomNumberController;
 use App\Http\Controllers\FabricColorController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\TransferController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -64,6 +65,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/purchase/{id}/edit', [PurchaseController::class, 'edit'])->name('purchase.edit');
         Route::put('/purchase/{id}', [PurchaseController::class, 'update'])->name('purchase.update');
         Route::delete('/purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
+
+        // Transfer (table: intransfer)
+        Route::get('/transfer', [TransferController::class, 'index'])->name('transfer.index');
+        Route::get('/transfer/data', [TransferController::class, 'data'])->name('transfer.data');
+        Route::get('/transfer/get-rolls', [TransferController::class, 'getRolls'])->name('transfer.getRolls');
+        Route::get('/transfer/create', [TransferController::class, 'create'])->name('transfer.create');
+        Route::post('/transfer', [TransferController::class, 'store'])->name('transfer.store');
+        Route::get('/transfer/{id}/edit', [TransferController::class, 'edit'])->name('transfer.edit');
+        Route::put('/transfer/{id}', [TransferController::class, 'update'])->name('transfer.update');
+        Route::delete('/transfer/{id}', [TransferController::class, 'destroy'])->name('transfer.destroy');
     });
 
     // Masters Prefix
