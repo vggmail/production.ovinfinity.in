@@ -171,22 +171,49 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const reqGramInput = document.getElementById('RequiredGramMeter');
+        const actualMeterInput = document.getElementById('ActualMeter');
         const grossInput = document.getElementById('GrossWeight');
         const coreInput = document.getElementById('CoreWeight');
         const netWeightInput = document.getElementById('NetWeight');
+        const actualMeterWeightInput = document.getElementById('ActualMeterWeight');
+        const variationInput = document.getElementById('Variation');
 
-        function calcWeights() {
-            const gr = parseFloat(grossInput.value);
-            const cr = parseFloat(coreInput.value);
+        function calculateAll() {
+            // Net Weight = Gross Weight - Core Weight
+            const gr = parseFloat(grossInput?.value);
+            const cr = parseFloat(coreInput?.value);
             if (!isNaN(gr) && !isNaN(cr)) {
-                netWeightInput.value = (gr - cr).toFixed(2).replace(/\.00$/, '');
+                const netVal = gr - cr;
+                netWeightInput.value = isNaN(netVal) ? '' : netVal.toFixed(2).replace(/\.00$/, '');
+            }
+
+            // Actual Meter Weight = (Net Weight / Actual Meter) * 1000
+            const net = parseFloat(netWeightInput?.value);
+            const am = parseFloat(actualMeterInput?.value);
+            if (!isNaN(net) && !isNaN(am) && am !== 0) {
+                const amwVal = (net / am) * 1000;
+                actualMeterWeightInput.value = isNaN(amwVal) ? '' : amwVal.toFixed(2).replace(/\.00$/, '');
+            }
+
+            // Variation = Required Gram Meter Weight - Actual Meter Weight
+            const rgm = parseFloat(reqGramInput?.value);
+            const amw = parseFloat(actualMeterWeightInput?.value);
+            if (!isNaN(rgm) && !isNaN(amw)) {
+                const varVal = rgm - amw;
+                variationInput.value = isNaN(varVal) ? '' : varVal.toFixed(2).replace(/\.00$/, '');
             }
         }
 
-        if (grossInput && coreInput) {
-            grossInput.addEventListener('input', calcWeights);
-            coreInput.addEventListener('input', calcWeights);
-        }
+        const allInputs = [
+            reqGramInput, actualMeterInput, grossInput, coreInput, netWeightInput, actualMeterWeightInput
+        ];
+
+        allInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', calculateAll);
+            }
+        });
     });
 </script>
 @endsection
