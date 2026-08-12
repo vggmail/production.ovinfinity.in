@@ -40,7 +40,7 @@
 
             <div class="form-group">
                 <label for="GSTIN">GSTIN</label>
-                <input type="text" id="GSTIN" name="GSTIN" value="{{ old('GSTIN', $party->GSTIN) }}" placeholder="Enter GSTIN" required>
+                <input type="text" id="GSTIN" name="GSTIN" value="{{ old('GSTIN', $party->GSTIN) }}" placeholder="Enter GSTIN">
                 @error('GSTIN')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

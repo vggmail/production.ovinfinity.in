@@ -170,7 +170,7 @@ class DispatchController extends Controller
         $validated = $request->validate([
             'EntryDate' => 'required|date',
             'PartyName' => 'required|integer',
-            'InvoiceNumber' => 'required|string|max:50',
+            'InvoiceNumber' => 'nullable|string|max:50',
             'items' => 'required|array|min:1',
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollSize' => 'required|integer',
@@ -263,7 +263,7 @@ class DispatchController extends Controller
         $validated = $request->validate([
             'EntryDate' => 'required|date',
             'PartyName' => 'required|integer',
-            'InvoiceNumber' => 'required|string|max:50',
+            'InvoiceNumber' => 'nullable|string|max:50',
             'items' => 'required|array|min:1',
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollSize' => 'required|integer',

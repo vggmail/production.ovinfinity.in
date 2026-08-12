@@ -57,7 +57,7 @@ class PartyController extends Controller
     {
         $validated = $request->validate([
             'PartyName' => 'required|string|max:50',
-            'GSTIN' => 'required|string|max:50',
+            'GSTIN' => 'nullable|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',
             'Street' => 'required|string|max:50',
@@ -89,7 +89,7 @@ class PartyController extends Controller
 
         $validated = $request->validate([
             'PartyName' => 'required|string|max:50',
-            'GSTIN' => 'required|string|max:50',
+            'GSTIN' => 'nullable|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',
             'Street' => 'required|string|max:50',

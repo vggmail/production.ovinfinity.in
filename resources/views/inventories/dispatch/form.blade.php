@@ -51,7 +51,7 @@
 
             <div class="form-group">
                 <label for="InvoiceNumber">Invoice Number</label>
-                <input type="text" name="InvoiceNumber" id="InvoiceNumber" value="{{ old('InvoiceNumber', $dispatch->InvoiceNumber) }}" class="@error('InvoiceNumber') is-invalid @enderror" placeholder="Enter invoice number" required>
+                <input type="text" name="InvoiceNumber" id="InvoiceNumber" value="{{ old('InvoiceNumber', $dispatch->InvoiceNumber) }}" class="@error('InvoiceNumber') is-invalid @enderror" placeholder="Enter invoice number">
                 @error('InvoiceNumber')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
