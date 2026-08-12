@@ -83,7 +83,7 @@
             </ul>
         </li>
 
-        <!-- <li class="sidebar-item has-submenu {{ request()->routeIs('reports.*') ? 'open' : '' }}">
+        <li class="sidebar-item has-submenu {{ request()->routeIs('reports.*') ? 'open' : '' }}">
             <a href="#" onclick="toggleSubmenu(event)" class="submenu-toggle" title="Reports">
                 <span style="display: flex; align-items: center; gap: 0.75rem;">
                     <span>📈</span> <span class="menu-text">Reports</span>
@@ -97,7 +97,7 @@
                     </a>
                 </li>
             </ul>
-        </li> -->
+        </li>
 
         <li class="sidebar-item {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
             <a href="{{ route('profile.edit') }}" title="Profile Settings">

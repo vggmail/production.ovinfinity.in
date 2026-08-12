@@ -60,6 +60,7 @@ class TransferController extends Controller
     public function getRolls(Request $request)
     {
         $sourceType = $request->input('source_type');
+        $transferId = $request->input('transfer_id');
 
         if (!$sourceType) {
             return response()->json([]);
@@ -67,6 +68,27 @@ class TransferController extends Controller
 
         $rolls = InTransaction::where('TransactionType', $sourceType)
             ->where('IsActive', 1)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('indispatchchild as dc')
+                  ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                  ->whereColumn('dc.RollNumber', 'intransaction.RollNumber')
+                  ->whereColumn('dc.SourceType', 'intransaction.TransactionType')
+                  ->where('dc.IsActive', 1)
+                  ->where('d.IsActive', 1);
+            })
+            ->whereNotExists(function ($q) use ($transferId) {
+                $q->select(DB::raw(1))
+                  ->from('intransferchild as tc')
+                  ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                  ->whereColumn('tc.RollNumber', 'intransaction.RollNumber')
+                  ->whereColumn('tc.SourceType', 'intransaction.TransactionType')
+                  ->where('tc.IsActive', 1)
+                  ->where('t.IsActive', 1);
+                if ($transferId) {
+                    $q->where('tc.Transfer', '!=', $transferId);
+                }
+            })
             ->select('RollNumber')
             ->distinct()
             ->orderBy('RollNumber', 'asc')
@@ -95,6 +117,39 @@ class TransferController extends Controller
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollNumber' => 'required|integer',
         ]);
+
+        $seenItems = [];
+        foreach ($validated['items'] as $item) {
+            $key = $item['SourceType'] . '_' . $item['RollNumber'];
+            if (isset($seenItems[$key])) {
+                return back()->withInput()->withErrors(['items' => "Duplicate Roll Number {$item['RollNumber']} in submission."]);
+            }
+            $seenItems[$key] = true;
+
+            $alreadyDispatched = DB::table('indispatchchild as dc')
+                ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                ->where('dc.SourceType', $item['SourceType'])
+                ->where('dc.RollNumber', $item['RollNumber'])
+                ->where('dc.IsActive', 1)
+                ->where('d.IsActive', 1)
+                ->exists();
+
+            if ($alreadyDispatched) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already dispatched and cannot be transferred."]);
+            }
+
+            $alreadyTransferred = DB::table('intransferchild as tc')
+                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                ->where('tc.SourceType', $item['SourceType'])
+                ->where('tc.RollNumber', $item['RollNumber'])
+                ->where('tc.IsActive', 1)
+                ->where('t.IsActive', 1)
+                ->exists();
+
+            if ($alreadyTransferred) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already transferred."]);
+            }
+        }
 
         DB::transaction(function () use ($validated, $request) {
             $userId = Auth::id() ?? 1;
@@ -147,6 +202,40 @@ class TransferController extends Controller
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollNumber' => 'required|integer',
         ]);
+
+        $seenItems = [];
+        foreach ($validated['items'] as $item) {
+            $key = $item['SourceType'] . '_' . $item['RollNumber'];
+            if (isset($seenItems[$key])) {
+                return back()->withInput()->withErrors(['items' => "Duplicate Roll Number {$item['RollNumber']} in submission."]);
+            }
+            $seenItems[$key] = true;
+
+            $alreadyDispatched = DB::table('indispatchchild as dc')
+                ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                ->where('dc.SourceType', $item['SourceType'])
+                ->where('dc.RollNumber', $item['RollNumber'])
+                ->where('dc.IsActive', 1)
+                ->where('d.IsActive', 1)
+                ->exists();
+
+            if ($alreadyDispatched) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already dispatched and cannot be transferred."]);
+            }
+
+            $alreadyTransferred = DB::table('intransferchild as tc')
+                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                ->where('tc.SourceType', $item['SourceType'])
+                ->where('tc.RollNumber', $item['RollNumber'])
+                ->where('tc.Transfer', '!=', $id)
+                ->where('tc.IsActive', 1)
+                ->where('t.IsActive', 1)
+                ->exists();
+
+            if ($alreadyTransferred) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already transferred."]);
+            }
+        }
 
         DB::transaction(function () use ($transfer, $validated, $id) {
             $userId = Auth::id() ?? 1;

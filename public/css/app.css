@@ -908,3 +908,80 @@ table.datatable tbody tr:last-child td {
     color: #ffffff;
     box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
 }
+
+/* Select2 Custom Theme Styles - Matching Native Form Select */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single {
+    height: 36px !important;
+    padding: 0.35rem 0.6rem !important;
+    background: #ffffff !important;
+    border: 1px solid #888888 !important;
+    border-radius: 6px !important;
+    font-family: inherit !important;
+    font-size: 0.9rem !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #333333 !important;
+    padding-left: 0 !important;
+    padding-right: 20px !important;
+    line-height: normal !important;
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #888888 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 34px !important;
+    right: 8px !important;
+    top: 1px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #666666 transparent transparent transparent !important;
+    border-width: 5px 4px 0 4px !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent #666666 transparent !important;
+    border-width: 0 4px 5px 4px !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #4f46e5 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15) !important;
+}
+
+.select2-dropdown {
+    border: 1px solid #888888 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    font-family: inherit !important;
+    font-size: 0.9rem !important;
+    background-color: #ffffff !important;
+    z-index: 9999 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+}
+
+.select2-search__field {
+    border: 1px solid #cccccc !important;
+    border-radius: 4px !important;
+    padding: 0.35rem 0.5rem !important;
+    outline: none !important;
+    font-family: inherit !important;
+    font-size: 0.85rem !important;
+}

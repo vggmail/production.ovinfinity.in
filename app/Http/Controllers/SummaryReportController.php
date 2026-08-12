@@ -19,16 +19,20 @@ class SummaryReportController extends Controller
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
                   ->from('intransferchild as tc')
+                  ->join('intransfer as tr', 'tc.Transfer', '=', 'tr.ID')
                   ->whereColumn('tc.RollNumber', 't.RollNumber')
                   ->whereColumn('tc.SourceType', 't.TransactionType')
-                  ->where('tc.IsActive', 1);
+                  ->where('tc.IsActive', 1)
+                  ->where('tr.IsActive', 1);
             })
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
                   ->from('indispatchchild as dc')
+                  ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
                   ->whereColumn('dc.RollNumber', 't.RollNumber')
                   ->whereColumn('dc.SourceType', 't.TransactionType')
-                  ->where('dc.IsActive', 1);
+                  ->where('dc.IsActive', 1)
+                  ->where('d.IsActive', 1);
             });
 
         if ($prod !== 'all' && in_array($prod, ['1', '2'])) {

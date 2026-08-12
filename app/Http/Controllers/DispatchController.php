@@ -67,15 +67,39 @@ class DispatchController extends Controller
         $rollSize = $request->input('roll_size');
         $rgm = $request->input('rgm');
         $fabricColor = $request->input('fabric_color');
+        $dispatchId = $request->input('dispatch_id');
 
         if (!$sourceType) {
             return response()->json([]);
         }
 
+        $baseQuery = InTransaction::where('TransactionType', $sourceType)
+            ->where('IsActive', 1)
+            ->whereNotExists(function ($q) use ($dispatchId) {
+                $q->select(DB::raw(1))
+                  ->from('indispatchchild as dc')
+                  ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                  ->whereColumn('dc.RollNumber', 'intransaction.RollNumber')
+                  ->whereColumn('dc.SourceType', 'intransaction.TransactionType')
+                  ->where('dc.IsActive', 1)
+                  ->where('d.IsActive', 1);
+                if ($dispatchId) {
+                    $q->where('dc.Dispatch', '!=', $dispatchId);
+                }
+            })
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('intransferchild as tc')
+                  ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                  ->whereColumn('tc.RollNumber', 'intransaction.RollNumber')
+                  ->whereColumn('tc.SourceType', 'intransaction.TransactionType')
+                  ->where('tc.IsActive', 1)
+                  ->where('t.IsActive', 1);
+            });
+
         switch ($step) {
             case 'roll_size':
-                $ids = InTransaction::where('TransactionType', $sourceType)
-                    ->where('IsActive', 1)
+                $ids = (clone $baseQuery)
                     ->whereNotNull('RollSize')
                     ->distinct()
                     ->pluck('RollSize');
@@ -87,9 +111,8 @@ class DispatchController extends Controller
                 if (!$rollSize) {
                     return response()->json([]);
                 }
-                $rgms = InTransaction::where('TransactionType', $sourceType)
+                $rgms = (clone $baseQuery)
                     ->where('RollSize', $rollSize)
-                    ->where('IsActive', 1)
                     ->whereNotNull('RequiredGramMeter')
                     ->distinct()
                     ->orderBy('RequiredGramMeter', 'asc')
@@ -101,10 +124,9 @@ class DispatchController extends Controller
                 if (!$rollSize || !$rgm) {
                     return response()->json([]);
                 }
-                $colorIds = InTransaction::where('TransactionType', $sourceType)
+                $colorIds = (clone $baseQuery)
                     ->where('RollSize', $rollSize)
                     ->where('RequiredGramMeter', $rgm)
-                    ->where('IsActive', 1)
                     ->whereNotNull('FabricColor')
                     ->distinct()
                     ->pluck('FabricColor');
@@ -116,11 +138,10 @@ class DispatchController extends Controller
                 if (!$rollSize || !$rgm || !$fabricColor) {
                     return response()->json([]);
                 }
-                $rolls = InTransaction::where('TransactionType', $sourceType)
+                $rolls = (clone $baseQuery)
                     ->where('RollSize', $rollSize)
                     ->where('RequiredGramMeter', $rgm)
                     ->where('FabricColor', $fabricColor)
-                    ->where('IsActive', 1)
                     ->whereNotNull('RollNumber')
                     ->distinct()
                     ->orderBy('RollNumber', 'asc')
@@ -157,6 +178,39 @@ class DispatchController extends Controller
             'items.*.FabricColor' => 'required|integer',
             'items.*.RollNumber' => 'required|integer',
         ]);
+
+        $seenItems = [];
+        foreach ($validated['items'] as $item) {
+            $key = $item['SourceType'] . '_' . $item['RollNumber'];
+            if (isset($seenItems[$key])) {
+                return back()->withInput()->withErrors(['items' => "Duplicate Roll Number {$item['RollNumber']} in submission."]);
+            }
+            $seenItems[$key] = true;
+
+            $alreadyDispatched = DB::table('indispatchchild as dc')
+                ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                ->where('dc.SourceType', $item['SourceType'])
+                ->where('dc.RollNumber', $item['RollNumber'])
+                ->where('dc.IsActive', 1)
+                ->where('d.IsActive', 1)
+                ->exists();
+
+            if ($alreadyDispatched) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already dispatched."]);
+            }
+
+            $alreadyTransferred = DB::table('intransferchild as tc')
+                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                ->where('tc.SourceType', $item['SourceType'])
+                ->where('tc.RollNumber', $item['RollNumber'])
+                ->where('tc.IsActive', 1)
+                ->where('t.IsActive', 1)
+                ->exists();
+
+            if ($alreadyTransferred) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already transferred and cannot be dispatched."]);
+            }
+        }
 
         DB::transaction(function () use ($validated) {
             $userId = Auth::id() ?? 1;
@@ -217,6 +271,40 @@ class DispatchController extends Controller
             'items.*.FabricColor' => 'required|integer',
             'items.*.RollNumber' => 'required|integer',
         ]);
+
+        $seenItems = [];
+        foreach ($validated['items'] as $item) {
+            $key = $item['SourceType'] . '_' . $item['RollNumber'];
+            if (isset($seenItems[$key])) {
+                return back()->withInput()->withErrors(['items' => "Duplicate Roll Number {$item['RollNumber']} in submission."]);
+            }
+            $seenItems[$key] = true;
+
+            $alreadyDispatched = DB::table('indispatchchild as dc')
+                ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                ->where('dc.SourceType', $item['SourceType'])
+                ->where('dc.RollNumber', $item['RollNumber'])
+                ->where('dc.Dispatch', '!=', $id)
+                ->where('dc.IsActive', 1)
+                ->where('d.IsActive', 1)
+                ->exists();
+
+            if ($alreadyDispatched) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already dispatched."]);
+            }
+
+            $alreadyTransferred = DB::table('intransferchild as tc')
+                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+                ->where('tc.SourceType', $item['SourceType'])
+                ->where('tc.RollNumber', $item['RollNumber'])
+                ->where('tc.IsActive', 1)
+                ->where('t.IsActive', 1)
+                ->exists();
+
+            if ($alreadyTransferred) {
+                return back()->withInput()->withErrors(['items' => "Roll Number {$item['RollNumber']} is already transferred and cannot be dispatched."]);
+            }
+        }
 
         DB::transaction(function () use ($dispatch, $validated, $id) {
             $userId = Auth::id() ?? 1;

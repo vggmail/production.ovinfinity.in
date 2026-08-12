@@ -100,6 +100,7 @@
 
         const initialItems = @json(old('items', $transfer->children ?? []));
         const rollsApiUrl = "{{ route('inventories.transfer.getRolls') }}";
+        const transferId = "{{ $transfer->exists ? $transfer->ID : '' }}";
 
         let rowCount = 0;
 
@@ -126,13 +127,23 @@
         async function fetchRollNumbers(sourceType, rollSelectElement, selectedRollNumber = null) {
             if (!sourceType) {
                 rollSelectElement.innerHTML = '<option value="">Select</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollSelectElement).select2({ placeholder: 'Select Roll Number' });
+                }
                 return;
             }
 
             rollSelectElement.innerHTML = '<option value="">Loading...</option>';
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollSelectElement).select2({ placeholder: 'Loading...' });
+            }
 
             try {
-                const response = await fetch(`${rollsApiUrl}?source_type=${sourceType}`);
+                let url = `${rollsApiUrl}?source_type=${sourceType}`;
+                if (transferId) {
+                    url += `&transfer_id=${transferId}`;
+                }
+                const response = await fetch(url);
                 const rolls = await response.json();
 
                 let html = '<option value="">Select</option>';
@@ -147,9 +158,15 @@
                 }
 
                 rollSelectElement.innerHTML = html;
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollSelectElement).select2({ placeholder: 'Select Roll Number' });
+                }
             } catch (err) {
                 console.error('Failed to load roll numbers', err);
                 rollSelectElement.innerHTML = '<option value="">Error loading</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollSelectElement).select2({ placeholder: 'Error loading' });
+                }
             }
         }
 
@@ -185,12 +202,19 @@
             const rollNumberSelect = tr.querySelector('.roll-number-select');
             const btnRemove = tr.querySelector('.btn-remove-row');
 
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollNumberSelect).select2({ placeholder: 'Select' });
+            }
+
             sourceTypeSelect.addEventListener('change', (e) => {
                 fetchRollNumbers(e.target.value, rollNumberSelect);
             });
 
             btnRemove.addEventListener('click', () => {
                 if (tableBody.children.length > 1) {
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(rollNumberSelect).select2('destroy');
+                    }
                     tr.remove();
                     updateSrNumbersAndTotal();
                 } else {

@@ -111,6 +111,7 @@
 
         const initialItems = @json(old('items', $dispatch->children ?? []));
         const optionsApiUrl = "{{ route('inventories.dispatch.options') }}";
+        const dispatchId = "{{ $dispatch->exists ? $dispatch->ID : '' }}";
 
         function updateSrNumbersAndTotal() {
             const rows = tableBody.querySelectorAll('tr');
@@ -136,8 +137,15 @@
 
         async function fetchOptions(step, params, selectElement, selectedValue = null) {
             selectElement.innerHTML = '<option value="">Loading...</option>';
+            if (step === 'roll_number' && typeof $.fn.select2 !== 'undefined') {
+                $(selectElement).select2({ placeholder: 'Loading...' });
+            }
 
-            const queryStr = new URLSearchParams({ step, ...params }).toString();
+            const requestParams = { step, ...params };
+            if (dispatchId) {
+                requestParams.dispatch_id = dispatchId;
+            }
+            const queryStr = new URLSearchParams(requestParams).toString();
             try {
                 const response = await fetch(`${optionsApiUrl}?${queryStr}`);
                 const data = await response.json();
@@ -167,6 +175,9 @@
                 }
 
                 selectElement.innerHTML = html;
+                if (step === 'roll_number' && typeof $.fn.select2 !== 'undefined') {
+                    $(selectElement).select2({ placeholder: 'Select Roll Number' });
+                }
             } catch (err) {
                 console.error(`Failed to load options for step ${step}`, err);
                 selectElement.innerHTML = '<option value="">Error loading</option>';
@@ -225,6 +236,10 @@
             const rollNumberSelect = tr.querySelector('.roll-number-select');
             const btnRemove = tr.querySelector('.btn-remove-row');
 
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollNumberSelect).select2({ placeholder: 'Select' });
+            }
+
             // 1. Source Type change handler
             sourceTypeSelect.addEventListener('change', async (e) => {
                 const sourceType = e.target.value;
@@ -232,6 +247,9 @@
                 rgmSelect.innerHTML = '<option value="">Select</option>';
                 fabricColorSelect.innerHTML = '<option value="">Select</option>';
                 rollNumberSelect.innerHTML = '<option value="">Select</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollNumberSelect).select2({ placeholder: 'Select' });
+                }
 
                 if (sourceType) {
                     await fetchOptions('roll_size', { source_type: sourceType }, rollSizeSelect);
@@ -245,6 +263,9 @@
                 rgmSelect.innerHTML = '<option value="">Select</option>';
                 fabricColorSelect.innerHTML = '<option value="">Select</option>';
                 rollNumberSelect.innerHTML = '<option value="">Select</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollNumberSelect).select2({ placeholder: 'Select' });
+                }
 
                 if (sourceType && rollSize) {
                     await fetchOptions('rgm', { source_type: sourceType, roll_size: rollSize }, rgmSelect);
@@ -258,6 +279,9 @@
                 const rgm = e.target.value;
                 fabricColorSelect.innerHTML = '<option value="">Select</option>';
                 rollNumberSelect.innerHTML = '<option value="">Select</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollNumberSelect).select2({ placeholder: 'Select' });
+                }
 
                 if (sourceType && rollSize && rgm) {
                     await fetchOptions('fabric_color', { source_type: sourceType, roll_size: rollSize, rgm }, fabricColorSelect);
@@ -271,6 +295,9 @@
                 const rgm = rgmSelect.value;
                 const fabricColor = e.target.value;
                 rollNumberSelect.innerHTML = '<option value="">Select</option>';
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(rollNumberSelect).select2({ placeholder: 'Select' });
+                }
 
                 if (sourceType && rollSize && rgm && fabricColor) {
                     await fetchOptions('roll_number', { source_type: sourceType, roll_size: rollSize, rgm, fabric_color: fabricColor }, rollNumberSelect);
@@ -279,6 +306,9 @@
 
             btnRemove.addEventListener('click', () => {
                 if (tableBody.children.length > 1) {
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(rollNumberSelect).select2('destroy');
+                    }
                     tr.remove();
                     updateSrNumbersAndTotal();
                 } else {
