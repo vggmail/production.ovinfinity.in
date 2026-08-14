@@ -18,15 +18,6 @@ class SummaryReportController extends Controller
             ->leftJoin('umfabriccolor as fc', 't.FabricColor', '=', 'fc.ID')
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('intransferchild as tc')
-                  ->join('intransfer as tr', 'tc.Transfer', '=', 'tr.ID')
-                  ->whereColumn('tc.RollNumber', 't.RollNumber')
-                  ->whereColumn('tc.SourceType', 't.TransactionType')
-                  ->where('tc.IsActive', 1)
-                  ->where('tr.IsActive', 1);
-            })
-            ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
                   ->from('indispatchchild as dc')
                   ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
                   ->whereColumn('dc.RollNumber', 't.RollNumber')

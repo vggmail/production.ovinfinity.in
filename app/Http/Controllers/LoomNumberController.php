@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LoomNumber;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class LoomNumberController extends Controller
 {
@@ -68,7 +69,7 @@ class LoomNumberController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'LoomNumber' => 'required|string|max:50',
+            'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')],
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$yarnTypes)),
             'IsActive' => 'nullable|boolean',
         ]);
@@ -94,7 +95,7 @@ class LoomNumberController extends Controller
         $loomnumber = LoomNumber::findOrFail($id);
 
         $validated = $request->validate([
-            'LoomNumber' => 'required|string|max:50',
+            'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->ignore($id, 'ID')],
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$yarnTypes)),
             'IsActive' => 'nullable|boolean',
         ]);

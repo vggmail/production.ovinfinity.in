@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Party;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PartyController extends Controller
 {
@@ -56,7 +57,7 @@ class PartyController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'PartyName' => 'required|string|max:50',
+            'PartyName' => ['required', 'string', 'max:50', Rule::unique('umparty', 'PartyName')],
             'GSTIN' => 'nullable|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',
@@ -88,7 +89,7 @@ class PartyController extends Controller
         $party = Party::findOrFail($id);
 
         $validated = $request->validate([
-            'PartyName' => 'required|string|max:50',
+            'PartyName' => ['required', 'string', 'max:50', Rule::unique('umparty', 'PartyName')->ignore($id, 'ID')],
             'GSTIN' => 'nullable|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',

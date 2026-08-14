@@ -75,11 +75,13 @@
                         <span>🚚</span> <span class="menu-text">Dispatch</span>
                     </a>
                 </li>
+                <!-- 
                 <li class="sidebar-subitem {{ request()->routeIs('inventories.transfer.*') ? 'active' : '' }}">
                     <a href="{{ route('inventories.transfer.index') }}" title="Transfer">
                         <span>🔄</span> <span class="menu-text">Transfer</span>
                     </a>
                 </li>
+                -->
             </ul>
         </li>
 

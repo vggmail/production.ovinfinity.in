@@ -38,6 +38,7 @@
                     <th data-column="EntryDate">Entry Date</th>
                     <th data-column="PartyName">Party Name</th>
                     <th data-column="InvoiceNumber">Invoice Number</th>
+                    <th data-column="DispatchType">Type</th>
                     <th data-column="TotalRolls">Total Rolls</th>
                     <th data-column="CreatedOn">Created On</th>
                     <th data-column="UpdatedOn">Updated On</th>
@@ -87,6 +88,15 @@
                 { name: 'EntryDateFormatted', sortable: true },
                 { name: 'PartyNameValue', sortable: true },
                 { name: 'InvoiceNumber', sortable: true },
+                { 
+                    name: 'DispatchType', 
+                    sortable: true,
+                    render: (val) => {
+                        const typeStr = val || 'Dispatch';
+                        const badgeColor = typeStr === 'Transfer' ? 'background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;' : 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;';
+                        return `<span style="padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; ${badgeColor}">${typeStr}</span>`;
+                    }
+                },
                 { name: 'TotalRolls', sortable: true },
                 { 
                     name: 'CreatedOn', 

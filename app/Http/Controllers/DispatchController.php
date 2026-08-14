@@ -28,6 +28,7 @@ class DispatchController extends Controller
                 $q->where('ID', 'like', "%{$search}%")
                   ->orWhere('EntryDate', 'like', "%{$search}%")
                   ->orWhere('InvoiceNumber', 'like', "%{$search}%")
+                  ->orWhere('DispatchType', 'like', "%{$search}%")
                   ->orWhere('TotalRolls', 'like', "%{$search}%")
                   ->orWhereHas('partyRelation', function ($pr) use ($search) {
                       $pr->where('PartyName', 'like', "%{$search}%");
@@ -38,7 +39,7 @@ class DispatchController extends Controller
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'EntryDate', 'PartyName', 'InvoiceNumber', 'TotalRolls', 'CreatedOn', 'UpdatedOn'];
+        $allowedCols = ['ID', 'EntryDate', 'PartyName', 'InvoiceNumber', 'DispatchType', 'TotalRolls', 'CreatedOn', 'UpdatedOn'];
 
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
@@ -51,6 +52,7 @@ class DispatchController extends Controller
 
         $data->getCollection()->transform(function ($item) {
             $item->PartyNameValue = $item->partyRelation ? $item->partyRelation->PartyName : ($item->PartyName ?? '-');
+            $item->DispatchType = $item->DispatchType ?? 'Dispatch';
             $item->EntryDateFormatted = $item->EntryDate ? date('n/j/Y g:i:s A', strtotime($item->EntryDate)) : '-';
             $item->CreatedOnFormatted = $item->CreatedOn ? date('d-m-Y', strtotime($item->CreatedOn)) : '-';
             $item->UpdatedOnFormatted = $item->UpdatedOn ? date('d-m-Y', strtotime($item->UpdatedOn)) : '-';
@@ -158,6 +160,7 @@ class DispatchController extends Controller
     {
         $dispatch = new InDispatch();
         $dispatch->EntryDate = date('Y-m-d');
+        $dispatch->DispatchType = 'Dispatch';
         $dispatch->children = collect();
 
         $parties = Party::where('IsActive', 1)->get();
@@ -171,6 +174,7 @@ class DispatchController extends Controller
             'EntryDate' => 'required|date',
             'PartyName' => 'required|integer',
             'InvoiceNumber' => 'nullable|string|max:50',
+            'DispatchType' => 'nullable|string|in:Dispatch,Transfer',
             'items' => 'required|array|min:1',
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollSize' => 'required|integer',
@@ -219,6 +223,7 @@ class DispatchController extends Controller
                 'EntryDate' => $validated['EntryDate'],
                 'PartyName' => $validated['PartyName'],
                 'InvoiceNumber' => $validated['InvoiceNumber'],
+                'DispatchType' => $validated['DispatchType'] ?? 'Dispatch',
                 'TotalRolls' => count($validated['items']),
                 'IsActive' => 1,
                 'CreatedBy' => $userId,
@@ -264,6 +269,7 @@ class DispatchController extends Controller
             'EntryDate' => 'required|date',
             'PartyName' => 'required|integer',
             'InvoiceNumber' => 'nullable|string|max:50',
+            'DispatchType' => 'nullable|string|in:Dispatch,Transfer',
             'items' => 'required|array|min:1',
             'items.*.SourceType' => 'required|integer|in:1,2',
             'items.*.RollSize' => 'required|integer',
@@ -313,6 +319,7 @@ class DispatchController extends Controller
                 'EntryDate' => $validated['EntryDate'],
                 'PartyName' => $validated['PartyName'],
                 'InvoiceNumber' => $validated['InvoiceNumber'],
+                'DispatchType' => $validated['DispatchType'] ?? 'Dispatch',
                 'TotalRolls' => count($validated['items']),
                 'UpdatedBy' => $userId,
             ]);

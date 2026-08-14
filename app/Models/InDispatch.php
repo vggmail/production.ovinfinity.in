@@ -16,6 +16,7 @@ class InDispatch extends Model
         'EntryDate',
         'PartyName',
         'InvoiceNumber',
+        'DispatchType',
         'TotalRolls',
         'IsActive',
         'CreatedBy',

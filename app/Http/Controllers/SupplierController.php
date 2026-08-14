@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
 {
@@ -56,7 +57,7 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'SupplierName' => 'required|string|max:50',
+            'SupplierName' => ['required', 'string', 'max:50', Rule::unique('umsupplier', 'SupplierName')],
             'GSTIN' => 'required|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',
@@ -88,7 +89,7 @@ class SupplierController extends Controller
         $supplier = Supplier::findOrFail($id);
 
         $validated = $request->validate([
-            'SupplierName' => 'required|string|max:50',
+            'SupplierName' => ['required', 'string', 'max:50', Rule::unique('umsupplier', 'SupplierName')->ignore($id, 'ID')],
             'GSTIN' => 'required|string|max:50',
             'ContactNo' => 'required|string|max:50',
             'Address' => 'required|string|max:50',

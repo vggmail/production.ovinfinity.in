@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\RollSize;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class RollSizeController extends Controller
 {
@@ -46,7 +47,7 @@ class RollSizeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'RollSize' => 'required|string|max:50',
+            'RollSize' => ['required', 'string', 'max:50', Rule::unique('umrollsize', 'RollSize')],
             'IsActive' => 'nullable|boolean',
         ]);
 
@@ -70,7 +71,7 @@ class RollSizeController extends Controller
         $rollsize = RollSize::findOrFail($id);
 
         $validated = $request->validate([
-            'RollSize' => 'required|string|max:50',
+            'RollSize' => ['required', 'string', 'max:50', Rule::unique('umrollsize', 'RollSize')->ignore($id, 'ID')],
             'IsActive' => 'nullable|boolean',
         ]);
 

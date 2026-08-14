@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\FabricColor;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class FabricColorController extends Controller
 {
@@ -46,7 +47,7 @@ class FabricColorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'FabricColor' => 'required|string|max:50',
+            'FabricColor' => ['required', 'string', 'max:50', Rule::unique('umfabriccolor', 'FabricColor')],
             'IsActive' => 'nullable|boolean',
         ]);
 
@@ -70,7 +71,7 @@ class FabricColorController extends Controller
         $fabriccolor = FabricColor::findOrFail($id);
 
         $validated = $request->validate([
-            'FabricColor' => 'required|string|max:50',
+            'FabricColor' => ['required', 'string', 'max:50', Rule::unique('umfabriccolor', 'FabricColor')->ignore($id, 'ID')],
             'IsActive' => 'nullable|boolean',
         ]);
 

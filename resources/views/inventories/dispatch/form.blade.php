@@ -56,6 +56,23 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
+            <div class="form-group">
+                <label>Entry Type</label>
+                <div style="display: flex; align-items: center; gap: 1.25rem; height: 38px;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; font-weight: 600;">
+                        <input type="radio" name="DispatchType" value="Dispatch" {{ old('DispatchType', $dispatch->DispatchType ?? 'Dispatch') === 'Dispatch' ? 'checked' : '' }}>
+                        <span>Dispatch</span>
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; font-weight: 600;">
+                        <input type="radio" name="DispatchType" value="Transfer" {{ old('DispatchType', $dispatch->DispatchType ?? 'Dispatch') === 'Transfer' ? 'checked' : '' }}>
+                        <span>Transfer</span>
+                    </label>
+                </div>
+                @error('DispatchType')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
 
         <!-- Dynamic Items Table matching user mockup styling -->
