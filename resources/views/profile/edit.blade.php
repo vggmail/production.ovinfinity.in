@@ -65,7 +65,7 @@
 
             <div class="form-group full-width">
                 <label for="Address">Address</label>
-                <textarea name="Address" id="Address" rows="3" class="@error('Address') is-invalid @enderror" required style="resize: vertical;">{{ old('Address', $user->Address) }}</textarea>
+                <textarea name="Address" id="Address" rows="3" class="@error('Address') is-invalid @enderror" style="resize: vertical;">{{ old('Address', $user->Address) }}</textarea>
                 @error('Address')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

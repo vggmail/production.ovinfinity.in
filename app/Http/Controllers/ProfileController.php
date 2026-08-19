@@ -23,7 +23,7 @@ class ProfileController extends Controller
             'FullName' => 'required|string|max:100',
             'ContactNo' => 'required|string|max:20',
             'EmailId' => 'required|email|max:100',
-            'Address' => 'required|string|max:255',
+            'Address' => 'nullable|string|max:255',
             'City' => 'required|string|max:50',
             'Password' => 'nullable|string|min:6|confirmed',
         ]);

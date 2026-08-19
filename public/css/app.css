@@ -185,6 +185,7 @@ body {
 body.sidebar-collapsed .sidebar {
     width: 76px;
     padding: 1.25rem 0.5rem;
+    overflow-x: hidden;
 }
 
 body.sidebar-collapsed .main-content {
@@ -197,16 +198,16 @@ body.sidebar-collapsed .submenu-arrow {
     display: none !important;
 }
 
+body.sidebar-collapsed .sidebar-submenu {
+    display: none !important;
+}
+
 body.sidebar-collapsed .sidebar-item a,
 body.sidebar-collapsed .sidebar-subitem a {
     justify-content: center;
     padding-left: 0.6rem;
     padding-right: 0.6rem;
     margin-left: 0;
-}
-
-body.sidebar-collapsed .sidebar-submenu {
-    padding-left: 0;
 }
 
 /* Header Area */
@@ -268,6 +269,17 @@ body.sidebar-collapsed .sidebar-submenu {
     background: rgba(0, 0, 0, 0.08);
 }
 
+.btn-close-circle {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
 /* Card Styling */
 .card {
     background: var(--card-bg);
@@ -301,6 +313,28 @@ label {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-secondary);
+}
+
+/* Mandatory input field red star next to label */
+.form-group:has(input[required]:not([type="checkbox"]):not([type="radio"])) > label:not(:has(.required-star))::after,
+.form-group:has(select[required]) > label:not(:has(.required-star))::after,
+.form-group:has(textarea[required]) > label:not(:has(.required-star))::after,
+label:has(+ input[required]:not([type="checkbox"]):not([type="radio"])):not(:has(.required-star))::after,
+label:has(+ select[required]):not(:has(.required-star))::after,
+label:has(+ textarea[required]):not(:has(.required-star))::after,
+label:has(~ input[required]:not([type="checkbox"]):not([type="radio"])):not(:has(.required-star))::after,
+label:has(~ select[required]):not(:has(.required-star))::after,
+label:has(~ textarea[required]):not(:has(.required-star))::after,
+label.required::after {
+    content: " *";
+    color: var(--error, #ef4444);
+    font-weight: 700;
+}
+
+.required-star {
+    color: var(--error, #ef4444);
+    font-weight: 700;
+    margin-left: 2px;
 }
 
 input[type="text"],
@@ -984,4 +1018,304 @@ table.datatable tbody tr:last-child td {
     outline: none !important;
     font-family: inherit !important;
     font-size: 0.85rem !important;
+}
+
+/* ==========================================================================
+   Store Module Dedicated Styles (Class-Based Styling)
+   ========================================================================== */
+
+/* Page Banner Header */
+.store-header-banner {
+    background-color: #dbeafe;
+    padding: 0.85rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #1e3a8a;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.store-banner-title {
+    font-weight: 600;
+    color: #1e3a8a;
+    font-size: 1rem;
+}
+
+/* Card Form Container */
+.card-form-wrapper {
+    position: relative;
+    padding: 1.75rem 2rem;
+}
+
+.form-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.75rem;
+}
+
+.form-close-btn {
+    color: #1e293b;
+    text-decoration: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.form-close-btn:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.form-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Layout Grids */
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-label-custom {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.form-label-muted {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.form-control-readonly {
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+    width: 100%;
+}
+
+.form-control-custom {
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    padding: 0.45rem 0.75rem;
+    width: 100%;
+    background-color: #ffffff;
+}
+
+/* Filter Box */
+.mrl-filter-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.mrl-filter-header {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1e3a8a;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.mrl-filter-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.mrl-date-group {
+    width: 200px;
+}
+
+.btn-fetch-mrl {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.2s;
+}
+
+.btn-fetch-mrl:hover {
+    background-color: #1d4ed8;
+}
+
+.fetch-status-msg {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+/* Store Table */
+.store-table-container {
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.store-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.store-table th {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #cbd5e1;
+    text-align: center;
+}
+
+.store-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.store-table-tfoot {
+    background-color: #f8fafc;
+}
+
+.store-table-tfoot td {
+    padding: 8px 14px;
+    text-align: center;
+    border-top: 1px solid #cbd5e1;
+}
+
+.btn-add-manual-item {
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px dashed #94a3b8;
+    background: #ffffff;
+    border-radius: 6px;
+    color: #334155;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.btn-add-manual-item:hover {
+    background-color: #f1f5f9;
+    border-color: #475569;
+}
+
+/* Action Buttons */
+.btn-save-green {
+    background-color: #059669;
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 2.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-save-green:hover {
+    background-color: #047857;
+}
+
+.btn-print-blue {
+    background-color: #1e40af;
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.2s;
+}
+
+.btn-print-blue:hover {
+    background-color: #1e3a8a;
+}
+
+.btn-print-badge {
+    background-color: #1e40af;
+    color: #ffffff;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0 0.2rem;
+    transition: background-color 0.2s;
+}
+
+.btn-print-badge:hover {
+    background-color: #1e3a8a;
+}
+
+.table-id-link {
+    font-weight: 700;
+    color: #1e40af;
+    text-decoration: none;
+}
+
+.table-id-link:hover {
+    text-decoration: underline;
+}
+
+.mrl-entry-disabled {
+    opacity: 0.55;
+    background-color: #f8fafc;
 }

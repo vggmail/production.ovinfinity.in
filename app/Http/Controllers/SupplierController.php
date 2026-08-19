@@ -58,17 +58,25 @@ class SupplierController extends Controller
     {
         $validated = $request->validate([
             'SupplierName' => ['required', 'string', 'max:50', Rule::unique('umsupplier', 'SupplierName')],
-            'GSTIN' => 'required|string|max:50',
-            'ContactNo' => 'required|string|max:50',
-            'Address' => 'required|string|max:50',
-            'Street' => 'required|string|max:50',
-            'City' => 'required|string|max:50',
-            'District' => 'required|string|max:50',
-            'State' => 'required|string|max:50',
-            'PinCode' => 'required|string|max:50',
+            'GSTIN' => 'nullable|string|max:50',
+            'ContactNo' => 'nullable|string|max:50',
+            'Address' => 'nullable|string|max:50',
+            'Street' => 'nullable|string|max:50',
+            'City' => 'nullable|string|max:50',
+            'District' => 'nullable|string|max:50',
+            'State' => 'nullable|string|max:50',
+            'PinCode' => 'nullable|string|max:50',
             'IsActive' => 'nullable|boolean',
         ]);
 
+        $validated['GSTIN'] = $validated['GSTIN'] ?? '';
+        $validated['ContactNo'] = $validated['ContactNo'] ?? '';
+        $validated['Address'] = $validated['Address'] ?? '';
+        $validated['Street'] = $validated['Street'] ?? '';
+        $validated['City'] = $validated['City'] ?? '';
+        $validated['District'] = $validated['District'] ?? '';
+        $validated['State'] = $validated['State'] ?? '';
+        $validated['PinCode'] = $validated['PinCode'] ?? '';
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;
         $validated['CreatedBy'] = Auth::id() ?? 1;
         $validated['UpdatedBy'] = Auth::id() ?? 1;
@@ -90,17 +98,25 @@ class SupplierController extends Controller
 
         $validated = $request->validate([
             'SupplierName' => ['required', 'string', 'max:50', Rule::unique('umsupplier', 'SupplierName')->ignore($id, 'ID')],
-            'GSTIN' => 'required|string|max:50',
-            'ContactNo' => 'required|string|max:50',
-            'Address' => 'required|string|max:50',
-            'Street' => 'required|string|max:50',
-            'City' => 'required|string|max:50',
-            'District' => 'required|string|max:50',
-            'State' => 'required|string|max:50',
-            'PinCode' => 'required|string|max:50',
+            'GSTIN' => 'nullable|string|max:50',
+            'ContactNo' => 'nullable|string|max:50',
+            'Address' => 'nullable|string|max:50',
+            'Street' => 'nullable|string|max:50',
+            'City' => 'nullable|string|max:50',
+            'District' => 'nullable|string|max:50',
+            'State' => 'nullable|string|max:50',
+            'PinCode' => 'nullable|string|max:50',
             'IsActive' => 'nullable|boolean',
         ]);
 
+        $validated['GSTIN'] = $validated['GSTIN'] ?? '';
+        $validated['ContactNo'] = $validated['ContactNo'] ?? '';
+        $validated['Address'] = $validated['Address'] ?? '';
+        $validated['Street'] = $validated['Street'] ?? '';
+        $validated['City'] = $validated['City'] ?? '';
+        $validated['District'] = $validated['District'] ?? '';
+        $validated['State'] = $validated['State'] ?? '';
+        $validated['PinCode'] = $validated['PinCode'] ?? '';
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;
         $validated['UpdatedBy'] = Auth::id() ?? 1;
 

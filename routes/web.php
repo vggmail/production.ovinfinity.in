@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,9 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\DispatchController;
 use App\Http\Controllers\SummaryReportController;
+use App\Http\Controllers\ItemMasterController;
+use App\Http\Controllers\MRLEntryController;
+use App\Http\Controllers\QuotationController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -32,6 +36,34 @@ Route::get('/', function () {
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Cache Utility Routes
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('optimize:clear');
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Cache cleared successfully (application, route, config, and view cache).'
+    ]);
+})->name('cache.clear');
+
+Route::get('/create-cache', function () {
+    Artisan::call('config:cache');
+    Artisan::call('route:cache');
+    Artisan::call('view:cache');
+    Artisan::call('optimize');
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Cache created/optimized successfully (config, route, and view cache).'
+    ]);
+})->name('cache.create');
+
+// Aliases for convenience
+Route::get('/cache/clear', fn() => redirect()->route('cache.clear'));
+Route::get('/cache/create', fn() => redirect()->route('cache.create'));
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -47,6 +79,38 @@ Route::middleware(['auth'])->group(function () {
     // Profile Settings
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    // Store Prefix
+    Route::prefix('store')->name('store.')->group(function () {
+        // Item Master
+        Route::get('/itemmaster', [ItemMasterController::class, 'index'])->name('itemmaster.index');
+        Route::get('/itemmaster/data', [ItemMasterController::class, 'data'])->name('itemmaster.data');
+        Route::get('/itemmaster/create', [ItemMasterController::class, 'create'])->name('itemmaster.create');
+        Route::post('/itemmaster', [ItemMasterController::class, 'store'])->name('itemmaster.store');
+        Route::get('/itemmaster/{id}/edit', [ItemMasterController::class, 'edit'])->name('itemmaster.edit');
+        Route::put('/itemmaster/{id}', [ItemMasterController::class, 'update'])->name('itemmaster.update');
+        Route::delete('/itemmaster/{id}', [ItemMasterController::class, 'destroy'])->name('itemmaster.destroy');
+
+        // MRL Entry
+        Route::get('/mrlentry', [MRLEntryController::class, 'index'])->name('mrlentry.index');
+        Route::get('/mrlentry/data', [MRLEntryController::class, 'data'])->name('mrlentry.data');
+        Route::get('/mrlentry/create', [MRLEntryController::class, 'create'])->name('mrlentry.create');
+        Route::post('/mrlentry', [MRLEntryController::class, 'store'])->name('mrlentry.store');
+        Route::get('/mrlentry/{id}/edit', [MRLEntryController::class, 'edit'])->name('mrlentry.edit');
+        Route::put('/mrlentry/{id}', [MRLEntryController::class, 'update'])->name('mrlentry.update');
+        Route::delete('/mrlentry/{id}', [MRLEntryController::class, 'destroy'])->name('mrlentry.destroy');
+
+        // Quotation
+        Route::get('/quotation', [QuotationController::class, 'index'])->name('quotation.index');
+        Route::get('/quotation/data', [QuotationController::class, 'data'])->name('quotation.data');
+        Route::get('/quotation/create', [QuotationController::class, 'create'])->name('quotation.create');
+        Route::get('/quotation/fetch-mrl', [QuotationController::class, 'fetchMrlItems'])->name('quotation.fetchMrl');
+        Route::post('/quotation', [QuotationController::class, 'store'])->name('quotation.store');
+        Route::get('/quotation/{id}/edit', [QuotationController::class, 'edit'])->name('quotation.edit');
+        Route::put('/quotation/{id}', [QuotationController::class, 'update'])->name('quotation.update');
+        Route::delete('/quotation/{id}', [QuotationController::class, 'destroy'])->name('quotation.destroy');
+        Route::get('/quotation/{id}/print', [QuotationController::class, 'print'])->name('quotation.print');
+    });
 
     // Reports Prefix
     Route::prefix('reports')->name('reports.')->group(function () {

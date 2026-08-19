@@ -40,7 +40,7 @@
 
             <div class="form-group">
                 <label for="GSTIN">GSTIN</label>
-                <input type="text" id="GSTIN" name="GSTIN" value="{{ old('GSTIN', $supplier->GSTIN) }}" placeholder="Enter GSTIN" required>
+                <input type="text" id="GSTIN" name="GSTIN" value="{{ old('GSTIN', $supplier->GSTIN) }}" placeholder="Enter GSTIN">
                 @error('GSTIN')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -48,7 +48,7 @@
 
             <div class="form-group">
                 <label for="ContactNo">Contact Number</label>
-                <input type="text" id="ContactNo" name="ContactNo" value="{{ old('ContactNo', $supplier->exists ? $supplier->ContactNo : '+91') }}" placeholder="Enter contact number" required>
+                <input type="text" id="ContactNo" name="ContactNo" value="{{ old('ContactNo', $supplier->exists ? $supplier->ContactNo : '+91') }}" placeholder="Enter contact number">
                 @error('ContactNo')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -57,7 +57,7 @@
             <!-- Row 2: Address, Street, City -->
             <div class="form-group">
                 <label for="Address">Address</label>
-                <input type="text" id="Address" name="Address" value="{{ old('Address', $supplier->Address) }}" placeholder="Enter address" required>
+                <input type="text" id="Address" name="Address" value="{{ old('Address', $supplier->Address) }}" placeholder="Enter address">
                 @error('Address')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -65,7 +65,7 @@
 
             <div class="form-group">
                 <label for="Street">Street</label>
-                <input type="text" id="Street" name="Street" value="{{ old('Street', $supplier->Street) }}" placeholder="Enter street" required>
+                <input type="text" id="Street" name="Street" value="{{ old('Street', $supplier->Street) }}" placeholder="Enter street">
                 @error('Street')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -73,7 +73,7 @@
 
             <div class="form-group">
                 <label for="City">City</label>
-                <input type="text" id="City" name="City" value="{{ old('City', $supplier->City) }}" placeholder="Enter city" required>
+                <input type="text" id="City" name="City" value="{{ old('City', $supplier->City) }}" placeholder="Enter city">
                 @error('City')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -82,7 +82,7 @@
             <!-- Row 3: District, State, Pin Code -->
             <div class="form-group">
                 <label for="District">District</label>
-                <input type="text" id="District" name="District" value="{{ old('District', $supplier->District) }}" placeholder="Enter district" required>
+                <input type="text" id="District" name="District" value="{{ old('District', $supplier->District) }}" placeholder="Enter district">
                 @error('District')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -90,7 +90,7 @@
 
             <div class="form-group">
                 <label for="State">State</label>
-                <input type="text" id="State" name="State" value="{{ old('State', $supplier->State) }}" placeholder="Enter state" required>
+                <input type="text" id="State" name="State" value="{{ old('State', $supplier->State) }}" placeholder="Enter state">
                 @error('State')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -98,7 +98,7 @@
 
             <div class="form-group">
                 <label for="PinCode">Pin Code</label>
-                <input type="text" id="PinCode" name="PinCode" value="{{ old('PinCode', $supplier->PinCode) }}" placeholder="Enter pin code" required>
+                <input type="text" id="PinCode" name="PinCode" value="{{ old('PinCode', $supplier->PinCode) }}" placeholder="Enter pin code">
                 @error('PinCode')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

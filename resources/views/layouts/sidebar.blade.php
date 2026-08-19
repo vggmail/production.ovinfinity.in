@@ -81,7 +81,33 @@
                         <span>🔄</span> <span class="menu-text">Transfer</span>
                     </a>
                 </li>
-                -->
+-->
+            </ul>
+        </li>
+
+        <li class="sidebar-item has-submenu {{ request()->routeIs('store.*') ? 'open' : '' }}">
+            <a href="#" onclick="toggleSubmenu(event)" class="submenu-toggle" title="Store">
+                <span style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span>🏬</span> <span class="menu-text">Store</span>
+                </span>
+                <span class="submenu-arrow">{{ request()->routeIs('store.*') ? '▼' : '▶' }}</span>
+            </a>
+            <ul class="sidebar-submenu" style="display: {{ request()->routeIs('store.*') ? 'flex' : 'none' }};">
+                <li class="sidebar-subitem {{ request()->routeIs('store.itemmaster.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.itemmaster.index') }}" title="Item Master">
+                        <span>📦</span> <span class="menu-text">Item Master</span>
+                    </a>
+                </li>
+                <li class="sidebar-subitem {{ request()->routeIs('store.mrlentry.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.mrlentry.index') }}" title="MRL Entry">
+                        <span>📝</span> <span class="menu-text">MRL Entry</span>
+                    </a>
+                </li>
+                <li class="sidebar-subitem {{ request()->routeIs('store.quotation.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.quotation.index') }}" title="Vendor Quotation">
+                        <span>📄</span> <span class="menu-text">Vendor Quotation</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
