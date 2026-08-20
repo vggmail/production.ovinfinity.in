@@ -4,18 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InTransferChild extends Model
+class Department extends Model
 {
-    protected $table = 'intransferchild';
+    protected $table = 'umdepartment';
     protected $primaryKey = 'ID';
 
     const CREATED_AT = 'CreatedOn';
     const UPDATED_AT = 'UpdatedOn';
 
     protected $fillable = [
-        'Transfer',
-        'SourceType',
-        'InTransactionID',
+        'DepartmentName',
+        'Slug',
         'IsActive',
         'CreatedBy',
         'UpdatedBy',
@@ -26,14 +25,4 @@ class InTransferChild extends Model
         'CreatedOn' => 'datetime',
         'UpdatedOn' => 'datetime',
     ];
-
-    public function transferRelation()
-    {
-        return $this->belongsTo(InTransfer::class, 'Transfer', 'ID');
-    }
-
-    public function transactionRelation()
-    {
-        return $this->belongsTo(InTransaction::class, 'InTransactionID', 'ID');
-    }
 }

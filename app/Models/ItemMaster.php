@@ -17,6 +17,7 @@ class ItemMaster extends Model
         'PartNo',
         'CatalogueNo',
         'MinQuantity',
+        'Department',
         'HSNNo',
         'GSTPercentage',
         'IsActive',
@@ -31,4 +32,9 @@ class ItemMaster extends Model
         'CreatedOn' => 'datetime',
         'UpdatedOn' => 'datetime',
     ];
+
+    public function departmentRelation()
+    {
+        return $this->belongsTo(Department::class, 'Department', 'ID');
+    }
 }

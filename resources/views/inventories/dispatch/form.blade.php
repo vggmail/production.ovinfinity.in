@@ -77,16 +77,16 @@
 
         <!-- Dynamic Items Table matching user mockup styling -->
         <div style="margin-bottom: 1.5rem; overflow-x: auto;">
-            <table class="datatable" id="items-table" style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #c2e2c4; border-radius: 6px;">
+            <table class="datatable" id="items-table" style="width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; border: 1px solid #c2e2c4; border-radius: 6px;">
                 <thead>
                     <tr style="background-color: #d8ebd9; color: #1e3a1f;">
-                        <th style="width: 70px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Size</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Required Gram Meter</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Fabric Color</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
-                        <th style="width: 70px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
+                        <th style="width: 60px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
+                        <th style="width: 15%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
+                        <th style="width: 15%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Size</th>
+                        <th style="width: 20%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Required Gram Meter</th>
+                        <th style="width: 20%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Fabric Color</th>
+                        <th style="width: 22%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
+                        <th style="width: 60px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="items-table-body" style="background-color: #eaf5eb;">
@@ -147,7 +147,7 @@
                 if (rollSizeSelect) rollSizeSelect.name = `items[${index}][RollSize]`;
                 if (rgmSelect) rgmSelect.name = `items[${index}][RequiredGramMeter]`;
                 if (fabricColorSelect) fabricColorSelect.name = `items[${index}][FabricColor]`;
-                if (rollNumberSelect) rollNumberSelect.name = `items[${index}][RollNumber]`;
+                if (rollNumberSelect) rollNumberSelect.name = `items[${index}][InTransactionID]`;
             });
             totalRollsInput.value = rows.length;
         }
@@ -185,15 +185,15 @@
                         html += `<option value="${item.ID}" ${sel}>${item.FabricColor}</option>`;
                     });
                 } else if (step === 'roll_number') {
-                    data.forEach(val => {
-                        const sel = selectedValue && String(selectedValue) === String(val) ? 'selected' : '';
-                        html += `<option value="${val}" ${sel}>${val}</option>`;
+                    data.forEach(item => {
+                        const sel = selectedValue && String(selectedValue) === String(item.ID) ? 'selected' : '';
+                        html += `<option value="${item.ID}" ${sel}>${item.RollNumber}</option>`;
                     });
                 }
 
                 selectElement.innerHTML = html;
                 if (step === 'roll_number' && typeof $.fn.select2 !== 'undefined') {
-                    $(selectElement).select2({ placeholder: 'Select Roll Number' });
+                    $(selectElement).select2({ placeholder: 'Select Roll Number', width: '100%' });
                 }
             } catch (err) {
                 console.error(`Failed to load options for step ${step}`, err);
@@ -210,7 +210,7 @@
             const selectedRollSize = itemData.RollSize || '';
             const selectedRgm = itemData.RequiredGramMeter || '';
             const selectedFabricColor = itemData.FabricColor || '';
-            const selectedRollNumber = itemData.RollNumber || '';
+            const selectedRollNumber = itemData.InTransactionID || itemData.RollNumber || '';
 
             tr.innerHTML = `
                 <td class="sr-no" style="text-align: center; padding: 8px;">${srNo}</td>
@@ -336,18 +336,53 @@
             tableBody.appendChild(tr);
             updateSrNumbersAndTotal();
 
-            // Preload options sequentially if editing or existing values provided
+            // Preload options instantly for existing values without network calls on page load
             if (selectedSourceType) {
-                await fetchOptions('roll_size', { source_type: selectedSourceType }, rollSizeSelect, selectedRollSize);
                 if (selectedRollSize) {
-                    await fetchOptions('rgm', { source_type: selectedSourceType, roll_size: selectedRollSize }, rgmSelect, selectedRgm);
-                    if (selectedRgm) {
-                        await fetchOptions('fabric_color', { source_type: selectedSourceType, roll_size: selectedRollSize, rgm: selectedRgm }, fabricColorSelect, selectedFabricColor);
-                        if (selectedFabricColor) {
-                            await fetchOptions('roll_number', { source_type: selectedSourceType, roll_size: selectedRollSize, rgm: selectedRgm, fabric_color: selectedFabricColor }, rollNumberSelect, selectedRollNumber);
-                        }
+                    const rollSizeLabel = (itemData.roll_size_relation && itemData.roll_size_relation.RollSize) ? itemData.roll_size_relation.RollSize : selectedRollSize;
+                    rollSizeSelect.innerHTML = `<option value="${selectedRollSize}" selected>${rollSizeLabel}</option>`;
+                }
+                if (selectedRgm) {
+                    rgmSelect.innerHTML = `<option value="${selectedRgm}" selected>${selectedRgm}</option>`;
+                }
+                if (selectedFabricColor) {
+                    const colorLabel = (itemData.fabric_color_relation && itemData.fabric_color_relation.FabricColor) ? itemData.fabric_color_relation.FabricColor : selectedFabricColor;
+                    fabricColorSelect.innerHTML = `<option value="${selectedFabricColor}" selected>${colorLabel}</option>`;
+                }
+                if (selectedRollNumber) {
+                    const rollLabel = (itemData.transaction_relation && itemData.transaction_relation.RollNumber) ? itemData.transaction_relation.RollNumber : selectedRollNumber;
+                    rollNumberSelect.innerHTML = `<option value="${selectedRollNumber}" selected>${rollLabel}</option>`;
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(rollNumberSelect).select2({ placeholder: 'Select Roll Number' });
                     }
                 }
+            }
+
+            // On-demand option loader when user clicks/focuses a dropdown
+            async function loadStepOnDemand(step) {
+                const sourceType = sourceTypeSelect.value;
+                const rollSize = rollSizeSelect.value;
+                const rgm = rgmSelect.value;
+                const fabricColor = fabricColorSelect.value;
+
+                if (step === 'roll_size' && sourceType && rollSizeSelect.options.length <= 1) {
+                    await fetchOptions('roll_size', { source_type: sourceType }, rollSizeSelect, rollSizeSelect.value);
+                } else if (step === 'rgm' && sourceType && rollSize && rgmSelect.options.length <= 1) {
+                    await fetchOptions('rgm', { source_type: sourceType, roll_size: rollSize }, rgmSelect, rgmSelect.value);
+                } else if (step === 'fabric_color' && sourceType && rollSize && rgm && fabricColorSelect.options.length <= 1) {
+                    await fetchOptions('fabric_color', { source_type: sourceType, roll_size: rollSize, rgm }, fabricColorSelect, fabricColorSelect.value);
+                } else if (step === 'roll_number' && sourceType && rollSize && rgm && fabricColor && rollNumberSelect.options.length <= 1) {
+                    await fetchOptions('roll_number', { source_type: sourceType, roll_size: rollSize, rgm, fabric_color: fabricColor }, rollNumberSelect, rollNumberSelect.value);
+                }
+            }
+
+            rollSizeSelect.addEventListener('focus', () => loadStepOnDemand('roll_size'));
+            rgmSelect.addEventListener('focus', () => loadStepOnDemand('rgm'));
+            fabricColorSelect.addEventListener('focus', () => loadStepOnDemand('fabric_color'));
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollNumberSelect).on('select2:open', () => loadStepOnDemand('roll_number'));
+            } else {
+                rollNumberSelect.addEventListener('focus', () => loadStepOnDemand('roll_number'));
             }
         }
 

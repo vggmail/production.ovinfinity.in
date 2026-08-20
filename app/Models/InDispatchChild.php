@@ -18,7 +18,7 @@ class InDispatchChild extends Model
         'RollSize',
         'RequiredGramMeter',
         'FabricColor',
-        'RollNumber',
+        'InTransactionID',
         'IsActive',
         'CreatedBy',
         'UpdatedBy',
@@ -43,5 +43,10 @@ class InDispatchChild extends Model
     public function fabricColorRelation()
     {
         return $this->belongsTo(FabricColor::class, 'FabricColor', 'ID');
+    }
+
+    public function transactionRelation()
+    {
+        return $this->belongsTo(InTransaction::class, 'InTransactionID', 'ID');
     }
 }

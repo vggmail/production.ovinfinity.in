@@ -20,7 +20,7 @@ class SummaryReportController extends Controller
                 $q->select(DB::raw(1))
                   ->from('indispatchchild as dc')
                   ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
-                  ->whereColumn('dc.RollNumber', 't.RollNumber')
+                  ->whereColumn('dc.InTransactionID', 't.ID')
                   ->whereColumn('dc.SourceType', 't.TransactionType')
                   ->where('dc.IsActive', 1)
                   ->where('d.IsActive', 1);

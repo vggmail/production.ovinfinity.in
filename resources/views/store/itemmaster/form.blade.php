@@ -63,8 +63,23 @@
             </div>
         </div>
 
-        <!-- Row 2: HSN No., GST Percentage -->
-        <div class="form-grid-2">
+        <!-- Row 2: Department, HSN No., GST Percentage -->
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label for="Department" class="form-label-custom">Department</label>
+                <select id="Department" name="Department" class="form-control-custom">
+                    <option value="">Select Department</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->ID }}" {{ old('Department', $item->Department) == $dept->ID ? 'selected' : '' }}>
+                            {{ $dept->DepartmentName }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('Department')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="form-group">
                 <label for="HSNNo" class="form-label-custom">HSN No.</label>
                 <input type="text" id="HSNNo" name="HSNNo" value="{{ old('HSNNo', $item->HSNNo) }}" class="form-control-custom">

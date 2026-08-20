@@ -52,13 +52,13 @@
 
         <!-- Dynamic Items Table matching user mockup styling -->
         <div style="margin-bottom: 1.5rem; overflow-x: auto;">
-            <table class="datatable" id="items-table" style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #c2e2c4; border-radius: 6px;">
+            <table class="datatable" id="items-table" style="width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; border: 1px solid #c2e2c4; border-radius: 6px;">
                 <thead>
                     <tr style="background-color: #d8ebd9; color: #1e3a1f;">
-                        <th style="width: 80px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
-                        <th style="text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
-                        <th style="width: 80px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
+                        <th style="width: 70px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
+                        <th style="width: 45%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
+                        <th style="width: 45%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
+                        <th style="width: 70px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="items-table-body" style="background-color: #eaf5eb;">
@@ -118,7 +118,7 @@
                     sourceTypeSelect.name = `items[${index}][SourceType]`;
                 }
                 if (rollNumberSelect) {
-                    rollNumberSelect.name = `items[${index}][RollNumber]`;
+                    rollNumberSelect.name = `items[${index}][InTransactionID]`;
                 }
             });
             totalRollsInput.value = rows.length;
@@ -147,19 +147,20 @@
                 const rolls = await response.json();
 
                 let html = '<option value="">Select</option>';
-                rolls.forEach(roll => {
-                    const isSelected = selectedRollNumber && String(selectedRollNumber) === String(roll) ? 'selected' : '';
-                    html += `<option value="${roll}" ${isSelected}>${roll}</option>`;
+                const rollIds = rolls.map(r => String(r.ID));
+                rolls.forEach(item => {
+                    const isSelected = selectedRollNumber && String(selectedRollNumber) === String(item.ID) ? 'selected' : '';
+                    html += `<option value="${item.ID}" ${isSelected}>${item.RollNumber}</option>`;
                 });
                 
                 // If selectedRollNumber exists but not in response list (e.g. legacy/custom), append it
-                if (selectedRollNumber && !rolls.includes(Number(selectedRollNumber)) && !rolls.includes(String(selectedRollNumber))) {
+                if (selectedRollNumber && !rollIds.includes(String(selectedRollNumber))) {
                     html += `<option value="${selectedRollNumber}" selected>${selectedRollNumber}</option>`;
                 }
 
                 rollSelectElement.innerHTML = html;
                 if (typeof $.fn.select2 !== 'undefined') {
-                    $(rollSelectElement).select2({ placeholder: 'Select Roll Number' });
+                    $(rollSelectElement).select2({ placeholder: 'Select Roll Number', width: '100%' });
                 }
             } catch (err) {
                 console.error('Failed to load roll numbers', err);
@@ -177,7 +178,7 @@
 
             const srNo = itemData.srNo || (tableBody.children.length + 1);
             const selectedSourceType = itemData.SourceType || '';
-            const selectedRollNumber = itemData.RollNumber || '';
+            const selectedRollNumber = itemData.InTransactionID || itemData.RollNumber || '';
 
             tr.innerHTML = `
                 <td class="sr-no" style="text-align: center; padding: 8px;">${srNo}</td>
@@ -226,7 +227,26 @@
             updateSrNumbersAndTotal();
 
             if (selectedSourceType) {
-                fetchRollNumbers(selectedSourceType, rollNumberSelect, selectedRollNumber);
+                if (selectedRollNumber) {
+                    const rollLabel = (itemData.transaction_relation && itemData.transaction_relation.RollNumber) ? itemData.transaction_relation.RollNumber : selectedRollNumber;
+                    rollNumberSelect.innerHTML = `<option value="${selectedRollNumber}" selected>${rollLabel}</option>`;
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(rollNumberSelect).select2({ placeholder: 'Select Roll Number' });
+                    }
+                }
+            }
+
+            async function loadRollsOnDemand() {
+                const sourceType = sourceTypeSelect.value;
+                if (sourceType && rollNumberSelect.options.length <= 1) {
+                    await fetchRollNumbers(sourceType, rollNumberSelect, rollNumberSelect.value);
+                }
+            }
+
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollNumberSelect).on('select2:open', loadRollsOnDemand);
+            } else {
+                rollNumberSelect.addEventListener('focus', loadRollsOnDemand);
             }
         }
 

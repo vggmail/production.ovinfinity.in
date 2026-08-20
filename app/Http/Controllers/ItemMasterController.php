@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ItemMaster;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 
 class ItemMasterController extends Controller
@@ -15,21 +16,24 @@ class ItemMasterController extends Controller
 
     public function data(Request $request)
     {
-        $query = ItemMaster::query();
+        $query = ItemMaster::with('departmentRelation');
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('ItemName', 'like', "%{$search}%")
                   ->orWhere('PartNo', 'like', "%{$search}%")
                   ->orWhere('CatalogueNo', 'like', "%{$search}%")
-                  ->orWhere('HSNNo', 'like', "%{$search}%");
+                  ->orWhere('HSNNo', 'like', "%{$search}%")
+                  ->orWhereHas('departmentRelation', function ($dq) use ($search) {
+                      $dq->where('DepartmentName', 'like', "%{$search}%");
+                  });
             });
         }
 
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'HSNNo', 'GSTPercentage', 'IsActive', 'CreatedOn', 'UpdatedOn'];
+        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'Department', 'HSNNo', 'GSTPercentage', 'IsActive', 'CreatedOn', 'UpdatedOn'];
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
         } else {
@@ -39,13 +43,20 @@ class ItemMasterController extends Controller
         $perPage = $request->input('per_page', 10);
         $data = $query->paginate($perPage);
 
+        $data->getCollection()->transform(function ($item) {
+            $item->DepartmentName = $item->departmentRelation ? $item->departmentRelation->DepartmentName : '-';
+            return $item;
+        });
+
         return response()->json($data);
     }
 
     public function create()
     {
         $item = new ItemMaster();
-        return view('store.itemmaster.form', compact('item'));
+        $departments = Department::where('IsActive', 1)->orderBy('DepartmentName', 'asc')->get();
+
+        return view('store.itemmaster.form', compact('item', 'departments'));
     }
 
     public function store(Request $request)
@@ -55,6 +66,7 @@ class ItemMasterController extends Controller
             'PartNo' => 'nullable|string|max:100',
             'CatalogueNo' => 'nullable|string|max:100',
             'MinQuantity' => 'nullable|numeric|min:0',
+            'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
             'IsActive' => 'nullable|boolean',
@@ -74,7 +86,9 @@ class ItemMasterController extends Controller
     public function edit($id)
     {
         $item = ItemMaster::findOrFail($id);
-        return view('store.itemmaster.form', compact('item'));
+        $departments = Department::where('IsActive', 1)->orderBy('DepartmentName', 'asc')->get();
+
+        return view('store.itemmaster.form', compact('item', 'departments'));
     }
 
     public function update(Request $request, $id)
@@ -86,6 +100,7 @@ class ItemMasterController extends Controller
             'PartNo' => 'nullable|string|max:100',
             'CatalogueNo' => 'nullable|string|max:100',
             'MinQuantity' => 'nullable|numeric|min:0',
+            'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
             'IsActive' => 'nullable|boolean',

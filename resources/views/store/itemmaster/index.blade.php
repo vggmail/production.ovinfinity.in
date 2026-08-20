@@ -39,6 +39,7 @@
                     <th data-column="PartNo">Part No</th>
                     <th data-column="CatalogueNo">Catalogue No</th>
                     <th data-column="MinQuantity">Min Quantity</th>
+                    <th data-column="Department">Department</th>
                     <th data-column="HSNNo">HSN No</th>
                     <th data-column="GSTPercentage">GST %</th>
                     <th data-column="CreatedOn">Created On</th>
@@ -89,6 +90,7 @@
                 { name: 'PartNo', sortable: true, render: (val) => val || '-' },
                 { name: 'CatalogueNo', sortable: true, render: (val) => val || '-' },
                 { name: 'MinQuantity', sortable: true, render: (val) => val ?? 0 },
+                { name: 'Department', sortable: true, render: (val, row) => row.DepartmentName || '-' },
                 { name: 'HSNNo', sortable: true, render: (val) => val || '-' },
                 { name: 'GSTPercentage', sortable: true, render: (val) => (val ?? 0) + '%' },
                 { 
