@@ -1319,3 +1319,45 @@ table.datatable tbody tr:last-child td {
     opacity: 0.55;
     background-color: #f8fafc;
 }
+
+/* Select2 Customization for Store Tables */
+.store-table .select2-container--default .select2-selection--single {
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    height: 38px;
+    padding: 0.2rem 0.4rem;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+}
+
+.store-table .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding-left: 4px;
+    width: 100%;
+}
+
+.store-table .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+    right: 6px;
+}
+
+.store-table .select2-container--default .select2-results__option[aria-disabled=true] {
+    color: #94a3b8;
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+}
+
+.store-table .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #166534;
+    color: #ffffff;
+}
+
+.store-table .select2-dropdown {
+    border-color: #cbd5e1;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+}

@@ -34,6 +34,9 @@ class SummaryReportController extends Controller
             $query->where('t.IsActive', 1);
         }
 
+        // Filter records entered on the selected date
+        $query->whereDate('t.EntryDate', '<=', $targetDate);
+
         $rawRows = $query->select([
             DB::raw("COALESCE(rs.RollSize, CAST(t.RollSize AS CHAR)) as SizeName"),
             't.RollSize',

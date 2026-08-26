@@ -7,6 +7,7 @@ class DynamicDataTable {
             url: config.url,
             columns: config.columns, // Array of { name: 'colName', sortable: true, render: fn }
             actions: config.actions || null, // fn(row) returning html for edit/delete buttons
+            getParams: config.getParams || null,
             onEdit: config.onEdit || null,
             onDelete: config.onDelete || null,
             perPage: config.perPage || 10,
@@ -97,13 +98,23 @@ class DynamicDataTable {
     fetch() {
         this.tbody.innerHTML = '<tr><td colspan="100" style="text-align: center; padding: 0.75rem 1rem;">Loading data...</td></tr>';
         
-        const params = new URLSearchParams({
+        const extraParams = this.config.getParams ? this.config.getParams() : {};
+        const queryParams = Object.assign({
             page: this.state.page,
             search: this.state.search,
             sort_col: this.state.sortCol,
             sort_dir: this.state.sortDir,
             per_page: this.state.perPage
+        }, extraParams);
+
+        // Remove empty/null/undefined params
+        Object.keys(queryParams).forEach(key => {
+            if (queryParams[key] === null || queryParams[key] === undefined || queryParams[key] === '') {
+                delete queryParams[key];
+            }
         });
+
+        const params = new URLSearchParams(queryParams);
 
         fetch(`${this.config.url}?${params.toString()}`, {
             headers: {

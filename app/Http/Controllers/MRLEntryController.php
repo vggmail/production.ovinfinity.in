@@ -48,7 +48,10 @@ class MRLEntryController extends Controller
     {
         $mrl = new MRLEntry();
         $mrl->EntryDate = date('Y-m-d');
-        $itemList = ItemMaster::where('IsActive', 1)->orderBy('ItemName', 'asc')->get();
+        $itemList = ItemMaster::where('IsActive', 1)
+            ->select('ID', 'ItemName', 'PartNo', 'CatalogueNo')
+            ->orderBy('ItemName', 'asc')
+            ->get();
         return view('store.mrlentry.form', compact('mrl', 'itemList'));
     }
 
@@ -103,7 +106,10 @@ class MRLEntryController extends Controller
     public function edit($id)
     {
         $mrl = MRLEntry::with(['children.itemMasterRelation'])->findOrFail($id);
-        $itemList = ItemMaster::where('IsActive', 1)->orderBy('ItemName', 'asc')->get();
+        $itemList = ItemMaster::where('IsActive', 1)
+            ->select('ID', 'ItemName', 'PartNo', 'CatalogueNo')
+            ->orderBy('ItemName', 'asc')
+            ->get();
 
         // Check if quoted
         $isQuoted = false;

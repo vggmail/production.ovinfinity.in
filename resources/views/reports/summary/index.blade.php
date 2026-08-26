@@ -99,10 +99,10 @@
                                 {{ number_format($item->SumMeter, 0) }}
                             </td>
                             <td style="padding: 6px; border: 1px solid #94a3b8; text-align: right; background-color: #ffffff;">
-                                {{ number_format($item->SumNW, 1) }}
+                                {{ number_format($item->SumNW, 0) }}
                             </td>
                             <td style="padding: 6px; border: 1px solid #94a3b8; text-align: right; background-color: #ffffff;">
-                                {{ number_format($item->AvgAGRM, 4) }}
+                                {{ round($item->AvgAGRM) }}
                             </td>
                             <td style="padding: 6px; border: 1px solid #94a3b8; text-align: right; background-color: #ffffff;">
                                 {{ round($item->AvgAge) }}
@@ -131,10 +131,10 @@
                     {{ number_format($grandTotals['SumMeter'], 0) }}
                 </td>
                 <td style="padding: 8px; border: 1px solid #000000; text-align: right; font-size: 0.95rem;">
-                    {{ number_format($grandTotals['SumNW'], 1) }}
+                    {{ number_format($grandTotals['SumNW'], 0) }}
                 </td>
                 <td style="padding: 8px; border: 1px solid #000000; text-align: right; font-size: 0.95rem;">
-                    {{ number_format($grandTotals['AvgAGRM'], 4) }}
+                    {{ round($grandTotals['AvgAGRM']) }}
                 </td>
                 <td style="padding: 8px; border: 1px solid #000000; text-align: right; font-size: 0.95rem;">
                     {{ round($grandTotals['AvgAge']) }}

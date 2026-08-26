@@ -86,7 +86,7 @@ class PurchaseController extends Controller
     {
         $validated = $request->validate([
             'EntryDate' => 'required|date',
-            'RollNumber' => 'required|integer',
+            'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',
             'Lamination' => 'nullable|integer',
@@ -129,7 +129,7 @@ class PurchaseController extends Controller
 
         $validated = $request->validate([
             'EntryDate' => 'required|date',
-            'RollNumber' => 'required|integer',
+            'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',
             'Lamination' => 'nullable|integer',

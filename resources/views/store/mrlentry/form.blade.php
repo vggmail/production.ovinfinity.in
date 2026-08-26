@@ -149,19 +149,34 @@
             totalQtyInput.value = totalQty.toFixed(2);
         }
 
-        function validateUniqueSelects(changedSelect) {
-            const selects = tableBody.querySelectorAll('.item-select');
-            const selectedValues = [];
-            selects.forEach(s => {
-                if (s.value) selectedValues.push(s.value);
-            });
+        function updateDisabledOptions() {
+            const selects = Array.from(tableBody.querySelectorAll('.item-select'));
+            const selectedValues = selects
+                .map(s => s.value)
+                .filter(val => val !== '' && val !== null && val !== undefined);
 
-            const hasDuplicates = selectedValues.some((val, idx) => selectedValues.indexOf(val) !== idx);
-            if (hasDuplicates) {
-                alert('Each item can only be selected once in an MRL entry.');
-                if (changedSelect) changedSelect.value = '';
-                calculateTotals();
-            }
+            selects.forEach(select => {
+                const currentValue = select.value;
+                const options = select.querySelectorAll('option');
+
+                options.forEach(option => {
+                    if (!option.value) return; // Do not disable placeholder
+                    if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+
+                // Re-initialize/refresh Select2 to reflect disabled options
+                if (typeof $.fn.select2 !== 'undefined' && $(select).hasClass("select2-hidden-accessible")) {
+                    $(select).select2({
+                        placeholder: '-- Select Item (Search by Name, Part No, or Cat No) --',
+                        width: '100%',
+                        allowClear: true
+                    });
+                }
+            });
         }
 
         function createRow(data = {}) {
@@ -171,10 +186,13 @@
             const selectedItemId = data.ItemMaster || data.item_master || '';
             const quantityVal = data.Quantity || data.quantity || '';
 
-            let itemOptionsHtml = '<option value="">Select</option>';
+            let itemOptionsHtml = '<option value="">-- Select Item (Search by Name, Part No, or Cat No) --</option>';
             itemListOptions.forEach(item => {
                 const isSel = String(selectedItemId) === String(item.ID) ? 'selected' : '';
-                itemOptionsHtml += `<option value="${item.ID}" ${isSel}>${item.ItemName}</option>`;
+                const partText = item.PartNo ? ` | Part No: ${item.PartNo}` : '';
+                const catText = item.CatalogueNo ? ` | Cat No: ${item.CatalogueNo}` : '';
+                const labelText = `${item.ItemName}${partText}${catText}`;
+                itemOptionsHtml += `<option value="${item.ID}" ${isSel}>${labelText}</option>`;
             });
 
             const disabledAttr = isQuoted ? 'disabled' : '';
@@ -182,7 +200,7 @@
             tr.innerHTML = `
                 <td class="sr-no" style="text-align: center; padding: 10px; font-weight: 600; color: #166534;">1</td>
                 <td style="padding: 8px 12px;">
-                    <select class="item-select" required ${disabledAttr} style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1; padding: 0.45rem 0.75rem; background-color: #fff;">
+                    <select class="item-select" required ${disabledAttr} style="width: 100%;">
                         ${itemOptionsHtml}
                     </select>
                 </td>
@@ -198,16 +216,37 @@
             const qtyInput = tr.querySelector('.qty-input');
             const btnRemove = tr.querySelector('.btn-remove-row');
 
-            itemSelect.addEventListener('change', (e) => {
-                validateUniqueSelects(e.target);
-            });
+            tableBody.appendChild(tr);
+
+            // Initialize Select2 on the item select dropdown
+            if (typeof $.fn.select2 !== 'undefined' && !isQuoted) {
+                $(itemSelect).select2({
+                    placeholder: '-- Select Item (Search by Name, Part No, or Cat No) --',
+                    width: '100%',
+                    allowClear: true
+                });
+
+                $(itemSelect).on('change select2:select select2:clear', () => {
+                    updateDisabledOptions();
+                    calculateTotals();
+                });
+            } else if (!isQuoted) {
+                itemSelect.addEventListener('change', () => {
+                    updateDisabledOptions();
+                    calculateTotals();
+                });
+            }
 
             qtyInput.addEventListener('input', calculateTotals);
 
             if (btnRemove) {
                 btnRemove.addEventListener('click', () => {
                     if (tableBody.children.length > 1) {
+                        if (typeof $.fn.select2 !== 'undefined' && $(itemSelect).hasClass("select2-hidden-accessible")) {
+                            $(itemSelect).select2('destroy');
+                        }
                         tr.remove();
+                        updateDisabledOptions();
                         calculateTotals();
                     } else {
                         alert('At least one item row is required.');
@@ -215,13 +254,13 @@
                 });
             }
 
-            tableBody.appendChild(tr);
             calculateTotals();
         }
 
         if (btnAddRow) {
             btnAddRow.addEventListener('click', () => {
                 createRow();
+                updateDisabledOptions();
             });
         }
 
@@ -231,6 +270,9 @@
         } else {
             createRow(); // Default 1 empty row
         }
+
+        updateDisabledOptions();
     });
 </script>
 @endsection
+

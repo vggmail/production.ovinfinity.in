@@ -122,7 +122,11 @@ class TransferController extends Controller
         foreach ($validated['items'] as $item) {
             $key = $item['SourceType'] . '_' . $item['InTransactionID'];
             if (isset($seenItems[$key])) {
-                return back()->withInput()->withErrors(['items' => "Duplicate Roll Item in submission."]);
+                $errMsg = "Duplicate Roll Item in submission.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errMsg], 422);
+                }
+                return back()->withInput()->withErrors(['items' => $errMsg]);
             }
             $seenItems[$key] = true;
 
@@ -135,7 +139,11 @@ class TransferController extends Controller
                 ->exists();
 
             if ($alreadyDispatched) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already dispatched and cannot be transferred."]);
+                $errMsg = "Selected Roll (ID: {$item['InTransactionID']}) is already dispatched and cannot be transferred.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errMsg], 422);
+                }
+                return back()->withInput()->withErrors(['items' => $errMsg]);
             }
 
             $alreadyTransferred = DB::table('intransferchild as tc')
@@ -147,11 +155,15 @@ class TransferController extends Controller
                 ->exists();
 
             if ($alreadyTransferred) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already transferred."]);
+                $errMsg = "Selected Roll (ID: {$item['InTransactionID']}) is already transferred.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errMsg], 422);
+                }
+                return back()->withInput()->withErrors(['items' => $errMsg]);
             }
         }
 
-        DB::transaction(function () use ($validated, $request) {
+        $transfer = DB::transaction(function () use ($validated, $request) {
             $userId = Auth::id() ?? 1;
 
             $transfer = InTransfer::create([
@@ -173,7 +185,17 @@ class TransferController extends Controller
                     'UpdatedBy' => $userId,
                 ]);
             }
+            return $transfer;
         });
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Transfer record created successfully.',
+                'id' => $transfer->ID,
+                'edit_url' => route('inventories.transfer.edit', $transfer->ID)
+            ]);
+        }
 
         return redirect()->route('inventories.transfer.index')->with('success', 'Transfer record created successfully.');
     }

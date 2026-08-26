@@ -65,6 +65,26 @@ Route::get('/create-cache', function () {
 Route::get('/cache/clear', fn() => redirect()->route('cache.clear'));
 Route::get('/cache/create', fn() => redirect()->route('cache.create'));
 
+// Migration Utility Route
+Route::get('/run-migrate', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Migration executed successfully.',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Migration failed: ' . $e->getMessage()
+        ], 500);
+    }
+})->name('migrate.run');
+
+Route::get('/migrate', fn() => redirect()->route('migrate.run'));
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard', [
@@ -122,6 +142,7 @@ Route::middleware(['auth'])->group(function () {
         // Production (table: intransaction, TransactionType = 1)
         Route::get('/production', [ProductionController::class, 'index'])->name('production.index');
         Route::get('/production/data', [ProductionController::class, 'data'])->name('production.data');
+        Route::get('/production/options', [ProductionController::class, 'getOptions'])->name('production.options');
         Route::get('/production/create', [ProductionController::class, 'create'])->name('production.create');
         Route::post('/production', [ProductionController::class, 'store'])->name('production.store');
         Route::get('/production/{id}/edit', [ProductionController::class, 'edit'])->name('production.edit');

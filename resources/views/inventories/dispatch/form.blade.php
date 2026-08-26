@@ -80,13 +80,17 @@
             <table class="datatable" id="items-table" style="width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; border: 1px solid #c2e2c4; border-radius: 6px;">
                 <thead>
                     <tr style="background-color: #d8ebd9; color: #1e3a1f;">
-                        <th style="width: 60px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
-                        <th style="width: 15%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
-                        <th style="width: 15%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Size</th>
-                        <th style="width: 20%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Required Gram Meter</th>
-                        <th style="width: 20%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Fabric Color</th>
-                        <th style="width: 22%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
-                        <th style="width: 60px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
+                        <th style="width: 50px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Sr No</th>
+                        <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Source Type</th>
+                        <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Size</th>
+                        <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">RGM</th>
+                        <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Fabric Color</th>
+                        <th style="width: 12%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
+                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Gross Weight</th>
+                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Core Weight</th>
+                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Actual Meter</th>
+                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Net Weight</th>
+                        <th style="width: 50px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="items-table-body" style="background-color: #eaf5eb;">
@@ -94,7 +98,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="background-color: #d8ebd9;">
-                        <td colspan="7" style="text-align: center; padding: 8px;">
+                        <td colspan="11" style="text-align: center; padding: 8px;">
                             <button type="button" id="btn-add-row" class="btn-action-secondary" style="width: 100%; max-width: 400px; padding: 6px 16px; font-weight: 600; cursor: pointer; border: 1px solid #6b8e6d; background: white; border-radius: 4px; color: #1e3a1f;">
                                 Add
                             </button>
@@ -105,10 +109,26 @@
         </div>
 
         <!-- Bottom Controls -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-            <div class="form-group" style="max-width: 250px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
                 <label for="TotalRolls">Total Rolls</label>
                 <input type="text" id="TotalRolls" value="{{ old('TotalRolls', $dispatch->TotalRolls ?? 0) }}" readonly style="background: rgba(0,0,0,0.03);">
+            </div>
+            <div class="form-group">
+                <label for="TotalGrossWeight">Total Gross Weight</label>
+                <input type="text" id="TotalGrossWeight" value="0" readonly style="background: rgba(0,0,0,0.03);">
+            </div>
+            <div class="form-group">
+                <label for="TotalCoreWeight">Total Core Weight</label>
+                <input type="text" id="TotalCoreWeight" value="0" readonly style="background: rgba(0,0,0,0.03);">
+            </div>
+            <div class="form-group">
+                <label for="TotalActualMeter">Total Actual Meter</label>
+                <input type="text" id="TotalActualMeter" value="0" readonly style="background: rgba(0,0,0,0.03);">
+            </div>
+            <div class="form-group">
+                <label for="TotalNetWeight">Total Net Weight</label>
+                <input type="text" id="TotalNetWeight" value="0" readonly style="background: rgba(0,0,0,0.03);">
             </div>
         </div>
 
@@ -125,13 +145,23 @@
         const tableBody = document.getElementById('items-table-body');
         const btnAddRow = document.getElementById('btn-add-row');
         const totalRollsInput = document.getElementById('TotalRolls');
+        const totalGrossWeightInput = document.getElementById('TotalGrossWeight');
+        const totalCoreWeightInput = document.getElementById('TotalCoreWeight');
+        const totalActualMeterInput = document.getElementById('TotalActualMeter');
+        const totalNetWeightInput = document.getElementById('TotalNetWeight');
 
         const initialItems = @json(old('items', $dispatch->children ?? []));
         const optionsApiUrl = "{{ route('inventories.dispatch.options') }}";
         const dispatchId = "{{ $dispatch->exists ? $dispatch->ID : '' }}";
 
+        function round2(val) {
+            return Math.round((parseFloat(val) || 0) * 100) / 100;
+        }
+
         function updateSrNumbersAndTotal() {
             const rows = tableBody.querySelectorAll('tr');
+            let sumGross = 0, sumCore = 0, sumMeter = 0, sumNet = 0;
+
             rows.forEach((row, index) => {
                 const srCell = row.querySelector('.sr-no');
                 if (srCell) {
@@ -148,8 +178,18 @@
                 if (rgmSelect) rgmSelect.name = `items[${index}][RequiredGramMeter]`;
                 if (fabricColorSelect) fabricColorSelect.name = `items[${index}][FabricColor]`;
                 if (rollNumberSelect) rollNumberSelect.name = `items[${index}][InTransactionID]`;
+
+                sumGross += round2(row.querySelector('.gross-weight-input')?.value);
+                sumCore  += round2(row.querySelector('.core-weight-input')?.value);
+                sumMeter += round2(row.querySelector('.actual-meter-input')?.value);
+                sumNet   += round2(row.querySelector('.net-weight-input')?.value);
             });
+
             totalRollsInput.value = rows.length;
+            totalGrossWeightInput.value = round2(sumGross);
+            totalCoreWeightInput.value  = round2(sumCore);
+            totalActualMeterInput.value = round2(sumMeter);
+            totalNetWeightInput.value   = round2(sumNet);
         }
 
         async function fetchOptions(step, params, selectElement, selectedValue = null) {
@@ -187,7 +227,7 @@
                 } else if (step === 'roll_number') {
                     data.forEach(item => {
                         const sel = selectedValue && String(selectedValue) === String(item.ID) ? 'selected' : '';
-                        html += `<option value="${item.ID}" ${sel}>${item.RollNumber}</option>`;
+                        html += `<option value="${item.ID}" data-gross="${item.GrossWeight ?? ''}" data-core="${item.CoreWeight ?? ''}" data-meter="${item.ActualMeter ?? ''}" data-net="${item.NetWeight ?? ''}" ${sel}>${item.RollNumber}</option>`;
                     });
                 }
 
@@ -241,6 +281,18 @@
                         <option value="">Select</option>
                     </select>
                 </td>
+                <td style="padding: 8px;">
+                    <input type="text" class="gross-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
+                </td>
+                <td style="padding: 8px;">
+                    <input type="text" class="core-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
+                </td>
+                <td style="padding: 8px;">
+                    <input type="text" class="actual-meter-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
+                </td>
+                <td style="padding: 8px;">
+                    <input type="text" class="net-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
+                </td>
                 <td style="text-align: center; padding: 8px;">
                     <button type="button" class="btn-remove-row" style="background: transparent; border: none; color: #dc2626; cursor: pointer; font-size: 1.1rem;" title="Remove Row">🗑️</button>
                 </td>
@@ -251,7 +303,27 @@
             const rgmSelect = tr.querySelector('.rgm-select');
             const fabricColorSelect = tr.querySelector('.fabric-color-select');
             const rollNumberSelect = tr.querySelector('.roll-number-select');
+            const grossWeightInput = tr.querySelector('.gross-weight-input');
+            const coreWeightInput = tr.querySelector('.core-weight-input');
+            const actualMeterInput = tr.querySelector('.actual-meter-input');
+            const netWeightInput = tr.querySelector('.net-weight-input');
             const btnRemove = tr.querySelector('.btn-remove-row');
+
+            function fillWeightFields(selectEl) {
+                const selected = selectEl.options[selectEl.selectedIndex];
+                if (selected && selected.value) {
+                    grossWeightInput.value = selected.dataset.gross || '';
+                    coreWeightInput.value  = selected.dataset.core  || '';
+                    actualMeterInput.value = selected.dataset.meter || '';
+                    netWeightInput.value   = selected.dataset.net   || '';
+                } else {
+                    grossWeightInput.value = '';
+                    coreWeightInput.value  = '';
+                    actualMeterInput.value = '';
+                    netWeightInput.value   = '';
+                }
+                updateSrNumbersAndTotal();
+            }
 
             if (typeof $.fn.select2 !== 'undefined') {
                 $(rollNumberSelect).select2({ placeholder: 'Select' });
@@ -312,6 +384,10 @@
                 const rgm = rgmSelect.value;
                 const fabricColor = e.target.value;
                 rollNumberSelect.innerHTML = '<option value="">Select</option>';
+                grossWeightInput.value = '';
+                coreWeightInput.value  = '';
+                actualMeterInput.value = '';
+                netWeightInput.value   = '';
                 if (typeof $.fn.select2 !== 'undefined') {
                     $(rollNumberSelect).select2({ placeholder: 'Select' });
                 }
@@ -319,7 +395,14 @@
                 if (sourceType && rollSize && rgm && fabricColor) {
                     await fetchOptions('roll_number', { source_type: sourceType, roll_size: rollSize, rgm, fabric_color: fabricColor }, rollNumberSelect);
                 }
+                updateSrNumbersAndTotal();
             });
+
+            // 5. Roll Number change handler — fill weight fields
+            rollNumberSelect.addEventListener('change', () => fillWeightFields(rollNumberSelect));
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(rollNumberSelect).on('select2:select select2:clear', () => fillWeightFields(rollNumberSelect));
+            }
 
             btnRemove.addEventListener('click', () => {
                 if (tableBody.children.length > 1) {
@@ -334,7 +417,6 @@
             });
 
             tableBody.appendChild(tr);
-            updateSrNumbersAndTotal();
 
             // Preload options instantly for existing values without network calls on page load
             if (selectedSourceType) {
@@ -351,12 +433,20 @@
                 }
                 if (selectedRollNumber) {
                     const rollLabel = (itemData.transaction_relation && itemData.transaction_relation.RollNumber) ? itemData.transaction_relation.RollNumber : selectedRollNumber;
-                    rollNumberSelect.innerHTML = `<option value="${selectedRollNumber}" selected>${rollLabel}</option>`;
+                    const tr_data = itemData.transaction_relation || {};
+                    rollNumberSelect.innerHTML = `<option value="${selectedRollNumber}" data-gross="${tr_data.GrossWeight ?? ''}" data-core="${tr_data.CoreWeight ?? ''}" data-meter="${tr_data.ActualMeter ?? ''}" data-net="${tr_data.NetWeight ?? ''}" selected>${rollLabel}</option>`;
+                    grossWeightInput.value = tr_data.GrossWeight ?? '';
+                    coreWeightInput.value  = tr_data.CoreWeight  ?? '';
+                    actualMeterInput.value = tr_data.ActualMeter ?? '';
+                    netWeightInput.value   = tr_data.NetWeight   ?? '';
                     if (typeof $.fn.select2 !== 'undefined') {
                         $(rollNumberSelect).select2({ placeholder: 'Select Roll Number' });
                     }
                 }
             }
+
+            // Update totals AFTER weight fields have been populated
+            updateSrNumbersAndTotal();
 
             // On-demand option loader when user clicks/focuses a dropdown
             async function loadStepOnDemand(step) {

@@ -7,18 +7,70 @@ use App\Models\InTransaction;
 use App\Models\RollSize;
 use App\Models\FabricColor;
 use App\Models\LoomNumber;
+use App\Models\Party;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductionController extends Controller
 {
+    private function getAvailableProductionQuery()
+    {
+        return InTransaction::where('TransactionType', 1)
+            ->where('IsActive', 1)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('indispatchchild as dc')
+                  ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                  ->whereColumn('dc.InTransactionID', 'intransaction.ID')
+                  ->whereColumn('dc.SourceType', 'intransaction.TransactionType')
+                  ->where('dc.IsActive', 1)
+                  ->where('d.IsActive', 1);
+            });
+    }
+
     public function index()
     {
-        return view('inventories.production.index');
+        $baseQuery = $this->getAvailableProductionQuery();
+
+        $rollSizeIds = (clone $baseQuery)->whereNotNull('RollSize')->distinct()->pluck('RollSize');
+        $rollSizes = RollSize::whereIn('ID', $rollSizeIds)->orderBy('RollSize', 'asc')->get();
+
+        $colorIds = (clone $baseQuery)->whereNotNull('FabricColor')->distinct()->pluck('FabricColor');
+        $fabricColors = FabricColor::whereIn('ID', $colorIds)->orderBy('FabricColor', 'asc')->get();
+
+        $rgmOptions = (clone $baseQuery)
+            ->whereNotNull('RequiredGramMeter')
+            ->where('RequiredGramMeter', '!=', '')
+            ->distinct()
+            ->pluck('RequiredGramMeter')
+            ->sort()
+            ->values();
+
+        $parties = Party::where('IsActive', 1)->orderBy('PartyName', 'asc')->get();
+
+        return view('inventories.production.index', compact('rollSizes', 'fabricColors', 'rgmOptions', 'parties'));
     }
 
     public function data(Request $request)
     {
-        $query = InTransaction::with(['rollSizeRelation', 'fabricColorRelation', 'loomNumberRelation']);
+        $query = $this->getAvailableProductionQuery()
+            ->with(['rollSizeRelation', 'fabricColorRelation', 'loomNumberRelation']);
+
+        if ($rollSize = $request->input('roll_size')) {
+            $query->where('RollSize', $rollSize);
+        }
+
+        if ($rgm = $request->input('required_gram_meter')) {
+            $query->where('RequiredGramMeter', $rgm);
+        }
+
+        if ($fabricColor = $request->input('fabric_color')) {
+            $query->where('FabricColor', $fabricColor);
+        }
+
+        if ($loomNumber = $request->input('loom_number')) {
+            $query->where('LoomNumber', $loomNumber);
+        }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -75,6 +127,7 @@ class ProductionController extends Controller
         return response()->json($data);
     }
 
+
     public function create()
     {
         $production = new InTransaction();
@@ -91,7 +144,7 @@ class ProductionController extends Controller
     {
         $validated = $request->validate([
             'EntryDate' => 'required|date',
-            'RollNumber' => 'required|integer',
+            'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',
             'LoomNumber' => 'required|integer',
@@ -113,7 +166,7 @@ class ProductionController extends Controller
 
         InTransaction::create($validated);
 
-        return redirect()->route('inventories.production.index')->with('success', 'Production record created successfully.');
+        return redirect()->route('inventories.production.create')->with('success', 'Production record created successfully.');
     }
 
     public function edit($id)
@@ -138,7 +191,7 @@ class ProductionController extends Controller
 
         $validated = $request->validate([
             'EntryDate' => 'required|date',
-            'RollNumber' => 'required|integer',
+            'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',
             'LoomNumber' => 'required|integer',

@@ -147,7 +147,7 @@ class DispatchController extends Controller
                     ->whereNotNull('RollNumber')
                     ->distinct()
                     ->orderBy('RollNumber', 'asc')
-                    ->get(['ID', 'RollNumber']);
+                    ->get(['ID', 'RollNumber', 'GrossWeight', 'CoreWeight', 'ActualMeter', 'NetWeight']);
 
                 return response()->json($rolls);
 
@@ -187,7 +187,11 @@ class DispatchController extends Controller
         foreach ($validated['items'] as $item) {
             $key = $item['SourceType'] . '_' . $item['InTransactionID'];
             if (isset($seenItems[$key])) {
-                return back()->withInput()->withErrors(['items' => "Duplicate Roll Item in submission."]);
+                $errMsg = "Duplicate Roll Item in submission.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errMsg], 422);
+                }
+                return back()->withInput()->withErrors(['items' => $errMsg]);
             }
             $seenItems[$key] = true;
 
@@ -200,23 +204,15 @@ class DispatchController extends Controller
                 ->exists();
 
             if ($alreadyDispatched) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already dispatched."]);
-            }
-
-            $alreadyTransferred = DB::table('intransferchild as tc')
-                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
-                ->where('tc.SourceType', $item['SourceType'])
-                ->where('tc.InTransactionID', $item['InTransactionID'])
-                ->where('tc.IsActive', 1)
-                ->where('t.IsActive', 1)
-                ->exists();
-
-            if ($alreadyTransferred) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already transferred and cannot be dispatched."]);
+                $errMsg = "Selected Roll (ID: {$item['InTransactionID']}) has already been transferred or dispatched.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errMsg], 422);
+                }
+                return back()->withInput()->withErrors(['items' => $errMsg]);
             }
         }
 
-        DB::transaction(function () use ($validated) {
+        $dispatch = DB::transaction(function () use ($validated) {
             $userId = Auth::id() ?? 1;
 
             $dispatch = InDispatch::create([
@@ -243,7 +239,17 @@ class DispatchController extends Controller
                     'UpdatedBy' => $userId,
                 ]);
             }
+            return $dispatch;
         });
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Dispatch record created successfully.',
+                'id' => $dispatch->ID,
+                'edit_url' => route('inventories.dispatch.edit', $dispatch->ID)
+            ]);
+        }
 
         return redirect()->route('inventories.dispatch.index')->with('success', 'Dispatch record created successfully.');
     }
