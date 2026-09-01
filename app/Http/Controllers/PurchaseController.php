@@ -23,6 +23,7 @@ class PurchaseController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('ID', 'like', "%{$search}%")
+                  ->orWhere('InvoiceNo', 'like', "%{$search}%")
                   ->orWhere('RollNumber', 'like', "%{$search}%")
                   ->orWhere('RequiredGramMeter', 'like', "%{$search}%")
                   ->orWhere('ActualMeter', 'like', "%{$search}%")
@@ -44,7 +45,7 @@ class PurchaseController extends Controller
         $sortDir = $request->input('sort_dir', 'desc');
 
         $allowedCols = [
-            'ID', 'EntryDate', 'RollSize', 'FabricColor', 'Lamination',
+            'ID', 'RollNumber', 'EntryDate', 'InvoiceNo', 'RollSize', 'FabricColor', 'Lamination',
             'RequiredGramMeter', 'ActualMeter', 'GrossWeight',
             'CoreWeight', 'NetWeight', 'ActualMeterWeight', 'Variation',
             'CreatedOn', 'UpdatedOn'
@@ -86,6 +87,7 @@ class PurchaseController extends Controller
     {
         $validated = $request->validate([
             'EntryDate' => 'required|date',
+            'InvoiceNo' => 'nullable|string|max:100',
             'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',
@@ -129,6 +131,7 @@ class PurchaseController extends Controller
 
         $validated = $request->validate([
             'EntryDate' => 'required|date',
+            'InvoiceNo' => 'nullable|string|max:100',
             'RollNumber' => 'required|string|max:50',
             'RollSize' => 'required|integer',
             'FabricColor' => 'required|integer',

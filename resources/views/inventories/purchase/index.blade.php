@@ -35,7 +35,9 @@
             <thead>
                 <tr>
                     <th data-column="ID" style="width: 50px;">ID</th>
+                    <th data-column="RollNumber">Roll No.</th>
                     <th data-column="EntryDate">Entry Date</th>
+                    <th data-column="InvoiceNo">Invoice No</th>
                     <th data-column="RollSize">Roll Size</th>
                     <th data-column="FabricColor">Fabric Color</th>
                     <th data-column="Lamination">Lamination</th>
@@ -91,7 +93,9 @@
                         return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
                     }
                 },
+                { name: 'RollNumber', sortable: true },
                 { name: 'EntryDateFormatted', sortable: true },
+                { name: 'InvoiceNo', sortable: true },
                 { name: 'RollSizeName', sortable: true },
                 { name: 'FabricColorName', sortable: true },
                 { name: 'LaminationName', sortable: true },

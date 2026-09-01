@@ -25,6 +25,9 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\DispatchController;
 use App\Http\Controllers\SummaryReportController;
+use App\Http\Controllers\MonthlyDispatchTransferReportController;
+use App\Http\Controllers\DailyDispatchTransferReportController;
+use App\Http\Controllers\MonthlyProductionReportController;
 use App\Http\Controllers\ItemMasterController;
 use App\Http\Controllers\MRLEntryController;
 use App\Http\Controllers\QuotationController;
@@ -135,7 +138,12 @@ Route::middleware(['auth'])->group(function () {
     // Reports Prefix
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/summary', [SummaryReportController::class, 'index'])->name('summary.index');
+        Route::get('/monthly-production', [MonthlyProductionReportController::class, 'index'])->name('monthly_production.index');
+        Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');
+        Route::get('/daily-dispatch-transfer', [DailyDispatchTransferReportController::class, 'index'])->name('daily_dispatch_transfer.index');
     });
+    // Alias route for backward compatibility
+    Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');
 
     // Inventories Prefix
     Route::prefix('inventories')->name('inventories.')->group(function () {

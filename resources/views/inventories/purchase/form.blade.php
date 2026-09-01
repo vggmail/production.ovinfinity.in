@@ -27,6 +27,14 @@
             </div>
 
             <div class="form-group">
+                <label for="InvoiceNo">Invoice No</label>
+                <input type="text" name="InvoiceNo" id="InvoiceNo" value="{{ old('InvoiceNo', $purchase->InvoiceNo) }}" class="@error('InvoiceNo') is-invalid @enderror" placeholder="Enter invoice number">
+                @error('InvoiceNo')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
                 <label for="EntryDate">Entry Date</label>
                 <input type="date" name="EntryDate" id="EntryDate" value="{{ old('EntryDate', $purchase->EntryDate) }}" class="@error('EntryDate') is-invalid @enderror" required>
                 @error('EntryDate')

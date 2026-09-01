@@ -124,6 +124,21 @@
                         <span>📊</span> <span class="menu-text">Summary Report</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.monthly_production.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.monthly_production.index') }}" title="Monthly Production Report">
+                        <span>🏭</span> <span class="menu-text">Monthly Production Report</span>
+                    </a>
+                </li>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.monthly_dispatch_transfer.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.monthly_dispatch_transfer.index') }}" title="Monthly Dispatch/Transfer">
+                        <span>📅</span> <span class="menu-text">Monthly Dispatch/Transfer</span>
+                    </a>
+                </li>
+                <!-- <li class="sidebar-subitem {{ request()->routeIs('reports.daily_dispatch_transfer.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.daily_dispatch_transfer.index') }}" title="Daily Dispatch/Transfer">
+                        <span>🗓️</span> <span class="menu-text">Daily Dispatch/Transfer</span>
+                    </a>
+                </li> -->
             </ul>
         </li>
 

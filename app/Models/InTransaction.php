@@ -14,6 +14,7 @@ class InTransaction extends Model
 
     protected $fillable = [
         'EntryDate',
+        'InvoiceNo',
         'TransactionType',
         'RollNumber',
         'RollSize',

@@ -246,3 +246,16 @@
     });
 </script>
 @endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function () {
+        $('#LoomNumber').select2({
+            placeholder: 'Type or select loom number...',
+            allowClear: true,
+            width: '100%',
+            minimumResultsForSearch: 0
+        });
+    });
+</script>
+@endsection

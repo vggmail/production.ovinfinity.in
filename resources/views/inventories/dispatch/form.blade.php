@@ -86,9 +86,9 @@
                         <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">RGM</th>
                         <th style="width: 10%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Fabric Color</th>
                         <th style="width: 12%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Roll Number</th>
+                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Actual Meter</th>
                         <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Gross Weight</th>
                         <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Core Weight</th>
-                        <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Actual Meter</th>
                         <th style="width: 9%; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Net Weight</th>
                         <th style="width: 50px; text-align: center; padding: 10px; border-bottom: 1px solid #c2e2c4; font-weight: 700;">Action</th>
                     </tr>
@@ -115,16 +115,16 @@
                 <input type="text" id="TotalRolls" value="{{ old('TotalRolls', $dispatch->TotalRolls ?? 0) }}" readonly style="background: rgba(0,0,0,0.03);">
             </div>
             <div class="form-group">
+                <label for="TotalActualMeter">Total Actual Meter</label>
+                <input type="text" id="TotalActualMeter" value="0" readonly style="background: rgba(0,0,0,0.03);">
+            </div>
+            <div class="form-group">
                 <label for="TotalGrossWeight">Total Gross Weight</label>
                 <input type="text" id="TotalGrossWeight" value="0" readonly style="background: rgba(0,0,0,0.03);">
             </div>
             <div class="form-group">
                 <label for="TotalCoreWeight">Total Core Weight</label>
                 <input type="text" id="TotalCoreWeight" value="0" readonly style="background: rgba(0,0,0,0.03);">
-            </div>
-            <div class="form-group">
-                <label for="TotalActualMeter">Total Actual Meter</label>
-                <input type="text" id="TotalActualMeter" value="0" readonly style="background: rgba(0,0,0,0.03);">
             </div>
             <div class="form-group">
                 <label for="TotalNetWeight">Total Net Weight</label>
@@ -282,13 +282,13 @@
                     </select>
                 </td>
                 <td style="padding: 8px;">
+                    <input type="text" class="actual-meter-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
+                </td>
+                <td style="padding: 8px;">
                     <input type="text" class="gross-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
                 </td>
                 <td style="padding: 8px;">
                     <input type="text" class="core-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
-                </td>
-                <td style="padding: 8px;">
-                    <input type="text" class="actual-meter-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
                 </td>
                 <td style="padding: 8px;">
                     <input type="text" class="net-weight-input" readonly value="" style="width: 100%; background: rgba(0,0,0,0.03); border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 8px; text-align: right;">
