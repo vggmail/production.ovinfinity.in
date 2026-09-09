@@ -20,6 +20,7 @@ class ItemMaster extends Model
         'Department',
         'HSNNo',
         'GSTPercentage',
+        'RackNo',
         'IsActive',
         'CreatedBy',
         'UpdatedBy',

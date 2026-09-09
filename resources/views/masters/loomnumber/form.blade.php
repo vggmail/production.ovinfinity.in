@@ -36,12 +36,12 @@
                 @enderror
             </div>
 
-            <!-- Yarn Type (LoomType in DB) Select Dropdown -->
+            <!-- Loom Type Select Dropdown -->
             <div class="form-group">
-                <label for="LoomType">Yarn Type</label>
+                <label for="LoomType">Loom Type</label>
                 <select id="LoomType" name="LoomType" required>
                     <option value="">- Select -</option>
-                    @foreach($yarnTypes as $id => $name)
+                    @foreach($loomTypes as $id => $name)
                         <option value="{{ $id }}" {{ old('LoomType', $loomnumber->LoomType) == $id ? 'selected' : '' }}>
                             {{ $name }}
                         </option>

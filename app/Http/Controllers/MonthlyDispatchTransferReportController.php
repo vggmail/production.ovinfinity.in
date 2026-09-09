@@ -32,13 +32,21 @@ class MonthlyDispatchTransferReportController extends Controller
         // Fetch Monthly Dispatch Net Weight
         $dispatchQuery = DB::table('indispatchchild as dc')
             ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
-            ->join('intransaction as t', function ($join) {
-                $join->on('dc.InTransactionID', '=', 't.ID')
-                     ->on('dc.SourceType', '=', 't.TransactionType');
+            ->join('intransaction as t', 'dc.InTransactionID', '=', 't.ID')
+            ->where(function ($q) {
+                $q->whereNull('dc.IsActive')->orWhere('dc.IsActive', 1);
             })
-            ->where('dc.IsActive', 1)
-            ->where('d.IsActive', 1)
-            ->where('t.IsActive', 1);
+            ->where(function ($q) {
+                $q->whereNull('d.IsActive')->orWhere('d.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('t.IsActive')->orWhere('t.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('d.DispatchType')
+                  ->orWhere('d.DispatchType', 'Dispatch')
+                  ->orWhere('d.DispatchType', '');
+            });
 
         $this->applyInwardFilter($dispatchQuery, $inward);
 
@@ -57,28 +65,32 @@ class MonthlyDispatchTransferReportController extends Controller
         ->get()
         ->keyBy('ym');
 
-        // Fetch Monthly Transfer Net Weight
-        $transferQuery = DB::table('intransferchild as tc')
-            ->join('intransfer as tr', 'tc.Transfer', '=', 'tr.ID')
-            ->join('intransaction as t', function ($join) {
-                $join->on('tc.InTransactionID', '=', 't.ID')
-                     ->on('tc.SourceType', '=', 't.TransactionType');
+        // Fetch Monthly Transfer Net Weight from indispatch table (where DispatchType = 'Transfer')
+        $transferQuery = DB::table('indispatchchild as dc')
+            ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+            ->join('intransaction as t', 'dc.InTransactionID', '=', 't.ID')
+            ->where(function ($q) {
+                $q->whereNull('dc.IsActive')->orWhere('dc.IsActive', 1);
             })
-            ->where('tc.IsActive', 1)
-            ->where('tr.IsActive', 1)
-            ->where('t.IsActive', 1);
+            ->where(function ($q) {
+                $q->whereNull('d.IsActive')->orWhere('d.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('t.IsActive')->orWhere('t.IsActive', 1);
+            })
+            ->where('d.DispatchType', 'Transfer');
 
         $this->applyInwardFilter($transferQuery, $inward);
 
         if ($fromMonth) {
-            $transferQuery->whereRaw("DATE_FORMAT(tr.EntryDate, '%Y-%m') >= ?", [$fromMonth]);
+            $transferQuery->whereRaw("DATE_FORMAT(d.EntryDate, '%Y-%m') >= ?", [$fromMonth]);
         }
         if ($toMonth) {
-            $transferQuery->whereRaw("DATE_FORMAT(tr.EntryDate, '%Y-%m') <= ?", [$toMonth]);
+            $transferQuery->whereRaw("DATE_FORMAT(d.EntryDate, '%Y-%m') <= ?", [$toMonth]);
         }
 
         $transferMonthly = $transferQuery->select([
-            DB::raw("DATE_FORMAT(tr.EntryDate, '%Y-%m') as ym"),
+            DB::raw("DATE_FORMAT(d.EntryDate, '%Y-%m') as ym"),
             DB::raw("SUM(CAST(t.NetWeight AS DECIMAL(10,2))) as total_transfer_nw")
         ])
         ->groupBy('ym')

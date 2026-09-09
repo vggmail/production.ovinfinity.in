@@ -47,7 +47,7 @@ class DispatchController extends Controller
             $query->orderBy('ID', 'desc');
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $data = $query->paginate($perPage);
 
         $data->getCollection()->transform(function ($item) {
@@ -88,15 +88,6 @@ class DispatchController extends Controller
                 if ($dispatchId) {
                     $q->where('dc.Dispatch', '!=', $dispatchId);
                 }
-            })
-            ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
-                  ->from('intransferchild as tc')
-                  ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
-                  ->whereColumn('tc.InTransactionID', 'intransaction.ID')
-                  ->whereColumn('tc.SourceType', 'intransaction.TransactionType')
-                  ->where('tc.IsActive', 1)
-                  ->where('t.IsActive', 1);
             });
 
         switch ($step) {
@@ -302,19 +293,7 @@ class DispatchController extends Controller
                 ->exists();
 
             if ($alreadyDispatched) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already dispatched."]);
-            }
-
-            $alreadyTransferred = DB::table('intransferchild as tc')
-                ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
-                ->where('tc.SourceType', $item['SourceType'])
-                ->where('tc.InTransactionID', $item['InTransactionID'])
-                ->where('tc.IsActive', 1)
-                ->where('t.IsActive', 1)
-                ->exists();
-
-            if ($alreadyTransferred) {
-                return back()->withInput()->withErrors(['items' => "Selected Roll is already transferred and cannot be dispatched."]);
+                return back()->withInput()->withErrors(['items' => "Selected Roll is already dispatched or transferred."]);
             }
         }
 

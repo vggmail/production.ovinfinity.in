@@ -10,7 +10,7 @@ class DynamicDataTable {
             getParams: config.getParams || null,
             onEdit: config.onEdit || null,
             onDelete: config.onDelete || null,
-            perPage: config.perPage || 10,
+            perPage: config.perPage || 50,
         };
 
         this.state = {
@@ -31,6 +31,9 @@ class DynamicDataTable {
         this.wrapper = this.table.closest('.datatable-wrapper');
         this.searchInput = this.wrapper.querySelector('.datatable-search input');
         this.perPageSelect = this.wrapper.querySelector('.datatable-length select');
+        if (this.perPageSelect && this.perPageSelect.value) {
+            this.state.perPage = parseInt(this.perPageSelect.value, 10);
+        }
         this.infoText = this.wrapper.querySelector('.datatable-info');
         this.paginationContainer = this.wrapper.querySelector('.pagination-controls');
 

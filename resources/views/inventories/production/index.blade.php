@@ -43,7 +43,19 @@
         <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0; color: var(--text-primary);">Filter Header Section</h3>
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
-        <!-- 1. Roll Size -->
+        <!-- 1. From Date -->
+        <div class="form-group">
+            <label for="filter_start_date">From Date</label>
+            <input type="date" id="filter_start_date" class="form-control" style="height: 38px; border: 1px solid var(--card-border); border-radius: 8px; padding: 4px 8px; background: rgba(255, 255, 255, 0.9); width: 100%;">
+        </div>
+
+        <!-- 2. To Date -->
+        <div class="form-group">
+            <label for="filter_end_date">To Date</label>
+            <input type="date" id="filter_end_date" class="form-control" style="height: 38px; border: 1px solid var(--card-border); border-radius: 8px; padding: 4px 8px; background: rgba(255, 255, 255, 0.9); width: 100%;">
+        </div>
+
+        <!-- 3. Roll Size -->
         <div class="form-group">
             <label for="filter_roll_size">Roll Size</label>
             <select id="filter_roll_size" class="select2-filter">
@@ -54,7 +66,7 @@
             </select>
         </div>
 
-        <!-- 2. Required Gram Meter -->
+        <!-- 4. Required Gram Meter -->
         <div class="form-group">
             <label for="filter_required_gram_meter">Required Gram Meter</label>
             <select id="filter_required_gram_meter" class="select2-filter">
@@ -65,7 +77,7 @@
             </select>
         </div>
 
-        <!-- 3. Fabric Color -->
+        <!-- 5. Fabric Color -->
         <div class="form-group">
             <label for="filter_fabric_color">Fabric Color</label>
             <select id="filter_fabric_color" class="select2-filter">
@@ -76,6 +88,13 @@
             </select>
         </div>
 
+        <!-- 6. Show All Checkbox -->
+        <div class="form-group" style="display: flex; align-items: center; min-height: 38px; margin-bottom: 0;">
+            <label for="filter_show_all" style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--text-primary); margin: 0;">
+                <input type="checkbox" id="filter_show_all" style="width: 18px; height: 18px; cursor: pointer;">
+                Show All (Dispatched / Transferred)
+            </label>
+        </div>
 
         <!-- Filter & Clear Buttons -->
         <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -94,10 +113,10 @@
         <div class="datatable-length">
             <span>Show</span>
             <select id="dt-length">
-                <option value="10">10</option>
-                <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
             </select>
             <span>entries</span>
         </div>
@@ -127,6 +146,7 @@
                     <th data-column="ClosingMeter">Cl Mtr</th>
                     <th data-column="ActualMeterWeight">AWM</th>
                     <th data-column="Variation">Variation</th>
+                    <th data-column="Status">Status</th>
                     <th data-column="CreatedOn">C_Date</th>
                     <th data-column="UpdatedOn">U_Date</th>
                     <th style="width: 140px;">Action</th>
@@ -351,7 +371,10 @@
         let appliedFilters = {
             roll_size: '',
             required_gram_meter: '',
-            fabric_color: ''
+            fabric_color: '',
+            start_date: '',
+            end_date: '',
+            show_all: 0
         };
 
         // Initialize DataTable
@@ -367,6 +390,9 @@
                     name: 'select',
                     sortable: false,
                     render: (val, row) => {
+                        if (row.IsAvailable === false) {
+                            return `<div style="text-align: center;"><input type="checkbox" disabled style="opacity: 0.4; cursor: not-allowed;" title="Already ${row.Status}"></div>`;
+                        }
                         const isChecked = selectedRolls.has(row.ID) ? 'checked' : '';
                         return `<div style="text-align: center;"><input type="checkbox" class="roll-checkbox" data-id="${row.ID}" data-roll-size="${row.RollSize || ''}" data-rgm="${row.RequiredGramMeter || ''}" data-color="${row.FabricColor || ''}" ${isChecked} style="cursor: pointer;"></div>`;
                     }
@@ -392,6 +418,20 @@
                 { name: 'ClosingMeter', sortable: true },
                 { name: 'ActualMeterWeight', sortable: true },
                 { name: 'Variation', sortable: true },
+                {
+                    name: 'Status',
+                    sortable: false,
+                    render: (val, row) => {
+                        const status = row.Status || 'Available';
+                        if (status === 'Transferred') {
+                            return '<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600;">Transferred</span>';
+                        } else if (status === 'Dispatched') {
+                            return '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600;">Dispatched</span>';
+                        } else {
+                            return '<span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #16a34a; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600;">Available</span>';
+                        }
+                    }
+                },
                 { 
                     name: 'CreatedOn', 
                     sortable: true,
@@ -425,7 +465,10 @@
             appliedFilters = {
                 roll_size: $('#filter_roll_size').val() || '',
                 required_gram_meter: $('#filter_required_gram_meter').val() || '',
-                fabric_color: $('#filter_fabric_color').val() || ''
+                fabric_color: $('#filter_fabric_color').val() || '',
+                start_date: document.getElementById('filter_start_date').value || '',
+                end_date: document.getElementById('filter_end_date').value || '',
+                show_all: document.getElementById('filter_show_all').checked ? 1 : 0
             };
             table.state.page = 1;
             table.fetch();
@@ -435,8 +478,15 @@
             appliedFilters = {
                 roll_size: '',
                 required_gram_meter: '',
-                fabric_color: ''
+                fabric_color: '',
+                start_date: '',
+                end_date: '',
+                show_all: 0
             };
+
+            document.getElementById('filter_start_date').value = '';
+            document.getElementById('filter_end_date').value = '';
+            document.getElementById('filter_show_all').checked = false;
 
             if (typeof $.fn.select2 !== 'undefined') {
                 $('#filter_roll_size').val(null).trigger('change');

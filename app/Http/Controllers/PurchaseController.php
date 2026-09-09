@@ -57,7 +57,7 @@ class PurchaseController extends Controller
             $query->orderBy('ID', 'desc');
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $data = $query->paginate($perPage);
 
         // Transform collection for datatable rendering

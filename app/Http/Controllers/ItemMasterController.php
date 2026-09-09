@@ -24,6 +24,7 @@ class ItemMasterController extends Controller
                   ->orWhere('PartNo', 'like', "%{$search}%")
                   ->orWhere('CatalogueNo', 'like', "%{$search}%")
                   ->orWhere('HSNNo', 'like', "%{$search}%")
+                  ->orWhere('RackNo', 'like', "%{$search}%")
                   ->orWhereHas('departmentRelation', function ($dq) use ($search) {
                       $dq->where('DepartmentName', 'like', "%{$search}%");
                   });
@@ -33,14 +34,14 @@ class ItemMasterController extends Controller
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'Department', 'HSNNo', 'GSTPercentage', 'IsActive', 'CreatedOn', 'UpdatedOn'];
+        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'Department', 'HSNNo', 'GSTPercentage', 'RackNo', 'IsActive', 'CreatedOn', 'UpdatedOn'];
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
         } else {
             $query->orderBy('ID', 'desc');
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $data = $query->paginate($perPage);
 
         $data->getCollection()->transform(function ($item) {
@@ -69,6 +70,7 @@ class ItemMasterController extends Controller
             'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
+            'RackNo' => 'nullable|string|max:100',
             'IsActive' => 'nullable|boolean',
         ]);
 
@@ -103,6 +105,7 @@ class ItemMasterController extends Controller
             'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
+            'RackNo' => 'nullable|string|max:100',
             'IsActive' => 'nullable|boolean',
         ]);
 

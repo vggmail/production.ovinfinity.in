@@ -9,30 +9,65 @@ class DailyDispatchTransferReportController extends Controller
 {
     public function index(Request $request)
     {
-        $inward = $request->input('inward', 'prod'); // Default 'prod' matching mockup (02 Prod)
+        $inward = $request->input('inward', 'all'); // Default 'all' matching monthly report
         
-        // Fetch all available Ym options (e.g. 2026-07)
-        $dispatchMonths = DB::table('indispatch')->where('IsActive', 1)->selectRaw("DATE_FORMAT(EntryDate, '%Y-%m') as ym")->distinct()->pluck('ym')->toArray();
-        $transferMonths = DB::table('intransfer')->where('IsActive', 1)->selectRaw("DATE_FORMAT(EntryDate, '%Y-%m') as ym")->distinct()->pluck('ym')->toArray();
-        $allYmOptions = array_unique(array_filter(array_merge($dispatchMonths, $transferMonths)));
+        // Fetch all available Ym options from indispatch
+        $allYmOptions = DB::table('indispatch')
+            ->where(function ($q) {
+                $q->whereNull('IsActive')->orWhere('IsActive', 1);
+            })
+            ->selectRaw("DATE_FORMAT(EntryDate, '%Y-%m') as ym")
+            ->distinct()
+            ->pluck('ym')
+            ->toArray();
+        $allYmOptions = array_unique(array_filter($allYmOptions));
         rsort($allYmOptions);
 
         $dispatchMonth = $request->input('dm');
-        if (!$dispatchMonth || !in_array($dispatchMonth, $allYmOptions)) {
-            $dispatchMonth = !empty($allYmOptions) ? $allYmOptions[0] : date('Y-m');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Handle date range and month selection defaults
+        if (empty($fromDate) && empty($toDate)) {
+            if ($dispatchMonth && in_array($dispatchMonth, $allYmOptions)) {
+                $fromDate = $dispatchMonth . '-01';
+                $toDate = date('Y-m-t', strtotime($fromDate));
+            } else {
+                $dispatchMonth = !empty($allYmOptions) ? $allYmOptions[0] : date('Y-m');
+                $fromDate = $dispatchMonth . '-01';
+                $toDate = date('Y-m-t', strtotime($fromDate));
+            }
+        } elseif (!empty($fromDate) && empty($toDate)) {
+            $toDate = date('Y-m-t', strtotime($fromDate));
+        } elseif (empty($fromDate) && !empty($toDate)) {
+            $fromDate = date('Y-m-01', strtotime($toDate));
         }
 
         // Fetch Daily Dispatch Net Weight
         $dispatchQuery = DB::table('indispatchchild as dc')
             ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
-            ->join('intransaction as t', function ($join) {
-                $join->on('dc.InTransactionID', '=', 't.ID')
-                     ->on('dc.SourceType', '=', 't.TransactionType');
+            ->join('intransaction as t', 'dc.InTransactionID', '=', 't.ID')
+            ->where(function ($q) {
+                $q->whereNull('dc.IsActive')->orWhere('dc.IsActive', 1);
             })
-            ->where('dc.IsActive', 1)
-            ->where('d.IsActive', 1)
-            ->where('t.IsActive', 1)
-            ->whereRaw("DATE_FORMAT(d.EntryDate, '%Y-%m') = ?", [$dispatchMonth]);
+            ->where(function ($q) {
+                $q->whereNull('d.IsActive')->orWhere('d.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('t.IsActive')->orWhere('t.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('d.DispatchType')
+                  ->orWhere('d.DispatchType', 'Dispatch')
+                  ->orWhere('d.DispatchType', '');
+            });
+
+        if ($fromDate) {
+            $dispatchQuery->whereDate('d.EntryDate', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $dispatchQuery->whereDate('d.EntryDate', '<=', $toDate);
+        }
 
         $this->applyInwardFilter($dispatchQuery, $inward);
 
@@ -44,22 +79,32 @@ class DailyDispatchTransferReportController extends Controller
         ->get()
         ->keyBy('entry_date');
 
-        // Fetch Daily Transfer Net Weight
-        $transferQuery = DB::table('intransferchild as tc')
-            ->join('intransfer as tr', 'tc.Transfer', '=', 'tr.ID')
-            ->join('intransaction as t', function ($join) {
-                $join->on('tc.InTransactionID', '=', 't.ID')
-                     ->on('tc.SourceType', '=', 't.TransactionType');
+        // Fetch Daily Transfer Net Weight (from indispatch where DispatchType = 'Transfer')
+        $transferQuery = DB::table('indispatchchild as dc')
+            ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+            ->join('intransaction as t', 'dc.InTransactionID', '=', 't.ID')
+            ->where(function ($q) {
+                $q->whereNull('dc.IsActive')->orWhere('dc.IsActive', 1);
             })
-            ->where('tc.IsActive', 1)
-            ->where('tr.IsActive', 1)
-            ->where('t.IsActive', 1)
-            ->whereRaw("DATE_FORMAT(tr.EntryDate, '%Y-%m') = ?", [$dispatchMonth]);
+            ->where(function ($q) {
+                $q->whereNull('d.IsActive')->orWhere('d.IsActive', 1);
+            })
+            ->where(function ($q) {
+                $q->whereNull('t.IsActive')->orWhere('t.IsActive', 1);
+            })
+            ->where('d.DispatchType', 'Transfer');
+
+        if ($fromDate) {
+            $transferQuery->whereDate('d.EntryDate', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $transferQuery->whereDate('d.EntryDate', '<=', $toDate);
+        }
 
         $this->applyInwardFilter($transferQuery, $inward);
 
         $transferDaily = $transferQuery->select([
-            DB::raw("DATE(tr.EntryDate) as entry_date"),
+            DB::raw("DATE(d.EntryDate) as entry_date"),
             DB::raw("SUM(CAST(t.NetWeight AS DECIMAL(10,2))) as total_transfer_nw")
         ])
         ->groupBy('entry_date')
@@ -101,14 +146,20 @@ class DailyDispatchTransferReportController extends Controller
             'grand_total' => $overallGrandTotal,
         ];
 
-        // Readable month name for title e.g. "July 2026"
-        $monthTitle = date('F Y', strtotime($dispatchMonth . '-01'));
+        // Readable date title e.g. "01/07/2026 to 31/07/2026" or "July 2026"
+        if ($fromDate && $toDate && (date('Y-m', strtotime($fromDate)) !== date('Y-m', strtotime($toDate)) || $fromDate !== date('Y-m-01', strtotime($fromDate)) || $toDate !== date('Y-m-t', strtotime($toDate)))) {
+            $monthTitle = date('d/m/Y', strtotime($fromDate)) . ' to ' . date('d/m/Y', strtotime($toDate));
+        } else {
+            $monthTitle = date('F Y', strtotime($fromDate ?: ($dispatchMonth . '-01')));
+        }
 
         return view('reports.daily_dispatch_transfer.index', compact(
             'rows',
             'grandTotals',
             'inward',
             'dispatchMonth',
+            'fromDate',
+            'toDate',
             'allYmOptions',
             'monthTitle'
         ));

@@ -19,6 +19,16 @@
             @method('PUT')
         @endif
 
+        @php
+            $isLocked = $production->exists && !empty($isDispatchedOrTransferred);
+        @endphp
+
+        @if($isLocked)
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #b45309; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.88rem; font-weight: 500;">
+                ⚠️ <strong>Note:</strong> Roll Number, Roll Size, Fabric Color, and Loom Number are locked because this roll has already been dispatched or transferred.
+            </div>
+        @endif
+
         <!-- Header Controls Row 1 -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
             <div class="form-group">
@@ -39,7 +49,10 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
             <div class="form-group">
                 <label for="RollNumber">Roll Number</label>
-                <input type="text" name="RollNumber" id="RollNumber" value="{{ old('RollNumber', $production->RollNumber) }}" class="@error('RollNumber') is-invalid @enderror" placeholder="Enter roll number" required>
+                <input type="text" id="RollNumber" value="{{ old('RollNumber', $production->RollNumber) }}" class="@error('RollNumber') is-invalid @enderror" placeholder="Enter roll number" {{ $isLocked ? 'disabled style=background:rgba(0,0,0,0.03);cursor:not-allowed;' : 'name=RollNumber required' }}>
+                @if($isLocked)
+                    <input type="hidden" name="RollNumber" value="{{ old('RollNumber', $production->RollNumber) }}">
+                @endif
                 @error('RollNumber')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -47,7 +60,7 @@
 
             <div class="form-group">
                 <label for="RollSize">Roll Size</label>
-                <select name="RollSize" id="RollSize" class="@error('RollSize') is-invalid @enderror" required>
+                <select id="RollSize" class="@error('RollSize') is-invalid @enderror" {{ $isLocked ? 'disabled style=background:rgba(0,0,0,0.03);cursor:not-allowed;' : 'name=RollSize required' }}>
                     <option value="">Select</option>
                     @foreach($rollSizes as $rs)
                         <option value="{{ $rs->ID }}" {{ old('RollSize', $production->RollSize) == $rs->ID ? 'selected' : '' }}>
@@ -55,6 +68,9 @@
                         </option>
                     @endforeach
                 </select>
+                @if($isLocked)
+                    <input type="hidden" name="RollSize" value="{{ old('RollSize', $production->RollSize) }}">
+                @endif
                 @error('RollSize')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -62,7 +78,7 @@
 
             <div class="form-group">
                 <label for="FabricColor">Fabric Color</label>
-                <select name="FabricColor" id="FabricColor" class="@error('FabricColor') is-invalid @enderror" required>
+                <select id="FabricColor" class="@error('FabricColor') is-invalid @enderror" {{ $isLocked ? 'disabled style=background:rgba(0,0,0,0.03);cursor:not-allowed;' : 'name=FabricColor required' }}>
                     <option value="">Select</option>
                     @foreach($fabricColors as $fc)
                         <option value="{{ $fc->ID }}" {{ old('FabricColor', $production->FabricColor) == $fc->ID ? 'selected' : '' }}>
@@ -70,6 +86,9 @@
                         </option>
                     @endforeach
                 </select>
+                @if($isLocked)
+                    <input type="hidden" name="FabricColor" value="{{ old('FabricColor', $production->FabricColor) }}">
+                @endif
                 @error('FabricColor')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -77,7 +96,7 @@
 
             <div class="form-group">
                 <label for="LoomNumber">Loom Number</label>
-                <select name="LoomNumber" id="LoomNumber" class="@error('LoomNumber') is-invalid @enderror" required>
+                <select id="LoomNumber" class="@error('LoomNumber') is-invalid @enderror" {{ $isLocked ? 'disabled style=background:rgba(0,0,0,0.03);cursor:not-allowed;' : 'name=LoomNumber required' }}>
                     <option value="">Select</option>
                     @foreach($loomNumbers as $ln)
                         <option value="{{ $ln->ID }}" {{ old('LoomNumber', $production->LoomNumber) == $ln->ID ? 'selected' : '' }}>
@@ -85,6 +104,9 @@
                         </option>
                     @endforeach
                 </select>
+                @if($isLocked)
+                    <input type="hidden" name="LoomNumber" value="{{ old('LoomNumber', $production->LoomNumber) }}">
+                @endif
                 @error('LoomNumber')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

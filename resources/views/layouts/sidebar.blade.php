@@ -108,6 +108,11 @@
                         <span>📄</span> <span class="menu-text">Vendor Quotation</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('store.pi.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.pi.index') }}" title="PI Entry">
+                        <span>🧾</span> <span class="menu-text">PI Entry</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -129,16 +134,11 @@
                         <span>🏭</span> <span class="menu-text">Monthly Production Report</span>
                     </a>
                 </li>
-                <li class="sidebar-subitem {{ request()->routeIs('reports.monthly_dispatch_transfer.*') ? 'active' : '' }}">
-                    <a href="{{ route('reports.monthly_dispatch_transfer.index') }}" title="Monthly Dispatch/Transfer">
-                        <span>📅</span> <span class="menu-text">Monthly Dispatch/Transfer</span>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.monthly_dispatch_transfer.*') || request()->routeIs('reports.daily_dispatch_transfer.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.monthly_dispatch_transfer.index') }}" title="Dispatch/Transfer">
+                        <span>📅</span> <span class="menu-text">Dispatch/Transfer</span>
                     </a>
                 </li>
-                <!-- <li class="sidebar-subitem {{ request()->routeIs('reports.daily_dispatch_transfer.*') ? 'active' : '' }}">
-                    <a href="{{ route('reports.daily_dispatch_transfer.index') }}" title="Daily Dispatch/Transfer">
-                        <span>🗓️</span> <span class="menu-text">Daily Dispatch/Transfer</span>
-                    </a>
-                </li> -->
             </ul>
         </li>
 

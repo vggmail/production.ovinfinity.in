@@ -9,12 +9,11 @@ use Illuminate\Validation\Rule;
 
 class LoomNumberController extends Controller
 {
-    public static $yarnTypes = [
-        1 => 'LSL-6',
-        2 => 'Airjet',
-        3 => 'Rapier',
-        4 => 'Waterjet',
-        5 => 'Projectile',
+    public static $loomTypes = [
+        1 => '610',
+        2 => 'LSL-6',
+        3 => 'Nova-6',
+        4 => 'LSL-8',
     ];
 
     public function index()
@@ -30,7 +29,7 @@ class LoomNumberController extends Controller
             $query->where('LoomNumber', 'like', "%{$search}%");
             
             // Allow searching by Loom Type name
-            foreach (self::$yarnTypes as $id => $name) {
+            foreach (self::$loomTypes as $id => $name) {
                 if (stripos($name, $search) !== false) {
                     $query->orWhere('LoomType', $id);
                 }
@@ -47,12 +46,12 @@ class LoomNumberController extends Controller
             $query->orderBy('ID', 'desc');
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $data = $query->paginate($perPage);
 
         // Map LoomType ID to name for JSON response
         $data->getCollection()->transform(function ($item) {
-            $item->LoomTypeName = self::$yarnTypes[$item->LoomType] ?? 'Unknown';
+            $item->LoomTypeName = self::$loomTypes[$item->LoomType] ?? 'Unknown';
             return $item;
         });
 
@@ -62,15 +61,15 @@ class LoomNumberController extends Controller
     public function create()
     {
         $loomnumber = new LoomNumber();
-        $yarnTypes = self::$yarnTypes;
-        return view('masters.loomnumber.form', compact('loomnumber', 'yarnTypes'));
+        $loomTypes = self::$loomTypes;
+        return view('masters.loomnumber.form', compact('loomnumber', 'loomTypes'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')],
-            'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$yarnTypes)),
+            'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
         ]);
 
@@ -86,8 +85,8 @@ class LoomNumberController extends Controller
     public function edit($id)
     {
         $loomnumber = LoomNumber::findOrFail($id);
-        $yarnTypes = self::$yarnTypes;
-        return view('masters.loomnumber.form', compact('loomnumber', 'yarnTypes'));
+        $loomTypes = self::$loomTypes;
+        return view('masters.loomnumber.form', compact('loomnumber', 'loomTypes'));
     }
 
     public function update(Request $request, $id)
@@ -96,7 +95,7 @@ class LoomNumberController extends Controller
 
         $validated = $request->validate([
             'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->ignore($id, 'ID')],
-            'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$yarnTypes)),
+            'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
         ]);
 

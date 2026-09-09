@@ -28,9 +28,11 @@ use App\Http\Controllers\SummaryReportController;
 use App\Http\Controllers\MonthlyDispatchTransferReportController;
 use App\Http\Controllers\DailyDispatchTransferReportController;
 use App\Http\Controllers\MonthlyProductionReportController;
+use App\Http\Controllers\DailyProductionReportController;
 use App\Http\Controllers\ItemMasterController;
 use App\Http\Controllers\MRLEntryController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\PIController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -133,12 +135,25 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/quotation/{id}', [QuotationController::class, 'update'])->name('quotation.update');
         Route::delete('/quotation/{id}', [QuotationController::class, 'destroy'])->name('quotation.destroy');
         Route::get('/quotation/{id}/print', [QuotationController::class, 'print'])->name('quotation.print');
+
+        // PI (Proforma Invoice)
+        Route::get('/pi', [PIController::class, 'index'])->name('pi.index');
+        Route::get('/pi/data', [PIController::class, 'data'])->name('pi.data');
+        Route::get('/pi/create', [PIController::class, 'create'])->name('pi.create');
+        Route::get('/pi/fetch-mrl', [PIController::class, 'fetchMrlItems'])->name('pi.fetchMrl');
+        Route::post('/pi', [PIController::class, 'store'])->name('pi.store');
+        Route::get('/pi/{id}/edit', [PIController::class, 'edit'])->name('pi.edit');
+        Route::put('/pi/{id}', [PIController::class, 'update'])->name('pi.update');
+        Route::delete('/pi/{id}', [PIController::class, 'destroy'])->name('pi.destroy');
+        Route::get('/pi/{id}/print', [PIController::class, 'print'])->name('pi.print');
     });
+
 
     // Reports Prefix
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/summary', [SummaryReportController::class, 'index'])->name('summary.index');
         Route::get('/monthly-production', [MonthlyProductionReportController::class, 'index'])->name('monthly_production.index');
+        Route::get('/daily-production', [DailyProductionReportController::class, 'index'])->name('daily_production.index');
         Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');
         Route::get('/daily-dispatch-transfer', [DailyDispatchTransferReportController::class, 'index'])->name('daily_dispatch_transfer.index');
     });

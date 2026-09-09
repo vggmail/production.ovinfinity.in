@@ -6,9 +6,9 @@
 <div class="content-header" style="margin-bottom: 0.75rem;">
     <div class="content-title">
         <h1>Production Net Weight & Meter Report</h1>
-        <p>Month-wise and day-wise Actual Meter and Net Weight summary for Production and Purchases</p>
+        <p>Day-wise Actual Meter and Net Weight summary ({{ $dateTitle }})</p>
     </div>
-    <div>
+    <div style="display: flex; gap: 0.75rem;">
         <button type="button" onclick="window.print()" class="btn-action-secondary" title="Print Report">
             🖨️ Print
         </button>
@@ -17,35 +17,35 @@
 
 <!-- Navigation Tabs (Monthly vs Daily) -->
 <div class="report-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 2px solid var(--card-border, #cbd5e1); padding-bottom: 0.5rem;">
-    <a href="{{ route('reports.monthly_production.index', array_filter(['inward' => $inward, 'from_month' => $fromMonth, 'to_month' => $toMonth])) }}" 
-       class="tab-item active" 
-       style="padding: 0.55rem 1.25rem; font-weight: 700; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
-        <span>📅</span> Monthly
-    </a>
-    <a href="{{ route('reports.daily_production.index', array_filter(['inward' => $inward])) }}" 
+    <a href="{{ route('reports.monthly_production.index', array_filter(['inward' => $inward])) }}" 
        class="tab-item" 
        style="padding: 0.55rem 1.25rem; font-weight: 600; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #f1f5f9; color: #475569; transition: all 0.2s;"
        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+        <span>📅</span> Monthly
+    </a>
+    <a href="{{ route('reports.daily_production.index', array_filter(['inward' => $inward, 'from_date' => $fromDate, 'to_date' => $toDate])) }}" 
+       class="tab-item active" 
+       style="padding: 0.55rem 1.25rem; font-weight: 700; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
         <span>🗓️</span> Daily
     </a>
 </div>
 
 <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
-    <form method="GET" action="{{ route('reports.monthly_production.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.25rem;">
-        <!-- Date Range - From Month -->
-        <div class="form-group" style="min-width: 160px;">
-            <label for="from_month" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">From Month</label>
-            <input type="month" name="from_month" id="from_month" value="{{ $fromMonth }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
+    <form method="GET" action="{{ route('reports.daily_production.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.25rem;">
+        <!-- 1 From Date -->
+        <div class="form-group" style="min-width: 150px;">
+            <label for="from_date" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">From Date</label>
+            <input type="date" name="from_date" id="from_date" value="{{ $fromDate }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
         </div>
 
-        <!-- Date Range - To Month -->
-        <div class="form-group" style="min-width: 160px;">
-            <label for="to_month" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">To Month</label>
-            <input type="month" name="to_month" id="to_month" value="{{ $toMonth }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
+        <!-- 2 To Date -->
+        <div class="form-group" style="min-width: 150px;">
+            <label for="to_date" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">To Date</label>
+            <input type="date" name="to_date" id="to_date" value="{{ $toDate }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
         </div>
 
-        <!-- Select List (Source Type / Inward Filter) -->
-        <div class="form-group" style="min-width: 220px;">
+        <!-- 3 Inward Type -->
+        <div class="form-group" style="min-width: 200px;">
             <label for="inward" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">Select List</label>
             <select name="inward" id="inward" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
                 <option value="all" {{ $inward == 'all' ? 'selected' : '' }}>All</option>
@@ -55,12 +55,12 @@
             </select>
         </div>
 
-        <!-- Submit & Clear Buttons -->
+        <!-- Filter & Clear Buttons -->
         <div style="display: flex; gap: 0.5rem; align-items: center;">
             <button type="submit" class="btn-action" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
                 Filter
             </button>
-            <a href="{{ route('reports.monthly_production.index') }}" class="btn-action-secondary" style="padding: 0.55rem 1rem; font-size: 0.85rem; text-decoration: none;">
+            <a href="{{ route('reports.daily_production.index') }}" class="btn-action-secondary" style="padding: 0.55rem 1rem; font-size: 0.85rem; text-decoration: none;">
                 Clear
             </a>
         </div>
@@ -70,13 +70,13 @@
 <!-- Report Table matching user mockup styling -->
 <div class="card" style="padding: 0; border: 2px solid #2b547e; border-radius: 8px; overflow-x: auto; max-width: 550px;">
     <div style="background-color: #ffffff; padding: 8px 12px; font-weight: 700; font-size: 1.1rem; color: #000000; text-align: center; border-bottom: 2px solid #2b547e;">
-        Monthly Production Net Weight & Meter Report
+        Daily Production Net Weight & Meter Report
     </div>
     <table style="width: 100%; border-collapse: collapse; font-family: Segoe UI, Tahoma, sans-serif; font-size: 0.95rem; table-layout: auto;">
         <thead>
             <tr style="background-color: #3b6598; color: #ffffff;">
-                <th style="padding: 8px 12px; border: 1px solid #1e3a8a; text-align: left; font-weight: 700; width: 160px;">
-                    Production Month
+                <th style="padding: 8px 12px; border: 1px solid #1e3a8a; text-align: left; font-weight: 700; width: 180px;">
+                    Production Entry Date 🔻
                 </th>
                 <th style="padding: 8px 12px; border: 1px solid #1e3a8a; text-align: right; font-weight: 700; width: 160px;">
                     Actual Meter
@@ -89,22 +89,20 @@
         <tbody>
             @forelse($rows as $row)
                 <tr style="border-bottom: 1px solid #cbd5e1; text-align: right;">
-                    <td style="padding: 8px 12px; border: 1px solid #cbd5e1; text-align: left; background-color: #ffffff; color: #0f172a; font-weight: 600;">
-                        <a href="{{ route('reports.daily_production.index', ['inward' => $inward, 'from_date' => $row['ym'].'-01', 'to_date' => date('Y-m-t', strtotime($row['ym'].'-01'))]) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;" title="View daily breakdown for {{ $row['month_label'] }}">
-                            {{ $row['month_label'] }} 🔍
-                        </a>
+                    <td style="padding: 6px 12px; border: 1px solid #cbd5e1; text-align: left; background-color: #ffffff; color: #0f172a; font-weight: 500;">
+                        {{ $row['date_label'] }}
                     </td>
-                    <td style="padding: 8px 12px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #0f172a;">
+                    <td style="padding: 6px 12px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #0f172a;">
                         {{ number_format($row['actual_meter'], 0) }}
                     </td>
-                    <td style="padding: 8px 12px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #0f172a;">
+                    <td style="padding: 6px 12px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #0f172a;">
                         {{ number_format($row['net_weight'], 1) }}
                     </td>
                 </tr>
             @empty
                 <tr>
                     <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                        No production or purchase records found for the selected criteria.
+                        No production records found for the selected criteria.
                     </td>
                 </tr>
             @endforelse

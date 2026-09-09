@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <!-- Row 2: Department, HSN No., GST Percentage -->
+        <!-- Row 2: Department, HSN No., GST Percentage, Rack No. -->
         <div class="form-grid-3">
             <div class="form-group">
                 <label for="Department" class="form-label-custom">Department</label>
@@ -92,6 +92,14 @@
                 <label for="GSTPercentage" class="form-label-custom">GST Percentage</label>
                 <input type="number" step="0.01" id="GSTPercentage" name="GSTPercentage" value="{{ old('GSTPercentage', $item->GSTPercentage) }}" class="form-control-custom">
                 @error('GSTPercentage')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="RackNo" class="form-label-custom">Rack No.</label>
+                <input type="text" id="RackNo" name="RackNo" value="{{ old('RackNo', $item->RackNo) }}" class="form-control-custom" placeholder="Enter rack no">
+                @error('RackNo')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

@@ -30,7 +30,7 @@ class ProductionController extends Controller
 
     public function index()
     {
-        $baseQuery = $this->getAvailableProductionQuery();
+        $baseQuery = InTransaction::where('TransactionType', 1)->where('IsActive', 1);
 
         $rollSizeIds = (clone $baseQuery)->whereNotNull('RollSize')->distinct()->pluck('RollSize');
         $rollSizes = RollSize::whereIn('ID', $rollSizeIds)->orderBy('RollSize', 'asc')->get();
@@ -53,8 +53,31 @@ class ProductionController extends Controller
 
     public function data(Request $request)
     {
-        $query = $this->getAvailableProductionQuery()
+        $query = InTransaction::where('TransactionType', 1)
+            ->where('IsActive', 1)
             ->with(['rollSizeRelation', 'fabricColorRelation', 'loomNumberRelation']);
+
+        $showAll = $request->boolean('show_all') || $request->input('show_all') == '1';
+
+        if (!$showAll) {
+            $query->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('indispatchchild as dc')
+                  ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                  ->whereColumn('dc.InTransactionID', 'intransaction.ID')
+                  ->whereColumn('dc.SourceType', 'intransaction.TransactionType')
+                  ->where('dc.IsActive', 1)
+                  ->where('d.IsActive', 1);
+            });
+        }
+
+        if ($startDate = $request->input('start_date')) {
+            $query->whereDate('EntryDate', '>=', $startDate);
+        }
+
+        if ($endDate = $request->input('end_date')) {
+            $query->whereDate('EntryDate', '<=', $endDate);
+        }
 
         if ($rollSize = $request->input('roll_size')) {
             $query->where('RollSize', $rollSize);
@@ -112,15 +135,41 @@ class ProductionController extends Controller
             $query->orderBy('ID', 'desc');
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $data = $query->paginate($perPage);
 
-        // Transform collection for clean datatable rendering
-        $data->getCollection()->transform(function ($item) {
+        $pageIds = $data->getCollection()->pluck('ID')->toArray();
+
+        $dispatches = [];
+
+        if (!empty($pageIds)) {
+            $dispatches = DB::table('indispatchchild as dc')
+                ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+                ->where('dc.SourceType', 1)
+                ->whereIn('dc.InTransactionID', $pageIds)
+                ->where('dc.IsActive', 1)
+                ->where('d.IsActive', 1)
+                ->select('dc.InTransactionID', 'd.DispatchType')
+                ->get()
+                ->keyBy('InTransactionID');
+        }
+
+        // Transform collection for clean datatable rendering with status information
+        $data->getCollection()->transform(function ($item) use ($dispatches) {
             $item->RollSizeName = $item->rollSizeRelation ? $item->rollSizeRelation->RollSize : ($item->RollSize ?? '-');
             $item->FabricColorName = $item->fabricColorRelation ? $item->fabricColorRelation->FabricColor : ($item->FabricColor ?? '-');
             $item->LoomNumberValue = $item->loomNumberRelation ? $item->loomNumberRelation->LoomNumber : ($item->LoomNumber ?? '-');
             $item->EntryDateFormatted = $item->EntryDate ? date('d-m-Y', strtotime($item->EntryDate)) : '-';
+
+            if (isset($dispatches[$item->ID])) {
+                $disp = $dispatches[$item->ID];
+                $item->Status = ($disp->DispatchType === 'Transfer') ? 'Transferred' : 'Dispatched';
+                $item->IsAvailable = false;
+            } else {
+                $item->Status = 'Available';
+                $item->IsAvailable = true;
+            }
+
             return $item;
         });
 
@@ -178,16 +227,44 @@ class ProductionController extends Controller
             $production->EntryDate = date('Y-m-d', strtotime($production->EntryDate));
         }
 
-        $rollSizes = RollSize::all();
-        $fabricColors = FabricColor::all();
-        $loomNumbers = LoomNumber::all();
+        $isDispatchedOrTransferred = DB::table('indispatchchild as dc')
+            ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+            ->where('dc.SourceType', 1)
+            ->where('dc.InTransactionID', $id)
+            ->where('dc.IsActive', 1)
+            ->where('d.IsActive', 1)
+            ->exists() || DB::table('intransferchild as tc')
+            ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+            ->where('tc.SourceType', 1)
+            ->where('tc.InTransactionID', $id)
+            ->where('tc.IsActive', 1)
+            ->where('t.IsActive', 1)
+            ->exists();
 
-        return view('inventories.production.form', compact('production', 'rollSizes', 'fabricColors', 'loomNumbers'));
+        $rollSizes = RollSize::where('IsActive', 1)->get();
+        $fabricColors = FabricColor::where('IsActive', 1)->get();
+        $loomNumbers = LoomNumber::where('IsActive', 1)->get();
+
+        return view('inventories.production.form', compact('production', 'rollSizes', 'fabricColors', 'loomNumbers', 'isDispatchedOrTransferred'));
     }
 
     public function update(Request $request, $id)
     {
         $production = InTransaction::findOrFail($id);
+
+        $isDispatchedOrTransferred = DB::table('indispatchchild as dc')
+            ->join('indispatch as d', 'dc.Dispatch', '=', 'd.ID')
+            ->where('dc.SourceType', 1)
+            ->where('dc.InTransactionID', $id)
+            ->where('dc.IsActive', 1)
+            ->where('d.IsActive', 1)
+            ->exists() || DB::table('intransferchild as tc')
+            ->join('intransfer as t', 'tc.Transfer', '=', 't.ID')
+            ->where('tc.SourceType', 1)
+            ->where('tc.InTransactionID', $id)
+            ->where('tc.IsActive', 1)
+            ->where('t.IsActive', 1)
+            ->exists();
 
         $validated = $request->validate([
             'EntryDate' => 'required|date',
@@ -205,6 +282,13 @@ class ProductionController extends Controller
             'ActualMeterWeight' => 'required|string|max:50',
             'Variation' => 'required|string|max:50',
         ]);
+
+        if ($isDispatchedOrTransferred) {
+            $validated['RollNumber'] = $production->RollNumber;
+            $validated['RollSize'] = $production->RollSize;
+            $validated['FabricColor'] = $production->FabricColor;
+            $validated['LoomNumber'] = $production->LoomNumber;
+        }
 
         $validated['UpdatedBy'] = Auth::id() ?? 1;
 

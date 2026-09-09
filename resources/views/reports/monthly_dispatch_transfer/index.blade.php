@@ -1,18 +1,33 @@
 @extends('layouts.app')
 
-@section('title', 'Monthly Dispatch/Transfer Net Weight Report')
+@section('title', 'Dispatch/Transfer Net Weight Report')
 
 @section('content')
-<div class="content-header" style="margin-bottom: 1rem;">
+<div class="content-header" style="margin-bottom: 0.75rem;">
     <div class="content-title">
-        <h1>Monthly Dispatch/Transfer Net Weight Total</h1>
-        <p>Month-wise net weight breakdown for Dispatches and Transfers</p>
+        <h1>Dispatch/Transfer Net Weight Report</h1>
+        <p>Month-wise and day-wise net weight breakdown for Dispatches and Transfers</p>
     </div>
     <div>
         <button type="button" onclick="window.print()" class="btn-action-secondary" title="Print Report">
             🖨️ Print
         </button>
     </div>
+</div>
+
+<!-- Navigation Tabs (Monthly vs Daily) -->
+<div class="report-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 2px solid var(--card-border, #cbd5e1); padding-bottom: 0.5rem;">
+    <a href="{{ route('reports.monthly_dispatch_transfer.index', array_filter(['inward' => $inward, 'from_month' => $fromMonth, 'to_month' => $toMonth])) }}" 
+       class="tab-item active" 
+       style="padding: 0.55rem 1.25rem; font-weight: 700; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
+        <span>📅</span> Monthly
+    </a>
+    <a href="{{ route('reports.daily_dispatch_transfer.index', array_filter(['inward' => $inward])) }}" 
+       class="tab-item" 
+       style="padding: 0.55rem 1.25rem; font-weight: 600; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #f1f5f9; color: #475569; transition: all 0.2s;"
+       onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+        <span>🗓️</span> Daily
+    </a>
 </div>
 
 <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
@@ -82,10 +97,9 @@
             @forelse($rows as $row)
                 <tr style="border-bottom: 1px solid #cbd5e1; text-align: right;">
                     <td style="padding: 8px 12px; border: 1px solid #cbd5e1; text-align: left; background-color: #ffffff; color: #0f172a; font-weight: 500;">
-                        <!-- <a href="{{ route('reports.daily_dispatch_transfer.index', ['inward' => $inward, 'dm' => $row['ym']]) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;" title="View daily breakdown for {{ $row['month_label'] }}">
+                        <a href="{{ route('reports.daily_dispatch_transfer.index', ['inward' => $inward, 'from_date' => $row['ym'].'-01', 'to_date' => date('Y-m-t', strtotime($row['ym'].'-01'))]) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;" title="View daily breakdown for {{ $row['month_label'] }}">
                             {{ $row['month_label'] }} 🔍
-                        </a> -->
-                        {{ $row['month_label'] }}
+                        </a>
                     </td>
                     <td style="padding: 8px 12px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #0f172a;">
                         {{ $row['dispatch_nw'] > 0 ? number_format($row['dispatch_nw'], 1) : '-' }}
@@ -136,7 +150,7 @@
             background: #ffffff !important;
             color: #000000 !important;
         }
-        .sidebar, .top-bar, .content-header button, form, .btn-action-secondary {
+        .sidebar, .top-bar, .content-header button, form, .btn-action-secondary, .report-tabs {
             display: none !important;
         }
         .main-content {

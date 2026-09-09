@@ -18,10 +18,10 @@
         <div class="datatable-length">
             <span>Show</span>
             <select id="dt-length">
-                <option value="10">10</option>
-                <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
             </select>
             <span>entries</span>
         </div>
@@ -42,6 +42,7 @@
                     <th data-column="Department">Department</th>
                     <th data-column="HSNNo">HSN No</th>
                     <th data-column="GSTPercentage">GST %</th>
+                    <th data-column="RackNo">Rack No</th>
                     <th data-column="CreatedOn">Created On</th>
                     <th style="width: 140px;">Update | Delete</th>
                 </tr>
@@ -93,6 +94,7 @@
                 { name: 'Department', sortable: true, render: (val, row) => row.DepartmentName || '-' },
                 { name: 'HSNNo', sortable: true, render: (val) => val || '-' },
                 { name: 'GSTPercentage', sortable: true, render: (val) => (val ?? 0) + '%' },
+                { name: 'RackNo', sortable: true, render: (val) => val || '-' },
                 { 
                     name: 'CreatedOn', 
                     sortable: true,
