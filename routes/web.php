@@ -33,6 +33,7 @@ use App\Http\Controllers\ItemMasterController;
 use App\Http\Controllers\MRLEntryController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\PIController;
+use App\Http\Controllers\GRNController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -146,6 +147,18 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/pi/{id}', [PIController::class, 'update'])->name('pi.update');
         Route::delete('/pi/{id}', [PIController::class, 'destroy'])->name('pi.destroy');
         Route::get('/pi/{id}/print', [PIController::class, 'print'])->name('pi.print');
+
+        // GRN (Goods Receipt Note)
+        Route::get('/grn', [GRNController::class, 'index'])->name('grn.index');
+        Route::get('/grn/data', [GRNController::class, 'data'])->name('grn.data');
+        Route::get('/grn/create', [GRNController::class, 'create'])->name('grn.create');
+        Route::get('/grn/fetch-pis', [GRNController::class, 'fetchPIs'])->name('grn.fetchPIs');
+        Route::get('/grn/fetch-pi-items', [GRNController::class, 'fetchPIItems'])->name('grn.fetchPIItems');
+        Route::post('/grn', [GRNController::class, 'store'])->name('grn.store');
+        Route::get('/grn/{id}/edit', [GRNController::class, 'edit'])->name('grn.edit');
+        Route::put('/grn/{id}', [GRNController::class, 'update'])->name('grn.update');
+        Route::delete('/grn/{id}', [GRNController::class, 'destroy'])->name('grn.destroy');
+        Route::get('/grn/{id}/print', [GRNController::class, 'print'])->name('grn.print');
     });
 
 

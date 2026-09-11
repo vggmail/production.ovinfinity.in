@@ -113,6 +113,11 @@
                         <span>🧾</span> <span class="menu-text">PI Entry</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('store.grn.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.grn.index') }}" title="GRN Entry">
+                        <span>📥</span> <span class="menu-text">GRN Entry</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
