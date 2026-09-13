@@ -36,7 +36,9 @@
                 <tr>
                     <th data-column="ID" style="width: 60px;">ID</th>
                     <th data-column="GRNNumber">GRN No</th>
-                    <th data-column="GRNDate">Invoice Date</th>
+                    <th data-column="GRNDate">GRN Entry Date</th>
+                    <th data-column="InvoiceDate">Invoice Date</th>
+                    <th data-column="InvoiceNo">Invoice No</th>
                     <th>Supplier</th>
                     <th>PI No</th>
                     <th>Total Items</th>
@@ -96,6 +98,16 @@
                     name: 'GRNDate', 
                     sortable: true,
                     render: (val) => formatDate(val)
+                },
+                { 
+                    name: 'InvoiceDate', 
+                    sortable: true,
+                    render: (val) => formatDate(val)
+                },
+                { 
+                    name: 'InvoiceNo', 
+                    sortable: true,
+                    render: (val) => val ? `<span style="font-weight: 600; color: #475569;">${val}</span>` : '-'
                 },
                 { 
                     name: 'SupplierName', 

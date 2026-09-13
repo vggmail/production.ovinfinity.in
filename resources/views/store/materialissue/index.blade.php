@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Loom Number Master')
+@section('title', 'Material Issue')
 
 @section('content')
 <div class="content-header">
     <div class="content-title">
-        <h1>Loom Number List</h1>
-        <p>Manage loom registrations and types</p>
+        <h1>Material Issue List</h1>
+        <p>Manage store material issues and item distribution to departments & machines</p>
     </div>
-    <a href="{{ route('masters.loomnumber.create') }}" class="btn-circle-add" title="Add New Loom Number">
+    <a href="{{ route('store.materialissue.create') }}" class="btn-circle-add" title="Add New Material Issue">
         +
     </a>
 </div>
@@ -26,21 +26,21 @@
             <span>entries</span>
         </div>
         <div class="datatable-search">
-            <input type="text" id="dt-search" placeholder="Search loom numbers...">
+            <input type="text" id="dt-search" placeholder="Search by issue no, date, technician or remarks...">
         </div>
     </div>
 
     <div class="table-container">
-        <table class="datatable" id="loomnumber-table">
+        <table class="datatable" id="materialissue-table">
             <thead>
                 <tr>
-                    <th data-column="ID" style="width: 60px;">ID</th>
-                    <th data-column="LoomNumber">Loom Number</th>
-                    <th data-column="MachineName">Machine Name</th>
-                    <th data-column="LoomType">Loom Type</th>
-                    <th data-column="CreatedOn">Created On</th>
-                    <th data-column="UpdatedOn">Updated On</th>
-                    <th style="width: 140px;">Update | Delete</th>
+                    <th data-column="IssueNo" style="width: 140px;">Issue No</th>
+                    <th data-column="IssueDate" style="width: 110px;">Issue Date</th>
+                    <th style="min-width: 160px;">Technician / Person</th>
+                    <th data-column="TotalItems" style="width: 100px;">Total Items</th>
+                    <th data-column="TotalQuantity" style="width: 120px;">Total Qty</th>
+                    <th style="min-width: 180px;">Remarks</th>
+                    <th style="width: 140px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,54 +67,55 @@
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
+            return `${day}/${month}/${year}`;
         }
 
-        const table = new DynamicDataTable('loomnumber-table', {
-            url: "{{ route('masters.loomnumber.data') }}",
+        const table = new DynamicDataTable('materialissue-table', {
+            url: "{{ route('store.materialissue.data') }}",
             defaultSortCol: 'ID',
             defaultSortDir: 'desc',
             columns: [
                 { 
-                    name: 'ID', 
+                    name: 'IssueNo', 
                     sortable: true,
                     render: (val, row) => {
-                        const editUrl = "{{ route('masters.loomnumber.edit', ':id') }}".replace(':id', row.ID);
-                        return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
+                        const editUrl = "{{ route('store.materialissue.edit', ':id') }}".replace(':id', row.ID);
+                        return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val || row.ID}</a>`;
                     }
                 },
-                { name: 'LoomNumber', sortable: true },
                 { 
-                    name: 'MachineName', 
-                    sortable: true,
-                    render: (val) => val ? `<span style="font-weight: 600; color: #475569;">${val}</span>` : '-'
-                },
-                { name: 'LoomTypeName', sortable: true },
-                { 
-                    name: 'CreatedOn', 
+                    name: 'IssueDate', 
                     sortable: true,
                     render: (val) => formatDate(val)
                 },
                 { 
-                    name: 'UpdatedOn', 
-                    sortable: true,
-                    render: (val) => formatDate(val)
+                    name: 'Technician', 
+                    sortable: false,
+                    render: (val, row) => row.technician_relation ? row.technician_relation.Name : '<span class="text-muted">-</span>'
+                },
+                { name: 'TotalItems', sortable: true },
+                { name: 'TotalQuantity', sortable: true },
+                { 
+                    name: 'Remarks', 
+                    sortable: false,
+                    render: (val) => val ? val : '<span class="text-muted">-</span>'
                 }
             ],
             actions: (row) => {
-                const editUrl = "{{ route('masters.loomnumber.edit', ':id') }}".replace(':id', row.ID);
+                const editUrl = "{{ route('store.materialissue.edit', ':id') }}".replace(':id', row.ID);
+                const printUrl = "{{ route('store.materialissue.print', ':id') }}".replace(':id', row.ID);
                 return `
                     <a href="${editUrl}" class="datatable-action-btn btn-edit" title="Edit">✏️</a>
+                    <!--<a href="${printUrl}" target="_blank" class="datatable-action-btn" title="Print" style="margin-left: 4px;">🖨️</a>-->
                     <span style="opacity: 0.3; margin: 0 0.25rem;">|</span>
                     <button class="datatable-action-btn btn-delete" onclick="deleteRecord(${row.ID})" title="Delete">🗑️</button>
                 `;
             }
         });
 
-        // Global delete function
         window.deleteRecord = (id) => {
-            if (confirm('Are you sure you want to delete this loom number?')) {
-                fetch("{{ route('masters.loomnumber.destroy', ':id') }}".replace(':id', id), {
+            if (confirm('Are you sure you want to delete this Material Issue record?')) {
+                fetch("{{ route('store.materialissue.destroy', ':id') }}".replace(':id', id), {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -128,7 +129,7 @@
                     if (response.success) {
                         table.fetch();
                     } else {
-                        alert('Failed to delete the record.');
+                        alert(response.message || 'Failed to delete the record.');
                     }
                 })
                 .catch(err => {

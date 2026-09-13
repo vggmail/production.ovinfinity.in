@@ -4,19 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Department extends Model
+class Technician extends Model
 {
-    protected $table = 'umdepartment';
+    protected $table = 'umtechnician';
     protected $primaryKey = 'ID';
 
     const CREATED_AT = 'CreatedOn';
     const UPDATED_AT = 'UpdatedOn';
 
     protected $fillable = [
-        'DepartmentName',
+        'Name',
         'Code',
-        'Slug',
-        'Remarks',
+        'Phone',
         'IsActive',
         'CreatedBy',
         'UpdatedBy',

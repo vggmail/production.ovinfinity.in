@@ -34,6 +34,8 @@ use App\Http\Controllers\MRLEntryController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\PIController;
 use App\Http\Controllers\GRNController;
+use App\Http\Controllers\TechnicianController;
+use App\Http\Controllers\MaterialIssueController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -90,6 +92,31 @@ Route::get('/run-migrate', function () {
 })->name('migrate.run');
 
 Route::get('/migrate', fn() => redirect()->route('migrate.run'));
+
+// Seeder Utility Route
+Route::get('/run-seed', function () {
+    try {
+        $params = ['--force' => true];
+        if (request()->has('class')) {
+            $params['--class'] = request()->get('class');
+        }
+        Artisan::call('db:seed', $params);
+        $output = Artisan::output();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database seeder executed successfully.',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Seeder failed: ' . $e->getMessage()
+        ], 500);
+    }
+})->name('seed.run');
+
+Route::get('/seed', fn() => redirect()->route('seed.run'));
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -159,6 +186,16 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/grn/{id}', [GRNController::class, 'update'])->name('grn.update');
         Route::delete('/grn/{id}', [GRNController::class, 'destroy'])->name('grn.destroy');
         Route::get('/grn/{id}/print', [GRNController::class, 'print'])->name('grn.print');
+
+        // Material Issue
+        Route::get('/materialissue', [MaterialIssueController::class, 'index'])->name('materialissue.index');
+        Route::get('/materialissue/data', [MaterialIssueController::class, 'data'])->name('materialissue.data');
+        Route::get('/materialissue/create', [MaterialIssueController::class, 'create'])->name('materialissue.create');
+        Route::post('/materialissue', [MaterialIssueController::class, 'store'])->name('materialissue.store');
+        Route::get('/materialissue/{id}/edit', [MaterialIssueController::class, 'edit'])->name('materialissue.edit');
+        Route::put('/materialissue/{id}', [MaterialIssueController::class, 'update'])->name('materialissue.update');
+        Route::delete('/materialissue/{id}', [MaterialIssueController::class, 'destroy'])->name('materialissue.destroy');
+        Route::get('/materialissue/{id}/print', [MaterialIssueController::class, 'print'])->name('materialissue.print');
     });
 
 
@@ -261,5 +298,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/fabriccolor/{id}/edit', [FabricColorController::class, 'edit'])->name('fabriccolor.edit');
         Route::put('/fabriccolor/{id}', [FabricColorController::class, 'update'])->name('fabriccolor.update');
         Route::delete('/fabriccolor/{id}', [FabricColorController::class, 'destroy'])->name('fabriccolor.destroy');
+
+        // Technician Master
+        Route::get('/technician', [TechnicianController::class, 'index'])->name('technician.index');
+        Route::get('/technician/data', [TechnicianController::class, 'data'])->name('technician.data');
+        Route::get('/technician/create', [TechnicianController::class, 'create'])->name('technician.create');
+        Route::post('/technician', [TechnicianController::class, 'store'])->name('technician.store');
+        Route::get('/technician/{id}/edit', [TechnicianController::class, 'edit'])->name('technician.edit');
+        Route::put('/technician/{id}', [TechnicianController::class, 'update'])->name('technician.update');
+        Route::delete('/technician/{id}', [TechnicianController::class, 'destroy'])->name('technician.destroy');
     });
 });

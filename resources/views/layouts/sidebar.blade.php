@@ -49,6 +49,11 @@
                         <span>🎨</span> <span class="menu-text">Fabric Color Master</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('masters.technician.*') ? 'active' : '' }}">
+                    <a href="{{ route('masters.technician.index') }}" title="Technician Master">
+                        <span>👨‍🔧</span> <span class="menu-text">Technician Master</span>
+                    </a>
+                </li>
             </ul>
         </li>
         
@@ -116,6 +121,11 @@
                 <li class="sidebar-subitem {{ request()->routeIs('store.grn.*') ? 'active' : '' }}">
                     <a href="{{ route('store.grn.index') }}" title="GRN Entry">
                         <span>📥</span> <span class="menu-text">GRN Entry</span>
+                    </a>
+                </li>
+                <li class="sidebar-subitem {{ request()->routeIs('store.materialissue.*') ? 'active' : '' }}">
+                    <a href="{{ route('store.materialissue.index') }}" title="Material Issue">
+                        <span>📤</span> <span class="menu-text">Material Issue</span>
                     </a>
                 </li>
             </ul>

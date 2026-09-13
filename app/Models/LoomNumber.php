@@ -14,6 +14,7 @@ class LoomNumber extends Model
 
     protected $fillable = [
         'LoomNumber',
+        'MachineName',
         'LoomType',
         'IsActive',
         'CreatedBy',

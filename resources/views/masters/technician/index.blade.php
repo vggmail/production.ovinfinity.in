@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Loom Number Master')
+@section('title', 'Technician / Person Master')
 
 @section('content')
 <div class="content-header">
     <div class="content-title">
-        <h1>Loom Number List</h1>
-        <p>Manage loom registrations and types</p>
+        <h1>Technician / Person Master List</h1>
+        <p>Manage technician & staff personnel for material issues</p>
     </div>
-    <a href="{{ route('masters.loomnumber.create') }}" class="btn-circle-add" title="Add New Loom Number">
+    <a href="{{ route('masters.technician.create') }}" class="btn-circle-add" title="Add New Technician">
         +
     </a>
 </div>
@@ -21,30 +21,28 @@
                 <option value="50">50</option>
                 <option value="100">100</option>
                 <option value="250">250</option>
-                <option value="500">500</option>
             </select>
             <span>entries</span>
         </div>
         <div class="datatable-search">
-            <input type="text" id="dt-search" placeholder="Search loom numbers...">
+            <input type="text" id="dt-search" placeholder="Search technician name...">
         </div>
     </div>
 
     <div class="table-container">
-        <table class="datatable" id="loomnumber-table">
+        <table class="datatable" id="technician-table">
             <thead>
                 <tr>
                     <th data-column="ID" style="width: 60px;">ID</th>
-                    <th data-column="LoomNumber">Loom Number</th>
-                    <th data-column="MachineName">Machine Name</th>
-                    <th data-column="LoomType">Loom Type</th>
+                    <th data-column="Name">Technician Name</th>
+                    <th data-column="Code">Code</th>
+                    <th data-column="Phone">Phone</th>
                     <th data-column="CreatedOn">Created On</th>
-                    <th data-column="UpdatedOn">Updated On</th>
-                    <th style="width: 140px;">Update | Delete</th>
+                    <th style="width: 140px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Rows loaded via AJAX -->
+                <!-- Loaded via AJAX -->
             </tbody>
         </table>
     </div>
@@ -67,42 +65,45 @@
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
+            return `${day}/${month}/${year}`;
         }
 
-        const table = new DynamicDataTable('loomnumber-table', {
-            url: "{{ route('masters.loomnumber.data') }}",
+        const table = new DynamicDataTable('technician-table', {
+            url: "{{ route('masters.technician.data') }}",
             defaultSortCol: 'ID',
-            defaultSortDir: 'desc',
+            defaultSortDir: 'asc',
             columns: [
                 { 
                     name: 'ID', 
                     sortable: true,
                     render: (val, row) => {
-                        const editUrl = "{{ route('masters.loomnumber.edit', ':id') }}".replace(':id', row.ID);
+                        const editUrl = "{{ route('masters.technician.edit', ':id') }}".replace(':id', row.ID);
                         return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
                     }
                 },
-                { name: 'LoomNumber', sortable: true },
                 { 
-                    name: 'MachineName', 
+                    name: 'Name', 
                     sortable: true,
-                    render: (val) => val ? `<span style="font-weight: 600; color: #475569;">${val}</span>` : '-'
+                    render: (val) => `<strong>${val}</strong>`
                 },
-                { name: 'LoomTypeName', sortable: true },
+                { 
+                    name: 'Code', 
+                    sortable: true,
+                    render: (val) => val ? val : '<span class="text-muted">-</span>'
+                },
+                { 
+                    name: 'Phone', 
+                    sortable: true,
+                    render: (val) => val ? val : '<span class="text-muted">-</span>'
+                },
                 { 
                     name: 'CreatedOn', 
-                    sortable: true,
-                    render: (val) => formatDate(val)
-                },
-                { 
-                    name: 'UpdatedOn', 
                     sortable: true,
                     render: (val) => formatDate(val)
                 }
             ],
             actions: (row) => {
-                const editUrl = "{{ route('masters.loomnumber.edit', ':id') }}".replace(':id', row.ID);
+                const editUrl = "{{ route('masters.technician.edit', ':id') }}".replace(':id', row.ID);
                 return `
                     <a href="${editUrl}" class="datatable-action-btn btn-edit" title="Edit">✏️</a>
                     <span style="opacity: 0.3; margin: 0 0.25rem;">|</span>
@@ -111,10 +112,9 @@
             }
         });
 
-        // Global delete function
         window.deleteRecord = (id) => {
-            if (confirm('Are you sure you want to delete this loom number?')) {
-                fetch("{{ route('masters.loomnumber.destroy', ':id') }}".replace(':id', id), {
+            if (confirm('Are you sure you want to delete this technician?')) {
+                fetch("{{ route('masters.technician.destroy', ':id') }}".replace(':id', id), {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -128,7 +128,7 @@
                     if (response.success) {
                         table.fetch();
                     } else {
-                        alert('Failed to delete the record.');
+                        alert(response.message || 'Failed to delete record.');
                     }
                 })
                 .catch(err => {

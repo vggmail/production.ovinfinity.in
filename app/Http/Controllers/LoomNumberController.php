@@ -26,20 +26,23 @@ class LoomNumberController extends Controller
         $query = LoomNumber::query();
 
         if ($search = $request->input('search')) {
-            $query->where('LoomNumber', 'like', "%{$search}%");
-            
-            // Allow searching by Loom Type name
-            foreach (self::$loomTypes as $id => $name) {
-                if (stripos($name, $search) !== false) {
-                    $query->orWhere('LoomType', $id);
+            $query->where(function ($q) use ($search) {
+                $q->where('LoomNumber', 'like', "%{$search}%")
+                  ->orWhere('MachineName', 'like', "%{$search}%");
+
+                // Allow searching by Loom Type name
+                foreach (self::$loomTypes as $id => $name) {
+                    if (stripos($name, $search) !== false) {
+                        $q->orWhere('LoomType', $id);
+                    }
                 }
-            }
+            });
         }
 
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'LoomNumber', 'LoomType', 'IsActive', 'CreatedOn', 'UpdatedOn'];
+        $allowedCols = ['ID', 'LoomNumber', 'MachineName', 'LoomType', 'IsActive', 'CreatedOn', 'UpdatedOn'];
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
         } else {
@@ -69,6 +72,7 @@ class LoomNumberController extends Controller
     {
         $validated = $request->validate([
             'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')],
+            'MachineName' => 'nullable|string|max:100',
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
         ]);
@@ -95,6 +99,7 @@ class LoomNumberController extends Controller
 
         $validated = $request->validate([
             'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->ignore($id, 'ID')],
+            'MachineName' => 'nullable|string|max:100',
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
         ]);

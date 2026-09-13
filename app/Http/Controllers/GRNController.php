@@ -27,6 +27,8 @@ class GRNController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('GRNNumber', 'like', "%{$search}%")
                   ->orWhere('GRNDate', 'like', "%{$search}%")
+                  ->orWhere('InvoiceDate', 'like', "%{$search}%")
+                  ->orWhere('InvoiceNo', 'like', "%{$search}%")
                   ->orWhere('PINumbers', 'like', "%{$search}%")
                   ->orWhereHas('supplierRelation', function ($sq) use ($search) {
                       $sq->where('SupplierName', 'like', "%{$search}%");
@@ -37,7 +39,7 @@ class GRNController extends Controller
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'GRNNumber', 'GRNDate', 'CreatedOn'];
+        $allowedCols = ['ID', 'GRNNumber', 'GRNDate', 'InvoiceDate', 'InvoiceNo', 'CreatedOn'];
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
         } else {
@@ -73,6 +75,7 @@ class GRNController extends Controller
     {
         $grn = new GRN();
         $grn->GRNDate = date('Y-m-d');
+        $grn->InvoiceDate = date('Y-m-d');
 
         // Auto generate GRN No e.g. GRN-2026-0001
         $latest = GRN::latest('ID')->first();
@@ -198,6 +201,7 @@ class GRNController extends Controller
 
                 // Default Qty Received in form
                 $initialQtyReceived = $pendingQty;
+                $existingChild = null;
 
                 // If editing existing GRN, check if this line item has existing Qty in current GRN
                 if ($currentGrnId) {
@@ -208,6 +212,9 @@ class GRNController extends Controller
                         $initialQtyReceived = (float)$existingChild->Quantity;
                     }
                 }
+
+                $rate = ($existingChild && isset($existingChild->Rate)) ? (float)$existingChild->Rate : (float)($child->BasicRate ?? 0);
+                $gstRate = ($existingChild && isset($existingChild->GSTRate)) ? (float)$existingChild->GSTRate : (float)($child->GSTRate ?? 0);
 
                 $items[] = [
                     'pi_id' => $pi->ID,
@@ -220,7 +227,8 @@ class GRNController extends Controller
                     'already_received' => $alreadyReceived,
                     'pending_qty' => $pendingQty,
                     'qty_received' => $initialQtyReceived,
-                    'rate' => (float)$child->BasicRate,
+                    'rate' => $rate,
+                    'gst_rate' => $gstRate,
                     'rack_no' => $itemMaster->RackNo ?? 'N/A',
                 ];
             }
@@ -238,6 +246,8 @@ class GRNController extends Controller
         $validated = $request->validate([
             'GRNNumber' => 'nullable|string|max:100',
             'GRNDate' => 'required|date',
+            'InvoiceDate' => 'nullable|date',
+            'InvoiceNo' => 'nullable|string|max:100',
             'Supplier' => 'required|exists:umsupplier,ID',
             'PINumbers' => 'required|array|min:1',
             'Remarks' => 'nullable|string',
@@ -246,6 +256,8 @@ class GRNController extends Controller
             'items.*.PIChild' => 'required|exists:inpichild,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
             'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Rate' => 'nullable|numeric',
+            'items.*.GSTRate' => 'nullable|numeric',
         ], [
             'Supplier.required' => 'Please select a supplier.',
             'PINumbers.required' => 'Please select at least one PI.',
@@ -265,11 +277,31 @@ class GRNController extends Controller
 
             $piNumbersJson = json_encode(array_values(array_map('intval', $validated['PINumbers'])));
 
+            $totalAmount = 0;
+            $totalGSTAmount = 0;
+
+            foreach ($request->input('items', []) as $row) {
+                $qty = (float)($row['Quantity'] ?? 0);
+                if ($qty <= 0) continue;
+                $rate = (float)($row['Rate'] ?? 0);
+                $gstRate = (float)($row['GSTRate'] ?? 0);
+                $amt = $qty * $rate;
+                $gstAmt = $amt * ($gstRate / 100);
+                $totalAmount += $amt;
+                $totalGSTAmount += $gstAmt;
+            }
+            $grandTotal = $totalAmount + $totalGSTAmount;
+
             $grn = GRN::create([
                 'GRNNumber' => $validated['GRNNumber'],
                 'GRNDate' => $validated['GRNDate'],
+                'InvoiceDate' => $validated['InvoiceDate'] ?? null,
+                'InvoiceNo' => $validated['InvoiceNo'] ?? null,
                 'Supplier' => $validated['Supplier'],
                 'PINumbers' => $piNumbersJson,
+                'TotalAmount' => $totalAmount,
+                'TotalGSTAmount' => $totalGSTAmount,
+                'GrandTotal' => $grandTotal,
                 'Remarks' => $validated['Remarks'] ?? null,
                 'IsActive' => 1,
                 'CreatedBy' => Auth::id() ?? 1,
@@ -279,6 +311,11 @@ class GRNController extends Controller
             foreach ($request->input('items', []) as $row) {
                 $qty = (float)($row['Quantity'] ?? 0);
                 if ($qty <= 0) continue;
+                $rate = (float)($row['Rate'] ?? 0);
+                $gstRate = (float)($row['GSTRate'] ?? 0);
+                $amt = $qty * $rate;
+                $gstAmt = $amt * ($gstRate / 100);
+                $totAmt = $amt + $gstAmt;
 
                 GRNChild::create([
                     'GRN' => $grn->ID,
@@ -286,6 +323,11 @@ class GRNController extends Controller
                     'PIChild' => $row['PIChild'],
                     'ItemMaster' => $row['ItemMaster'],
                     'Quantity' => $qty,
+                    'Rate' => $rate,
+                    'Amount' => $amt,
+                    'GSTRate' => $gstRate,
+                    'GSTAmount' => $gstAmt,
+                    'TotalAmount' => $totAmt,
                     'CreatedBy' => Auth::id() ?? 1,
                     'UpdatedBy' => Auth::id() ?? 1,
                 ]);
@@ -317,6 +359,8 @@ class GRNController extends Controller
         $validated = $request->validate([
             'GRNNumber' => 'required|string|max:100',
             'GRNDate' => 'required|date',
+            'InvoiceDate' => 'nullable|date',
+            'InvoiceNo' => 'nullable|string|max:100',
             'Supplier' => 'required|exists:umsupplier,ID',
             'PINumbers' => 'required|array|min:1',
             'Remarks' => 'nullable|string',
@@ -325,6 +369,8 @@ class GRNController extends Controller
             'items.*.PIChild' => 'required|exists:inpichild,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
             'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Rate' => 'nullable|numeric',
+            'items.*.GSTRate' => 'nullable|numeric',
         ], [
             'Supplier.required' => 'Please select a supplier.',
             'PINumbers.required' => 'Please select at least one PI.',
@@ -334,11 +380,31 @@ class GRNController extends Controller
         DB::transaction(function () use ($request, $grn, $validated) {
             $piNumbersJson = json_encode(array_values(array_map('intval', $validated['PINumbers'])));
 
+            $totalAmount = 0;
+            $totalGSTAmount = 0;
+
+            foreach ($request->input('items', []) as $row) {
+                $qty = (float)($row['Quantity'] ?? 0);
+                if ($qty <= 0) continue;
+                $rate = (float)($row['Rate'] ?? 0);
+                $gstRate = (float)($row['GSTRate'] ?? 0);
+                $amt = $qty * $rate;
+                $gstAmt = $amt * ($gstRate / 100);
+                $totalAmount += $amt;
+                $totalGSTAmount += $gstAmt;
+            }
+            $grandTotal = $totalAmount + $totalGSTAmount;
+
             $grn->update([
                 'GRNNumber' => $validated['GRNNumber'],
                 'GRNDate' => $validated['GRNDate'],
+                'InvoiceDate' => $validated['InvoiceDate'] ?? null,
+                'InvoiceNo' => $validated['InvoiceNo'] ?? null,
                 'Supplier' => $validated['Supplier'],
                 'PINumbers' => $piNumbersJson,
+                'TotalAmount' => $totalAmount,
+                'TotalGSTAmount' => $totalGSTAmount,
+                'GrandTotal' => $grandTotal,
                 'Remarks' => $validated['Remarks'] ?? null,
                 'UpdatedBy' => Auth::id() ?? 1,
             ]);
@@ -349,6 +415,11 @@ class GRNController extends Controller
             foreach ($request->input('items', []) as $row) {
                 $qty = (float)($row['Quantity'] ?? 0);
                 if ($qty <= 0) continue;
+                $rate = (float)($row['Rate'] ?? 0);
+                $gstRate = (float)($row['GSTRate'] ?? 0);
+                $amt = $qty * $rate;
+                $gstAmt = $amt * ($gstRate / 100);
+                $totAmt = $amt + $gstAmt;
 
                 GRNChild::create([
                     'GRN' => $grn->ID,
@@ -356,6 +427,11 @@ class GRNController extends Controller
                     'PIChild' => $row['PIChild'],
                     'ItemMaster' => $row['ItemMaster'],
                     'Quantity' => $qty,
+                    'Rate' => $rate,
+                    'Amount' => $amt,
+                    'GSTRate' => $gstRate,
+                    'GSTAmount' => $gstAmt,
+                    'TotalAmount' => $totAmt,
                     'CreatedBy' => Auth::id() ?? 1,
                     'UpdatedBy' => Auth::id() ?? 1,
                 ]);

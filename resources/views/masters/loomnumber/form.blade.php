@@ -36,6 +36,15 @@
                 @enderror
             </div>
 
+            <!-- Machine Name Input (Optional) -->
+            <div class="form-group">
+                <label for="MachineName">Machine Name</label>
+                <input type="text" id="MachineName" name="MachineName" value="{{ old('MachineName', $loomnumber->MachineName) }}" placeholder="Enter machine name (optional)">
+                @error('MachineName')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <!-- Loom Type Select Dropdown -->
             <div class="form-group">
                 <label for="LoomType">Loom Type</label>

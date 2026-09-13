@@ -43,16 +43,32 @@
                 <input type="text" id="GRNNumber" name="GRNNumber" value="{{ old('GRNNumber', $grn->GRNNumber) }}" class="form-control" readonly style="background-color: #f8fafc; font-weight: 600; color: #64748b; font-size: 0.85rem;" placeholder="Auto Issued">
             </div>
 
-            <!-- Invoice Date (col 2) -->
+            <!-- GRN Entry Date (col 2) -->
             <div style="grid-column: span 2;">
                 <label for="GRNDate" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
-                    Invoice Date <span style="color: #ef4444;">*</span>
+                    GRN Entry Date <span style="color: #ef4444;">*</span>
                 </label>
                 <input type="date" id="GRNDate" name="GRNDate" value="{{ old('GRNDate', $grn->GRNDate) }}" class="form-control @error('GRNDate') is-invalid @enderror" required style="font-size: 0.85rem;">
             </div>
 
-            <!-- Supplier (col 3) -->
-            <div style="grid-column: span 3;">
+            <!-- Invoice Date (col 2) -->
+            <div style="grid-column: span 2;">
+                <label for="InvoiceDate" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
+                    Invoice Date
+                </label>
+                <input type="date" id="InvoiceDate" name="InvoiceDate" value="{{ old('InvoiceDate', $grn->InvoiceDate) }}" class="form-control @error('InvoiceDate') is-invalid @enderror" style="font-size: 0.85rem;">
+            </div>
+
+            <!-- Invoice No. (col 2) -->
+            <div style="grid-column: span 2;">
+                <label for="InvoiceNo" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
+                    Invoice No.
+                </label>
+                <input type="text" id="InvoiceNo" name="InvoiceNo" value="{{ old('InvoiceNo', $grn->InvoiceNo) }}" class="form-control @error('InvoiceNo') is-invalid @enderror" placeholder="Enter Invoice No" style="font-size: 0.85rem;">
+            </div>
+
+            <!-- Supplier (col 4) -->
+            <div style="grid-column: span 4;">
                 <label for="Supplier" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
                     Supplier <span style="color: #ef4444;">*</span>
                 </label>
@@ -66,8 +82,8 @@
                 </select>
             </div>
 
-            <!-- PI No. (col 5) -->
-            <div style="grid-column: span 5;">
+            <!-- PI No. (col 6) -->
+            <div style="grid-column: span 6;">
                 <label for="PINumbers" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
                     PI No. <span style="color: #ef4444;">*</span>
                 </label>
@@ -76,8 +92,8 @@
                 </select>
             </div>
 
-            <!-- Remarks (col 12) -->
-            <div style="grid-column: span 12;">
+            <!-- Remarks (col 6) -->
+            <div style="grid-column: span 6;">
                 <label for="Remarks" style="display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
                     Remarks
                 </label>
@@ -93,20 +109,22 @@
         </div>
 
         <div style="overflow-x: auto; width: 100%;">
-            <table class="table" id="itemsTable" style="width: 100%; border-collapse: collapse; min-width: 750px; font-size: 0.85rem;">
+            <table class="table" id="itemsTable" style="width: 100%; border-collapse: collapse; min-width: 850px; font-size: 0.85rem;">
                 <thead>
                     <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; font-size: 0.8rem;">
-                        <th style="padding: 0.5rem 0.4rem; width: 35%;">Item Name</th>
-                        <th style="padding: 0.5rem 0.4rem; width: 18%;">Qty Received</th>
-                        <th style="padding: 0.5rem 0.4rem; width: 15%;">Rate (₹)</th>
-                        <th style="padding: 0.5rem 0.4rem; width: 16%;">Amount (₹)</th>
-                        <th style="padding: 0.5rem 0.4rem; width: 12%;">Rack / Bin</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 26%;">Item Name</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 12%;">Qty Received</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 12%;">Rate (₹)</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 14%;">Amount (₹)</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 10%;">GST (%)</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 14%;">GST Amount (₹)</th>
+                        <th style="padding: 0.5rem 0.4rem; width: 8%;">Rack / Bin</th>
                         <th style="padding: 0.5rem 0.4rem; width: 4%; text-align: center;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="itemsTableBody">
                     <tr id="emptyRow">
-                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                             Select a Supplier and PI No. to load items.
                         </td>
                     </tr>
@@ -114,11 +132,27 @@
             </table>
         </div>
 
-        <!-- Total Amount Card matching PI summary -->
-        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: 1.25rem; margin-bottom: 1.25rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0;">
-            <label style="font-size: 0.85rem; font-weight: 700; color: #334155; margin: 0;">Total Amount (₹):</label>
-            <div style="width: 200px;">
-                <input type="text" id="TotalAmount" class="form-control" readonly style="background: #eef2ff; font-weight: 800; color: #3730a3; border-color: #c7d2fe; font-size: 0.95rem; text-align: right; padding: 0.4rem 0.6rem;" value="0.00">
+        <!-- Total Amount Card matching summary -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; margin-top: 1.25rem; margin-bottom: 1.25rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #334155; margin: 0;">Total Amount (₹):</label>
+                <div style="width: 130px;">
+                    <input type="text" id="TotalAmount" class="form-control" readonly style="background: #f8fafc; font-weight: 700; color: #1e293b; border-color: #cbd5e1; font-size: 0.9rem; text-align: right; padding: 0.4rem 0.6rem;" value="{{ number_format($grn->TotalAmount ?? 0, 2) }}">
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #334155; margin: 0;">GST Amount (₹):</label>
+                <div style="width: 130px;">
+                    <input type="text" id="TotalGSTAmount" class="form-control" readonly style="background: #f8fafc; font-weight: 700; color: #d97706; border-color: #fcd34d; font-size: 0.9rem; text-align: right; padding: 0.4rem 0.6rem;" value="{{ number_format($grn->TotalGSTAmount ?? 0, 2) }}">
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #334155; margin: 0;">Grand Total (₹):</label>
+                <div style="width: 150px;">
+                    <input type="text" id="GrandTotal" class="form-control" readonly style="background: #eef2ff; font-weight: 800; color: #3730a3; border-color: #c7d2fe; font-size: 0.95rem; text-align: right; padding: 0.4rem 0.6rem;" value="{{ number_format($grn->GrandTotal ?? 0, 2) }}">
+                </div>
             </div>
         </div>
 
@@ -127,9 +161,6 @@
             <button type="submit" name="action_type" value="save" class="btn-save-green">
                 Save
             </button>
-            <!-- <button type="submit" name="action_type" value="save_and_print" class="btn-print-blue" style="padding: 0.6rem 1.25rem; font-size: 0.88rem;">
-                <span>🖨️</span> <span>Save &amp; Print</span>
-            </button> -->
             <button type="button" id="btnClear" class="btn-action-secondary" style="padding: 0.55rem 1.25rem; font-size: 0.88rem;">
                 Clear
             </button>
@@ -167,7 +198,7 @@
             piSelect.empty();
             $('#itemsTableBody').html(`
                 <tr id="emptyRow">
-                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                         Select a Supplier and PI No. to load items.
                     </td>
                 </tr>
@@ -215,7 +246,7 @@
             if (!selectedPiIds || selectedPiIds.length === 0) {
                 tableBody.html(`
                     <tr id="emptyRow">
-                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                             Select a Supplier and PI No. to load items.
                         </td>
                     </tr>
@@ -237,7 +268,7 @@
                         if (res.data.length === 0) {
                             tableBody.html(`
                                 <tr id="emptyRow">
-                                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                                         No pending items found for the selected PI(s).
                                     </td>
                                 </tr>
@@ -247,6 +278,9 @@
                         }
 
                         res.data.forEach(function (item, index) {
+                            const rateVal = parseFloat(item.rate || 0).toFixed(2);
+                            const gstRateVal = parseFloat(item.gst_rate || 0).toFixed(2);
+
                             const rowHtml = `
                                 <tr class="item-row" style="border-bottom: 1px solid #e2e8f0;">
                                     <td style="padding: 0.4rem;">
@@ -259,10 +293,18 @@
                                         <input type="number" step="0.01" min="0" name="items[${index}][Quantity]" class="form-control qty-input" value="${item.qty_received}" required style="font-size: 0.85rem;">
                                     </td>
                                     <td style="padding: 0.4rem;">
-                                        <input type="text" class="form-control rate-input" value="${parseFloat(item.rate).toFixed(2)}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                        <input type="hidden" name="items[${index}][Rate]" value="${rateVal}">
+                                        <input type="text" class="form-control rate-input" value="${rateVal}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
                                     </td>
                                     <td style="padding: 0.4rem;">
                                         <input type="text" class="form-control amount-input" value="0.00" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
+                                    </td>
+                                    <td style="padding: 0.4rem;">
+                                        <input type="hidden" name="items[${index}][GSTRate]" value="${gstRateVal}">
+                                        <input type="text" class="form-control gst-rate-input" value="${gstRateVal}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                    </td>
+                                    <td style="padding: 0.4rem;">
+                                        <input type="text" class="form-control gst-amount-input" value="0.00" readonly style="background-color: #f8fafc; font-weight: 600; color: #d97706; font-size: 0.85rem;">
                                     </td>
                                     <td style="padding: 0.4rem;">
                                         <input type="text" class="form-control" value="${escapeHtml(item.rack_no || 'N/A')}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
@@ -284,8 +326,8 @@
             });
         });
 
-        // Delegate Quantity input change
-        $(document).on('input', '.qty-input', function () {
+        // Delegate Quantity and GST Rate input changes
+        $(document).on('input', '.qty-input, .gst-rate-input', function () {
             calculateTotals();
         });
 
@@ -295,7 +337,7 @@
             if ($('#itemsTableBody tr.item-row').length === 0) {
                 $('#itemsTableBody').html(`
                     <tr id="emptyRow">
-                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                             No items in entry.
                         </td>
                     </tr>
@@ -312,7 +354,7 @@
                 $('#PINumbers').empty().trigger('change.select2');
                 $('#itemsTableBody').html(`
                     <tr id="emptyRow">
-                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
                             Select a Supplier and PI No. to load items.
                         </td>
                     </tr>
@@ -324,14 +366,29 @@
         // Calculate Totals function
         function calculateTotals() {
             let totalAmount = 0;
+            let totalGSTAmount = 0;
+            let grandTotal = 0;
+
             $('.item-row').each(function () {
                 const qty = parseFloat($(this).find('.qty-input').val()) || 0;
                 const rate = parseFloat($(this).find('.rate-input').val()) || 0;
+                const gstRate = parseFloat($(this).find('.gst-rate-input').val()) || 0;
+
                 const amount = qty * rate;
+                const gstAmount = amount * (gstRate / 100);
+
                 $(this).find('.amount-input').val(amount.toFixed(2));
+                $(this).find('.gst-amount-input').val(gstAmount.toFixed(2));
+
                 totalAmount += amount;
+                totalGSTAmount += gstAmount;
             });
+
+            grandTotal = totalAmount + totalGSTAmount;
+
             $('#TotalAmount').val(totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            $('#TotalGSTAmount').val(totalGSTAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            $('#GrandTotal').val(grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         }
 
         function escapeHtml(text) {

@@ -18,12 +18,22 @@ class GRNChild extends Model
         'PIChild',
         'ItemMaster',
         'Quantity',
+        'Rate',
+        'Amount',
+        'GSTRate',
+        'GSTAmount',
+        'TotalAmount',
         'CreatedBy',
         'UpdatedBy',
     ];
 
     protected $casts = [
         'Quantity' => 'float',
+        'Rate' => 'float',
+        'Amount' => 'float',
+        'GSTRate' => 'float',
+        'GSTAmount' => 'float',
+        'TotalAmount' => 'float',
         'CreatedOn' => 'datetime',
         'UpdatedOn' => 'datetime',
     ];

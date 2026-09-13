@@ -15,8 +15,13 @@ class GRN extends Model
     protected $fillable = [
         'GRNNumber',
         'GRNDate',
+        'InvoiceNo',
+        'InvoiceDate',
         'Supplier',
         'PINumbers',
+        'TotalAmount',
+        'TotalGSTAmount',
+        'GrandTotal',
         'Remarks',
         'IsActive',
         'CreatedBy',
@@ -24,6 +29,9 @@ class GRN extends Model
     ];
 
     protected $casts = [
+        'TotalAmount' => 'float',
+        'TotalGSTAmount' => 'float',
+        'GrandTotal' => 'float',
         'IsActive' => 'boolean',
         'CreatedOn' => 'datetime',
         'UpdatedOn' => 'datetime',

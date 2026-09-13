@@ -14,20 +14,27 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            'Loom department',
-            'Plant department',
-            'BCS department',
-            'Printing department',
-            'Stitching department',
+            ['name' => 'Loom Shed 1', 'code' => 'LS1'],
+            ['name' => 'Loom Shed 2', 'code' => 'LS2'],
+            ['name' => 'Folding', 'code' => 'FLD'],
+            ['name' => 'Sizing', 'code' => 'SIZ'],
+            ['name' => 'Warping', 'code' => 'WRP'],
+            ['name' => 'Yarn Store', 'code' => 'YRN'],
+            ['name' => 'Engineering / Maintenance', 'code' => 'ENG'],
+            ['name' => 'Electrical', 'code' => 'ELE'],
+            ['name' => 'Quality / Inspection', 'code' => 'QTY'],
+            ['name' => 'Packing & Dispatch', 'code' => 'PACK'],
+            ['name' => 'Admin / Office', 'code' => 'ADM'],
         ];
 
-        foreach ($departments as $deptName) {
-            $slug = Str::slug($deptName);
+        foreach ($departments as $dept) {
+            $slug = Str::slug($dept['name']);
             
             Department::updateOrCreate(
                 ['Slug' => $slug],
                 [
-                    'DepartmentName' => $deptName,
+                    'DepartmentName' => $dept['name'],
+                    'Code' => $dept['code'],
                     'IsActive' => 1,
                     'CreatedBy' => 1,
                     'UpdatedBy' => 1,
