@@ -14,6 +14,13 @@ class LoomNumberController extends Controller
         2 => 'LSL-6',
         3 => 'Nova-6',
         4 => 'LSL-8',
+        5 => 'Tape Plant',
+        6 => 'BCS',
+        7 => 'Printing',
+        8 => 'Stitching',
+        9 => 'Office',
+        10 => 'Compressor',
+        11 => 'Bale Press',
     ];
 
     public function index()
