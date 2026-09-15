@@ -126,17 +126,29 @@
             @foreach($materialIssue->children as $index => $item)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->loomRelation ? ($item->loomRelation->MachineName ? $item->loomRelation->MachineName . ' - ' . $item->loomRelation->LoomNumber : $item->loomRelation->LoomNumber) : '-' }}</td>
+                    @php
+                        $loom = $item->loomRelation;
+                        $loomDisplay = '-';
+                        if ($loom) {
+                            $nameParts = [];
+                            if ($loom->LoomNumber) $nameParts[] = $loom->LoomNumber;
+                            if ($loom->MachineName) $nameParts[] = $loom->MachineName;
+                            $nameStr = implode(' / ', $nameParts) ?: 'Loom #' . $loom->ID;
+                            $typeStr = $loom->LoomTypeName ? ' - ( ' . $loom->LoomTypeName . ' )' : '';
+                            $loomDisplay = $nameStr . $typeStr;
+                        }
+                    @endphp
+                    <td>{{ $loomDisplay }}</td>
                     <td>{{ $item->departmentRelation ? $item->departmentRelation->DepartmentName . ($item->departmentRelation->Code ? ' ('.$item->departmentRelation->Code.')' : '') : '-' }}</td>
-                    <td>{{ $item->itemMasterRelation ? $item->itemMasterRelation->ItemName . ($item->itemMasterRelation->PartNo ? ' ('.$item->itemMasterRelation->PartNo.')' : '') : '-' }}</td>
-                    <td class="text-right">{{ number_format($item->Quantity, 2) }}</td>
+                    <td>{{ $item->itemMasterRelation ? $item->itemMasterRelation->ItemName . ($item->itemMasterRelation->PartNo ? ' | Part No: '.$item->itemMasterRelation->PartNo : '') . ($item->itemMasterRelation->CatalogueNo ? ' | Cat No: '.$item->itemMasterRelation->CatalogueNo : '') : '-' }}</td>
+                    <td class="text-right">{{ number_format($item->Quantity, 0) }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
                 <th colspan="4" class="text-right">Total Quantity Issued</th>
-                <th class="text-right">{{ number_format($materialIssue->TotalQuantity, 2) }}</th>
+                <th class="text-right">{{ number_format($materialIssue->TotalQuantity, 0) }}</th>
             </tr>
         </tfoot>
     </table>

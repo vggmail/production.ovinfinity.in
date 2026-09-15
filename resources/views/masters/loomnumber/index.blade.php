@@ -83,7 +83,11 @@
                         return `<a href="${editUrl}" class="table-id-link" title="Click to edit">${val}</a>`;
                     }
                 },
-                { name: 'LoomNumber', sortable: true },
+                { 
+                    name: 'LoomNumber', 
+                    sortable: true,
+                    render: (val) => val ? val : '-'
+                },
                 { 
                     name: 'MachineName', 
                     sortable: true,

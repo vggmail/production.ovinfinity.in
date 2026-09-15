@@ -151,6 +151,35 @@
             });
         }
 
+        function updateDisabledOptions() {
+            const selects = Array.from(container.querySelectorAll('.item-select'));
+            const selectedValues = selects
+                .map(s => s.value || $(s).val())
+                .filter(val => val !== '' && val !== null && val !== undefined);
+
+            selects.forEach(select => {
+                const currentValue = select.value || $(select).val();
+                const options = select.querySelectorAll('option');
+
+                options.forEach(option => {
+                    if (!option.value) return; // Do not disable placeholder
+                    if (selectedValues.includes(option.value) && String(option.value) !== String(currentValue)) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+
+                if (typeof $.fn.select2 !== 'undefined' && $(select).hasClass("select2-hidden-accessible")) {
+                    $(select).select2({
+                        placeholder: '-- Select Item (Search by Name, Part No, or Cat No) --',
+                        width: '100%',
+                        allowClear: true
+                    });
+                }
+            });
+        }
+
         function createRow(data = {}) {
             const index = rowIndex++;
             const tr = document.createElement('tr');
@@ -161,13 +190,27 @@
             const selectedLoom = data.LoomNumber || '';
             const selectedDept = data.Department || '';
             const selectedItem = data.ItemMaster || '';
-            const quantityVal = data.Quantity !== undefined && data.Quantity !== '' ? data.Quantity : (selectedItem && stockMap.hasOwnProperty(selectedItem) ? stockMap[selectedItem] : '');
+            const selectedQuantity = data.Quantity !== undefined && data.Quantity !== '' ? parseInt(data.Quantity) : (selectedItem && stockMap.hasOwnProperty(selectedItem) ? Math.floor(stockMap[selectedItem]) : '');
 
             // Loom Options
             let loomOptionsHtml = '<option value="">-- Select Machine --</option>';
             looms.forEach(loom => {
                 const isSel = String(selectedLoom) === String(loom.ID) ? 'selected' : '';
-                const loomLabel = loom.MachineName ? `${loom.MachineName} - ${loom.LoomNumber}` : loom.LoomNumber;
+
+                let nameStr = '';
+                if (loom.LoomNumber && loom.MachineName) {
+                    nameStr = `${loom.LoomNumber} / ${loom.MachineName}`;
+                } else if (loom.LoomNumber) {
+                    nameStr = loom.LoomNumber;
+                } else if (loom.MachineName) {
+                    nameStr = loom.MachineName;
+                } else {
+                    nameStr = `Loom #${loom.ID}`;
+                }
+
+                const typeStr = loom.LoomTypeName ? ` - ( ${loom.LoomTypeName} )` : '';
+                const loomLabel = `${nameStr}${typeStr}`;
+
                 loomOptionsHtml += `<option value="${loom.ID}" ${isSel}>${loomLabel}</option>`;
             });
 
@@ -180,11 +223,13 @@
             });
 
             // Item Options
-            let itemOptionsHtml = '<option value="">-- Select Item --</option>';
+            let itemOptionsHtml = '<option value="">-- Select Item (Search by Name, Part No, or Cat No) --</option>';
             items.forEach(item => {
                 const isSel = String(selectedItem) === String(item.ID) ? 'selected' : '';
-                const partNo = item.PartNo ? ` (${item.PartNo})` : '';
-                itemOptionsHtml += `<option value="${item.ID}" ${isSel}>${item.ItemName}${partNo}</option>`;
+                const partText = item.PartNo ? ` | Part No: ${item.PartNo}` : '';
+                const catText = item.CatalogueNo ? ` | Cat No: ${item.CatalogueNo}` : '';
+                const labelText = `${item.ItemName}${partText}${catText}`;
+                itemOptionsHtml += `<option value="${item.ID}" ${isSel}>${labelText}</option>`;
             });
 
             tr.innerHTML = `
@@ -200,11 +245,11 @@
                 </td>
                 <td style="padding: 0.5rem 0.4rem;">
                     <select name="items[${index}][ItemMaster]" class="form-control item-select" required style="width: 100%;">
-                        ${itemOptionsHtml}
+                        <option value="">-- Select Item (Search by Name, Part No, or Cat No) --</option>
                     </select>
                 </td>
                 <td style="padding: 0.5rem 0.4rem;">
-                    <input type="number" step="0.01" min="0.01" name="items[${index}][Quantity]" class="form-control qty-input" value="${quantityVal}" required placeholder="2" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color, #d1d5db); border-radius: 6px;">
+                    <input type="number" step="1" min="1" name="items[${index}][Quantity]" class="form-control qty-input" value="${selectedQuantity}" required placeholder="0" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color, #d1d5db); border-radius: 6px;">
                 </td>
                 <td style="padding: 0.5rem 0.4rem; text-align: center; vertical-align: middle;">
                     <button type="button" class="btn-remove-row" style="background: transparent; border: none; color: #dc2626; cursor: pointer; font-size: 1.1rem;" title="Remove Row">🗑️</button>
@@ -219,29 +264,133 @@
             const qtyInput = tr.querySelector('.qty-input');
             const removeBtn = tr.querySelector('.btn-remove-row');
 
+            // Function to update stock limits and quantity on item change
+            function updateStockLimit(itemId, autoFillQuantity = false) {
+                if (itemId && stockMap.hasOwnProperty(itemId)) {
+                    const availableStock = Math.floor(parseFloat(stockMap[itemId])) || 0;
+                    qtyInput.max = availableStock;
+                    qtyInput.setAttribute('data-max', availableStock);
+                    qtyInput.placeholder = `${availableStock}`;
+                    if (autoFillQuantity) {
+                        qtyInput.value = availableStock;
+                    }
+                } else {
+                    qtyInput.removeAttribute('max');
+                    qtyInput.removeAttribute('data-max');
+                    qtyInput.placeholder = "0";
+                    if (autoFillQuantity) {
+                        qtyInput.value = '';
+                    }
+                }
+            }
+
+            // Populate items dropdown based on department selection
+            function populateItems(deptId, initialItemId = '') {
+                const currentItemId = initialItemId !== '' ? initialItemId : ($(itemSelect).val() || '');
+                let filteredItems = items;
+                if (deptId) {
+                    const deptItems = items.filter(item => String(item.Department) === String(deptId));
+                    if (deptItems.length > 0) {
+                        filteredItems = deptItems;
+                    }
+                }
+
+                let itemOptionsHtml = '<option value="">-- Select Item (Search by Name, Part No, or Cat No) --</option>';
+                let hasCurrent = false;
+
+                filteredItems.forEach(item => {
+                    const isSel = String(currentItemId) === String(item.ID) ? 'selected' : '';
+                    if (isSel) hasCurrent = true;
+                    const partText = item.PartNo ? ` | Part No: ${item.PartNo}` : '';
+                    const catText = item.CatalogueNo ? ` | Cat No: ${item.CatalogueNo}` : '';
+                    const labelText = `${item.ItemName}${partText}${catText}`;
+                    itemOptionsHtml += `<option value="${item.ID}" ${isSel}>${labelText}</option>`;
+                });
+
+                if (typeof $.fn.select2 !== 'undefined' && $(itemSelect).data('select2')) {
+                    $(itemSelect).html(itemOptionsHtml);
+                    if (hasCurrent && currentItemId) {
+                        $(itemSelect).val(currentItemId).trigger('change.select2');
+                        updateStockLimit(currentItemId, false);
+                    } else {
+                        $(itemSelect).val('').trigger('change.select2');
+                        updateStockLimit('', true);
+                    }
+                } else {
+                    itemSelect.innerHTML = itemOptionsHtml;
+                    if (hasCurrent && currentItemId) {
+                        itemSelect.value = currentItemId;
+                        updateStockLimit(currentItemId, false);
+                    } else {
+                        itemSelect.value = '';
+                        updateStockLimit('', true);
+                    }
+                }
+                updateDisabledOptions();
+            }
+
+            // Enforce integer quantity without decimals and max stock limit
+            function validateQuantityInput() {
+                if (qtyInput.value && qtyInput.value.includes('.')) {
+                    qtyInput.value = Math.floor(parseFloat(qtyInput.value)) || 1;
+                }
+                const maxVal = parseInt(qtyInput.getAttribute('data-max'));
+                const currentVal = parseInt(qtyInput.value);
+                if (!isNaN(maxVal) && !isNaN(currentVal) && currentVal > maxVal) {
+                    alert(`Quantity cannot be increased beyond the available GRN stock (${maxVal}). You can only decrease it.`);
+                    qtyInput.value = maxVal;
+                }
+            }
+
+            qtyInput.addEventListener('keydown', function(e) {
+                if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '-') {
+                    e.preventDefault();
+                }
+            });
+
+            qtyInput.addEventListener('input', validateQuantityInput);
+            qtyInput.addEventListener('change', validateQuantityInput);
+
             // Initialize Select2 on selects
             if (typeof $.fn.select2 !== 'undefined') {
                 $(loomSelect).select2({ placeholder: '-- Select Machine --', width: '100%', allowClear: true });
                 $(deptSelect).select2({ placeholder: '-- Select To Department --', width: '100%', allowClear: true });
-                $(itemSelect).select2({ placeholder: '-- Select Item --', width: '100%', allowClear: true });
+                $(itemSelect).select2({ placeholder: '-- Select Item (Search by Name, Part No, or Cat No) --', width: '100%', allowClear: true });
+
+                // Initial populate for items
+                populateItems(selectedDept, selectedItem);
+                if (selectedItem) {
+                    updateStockLimit(selectedItem, quantityVal === '');
+                }
+
+                // Re-filter items when department changes
+                $(deptSelect).on('change select2:select select2:clear', function() {
+                    const deptId = $(this).val();
+                    populateItems(deptId, '');
+                    updateDisabledOptions();
+                });
 
                 // Fill Available Stock in Quantity input box when Item is selected
-                $(itemSelect).on('change select2:select', function() {
+                $(itemSelect).on('change select2:select select2:clear', function() {
                     const itemId = $(this).val();
-                    if (itemId && stockMap.hasOwnProperty(itemId)) {
-                        qtyInput.value = stockMap[itemId];
-                    } else if (!itemId) {
-                        qtyInput.value = '';
-                    }
+                    updateStockLimit(itemId, true);
+                    updateDisabledOptions();
                 });
             } else {
+                populateItems(selectedDept, selectedItem);
+                if (selectedItem) {
+                    updateStockLimit(selectedItem, quantityVal === '');
+                }
+
+                deptSelect.addEventListener('change', function() {
+                    populateItems(this.value, '');
+                    updateDisabledOptions();
+                });
+
                 itemSelect.addEventListener('change', function() {
                     const itemId = this.value;
-                    if (itemId && stockMap.hasOwnProperty(itemId)) {
-                        qtyInput.value = stockMap[itemId];
-                    } else if (!itemId) {
-                        qtyInput.value = '';
-                    }
+                    updateStockLimit(itemId, true);
+                    updateDisabledOptions();
                 });
             }
 
@@ -253,15 +402,19 @@
                         $(itemSelect).select2('destroy');
                     }
                     tr.remove();
+                    updateDisabledOptions();
                 } else {
                     alert('At least one item row is required and cannot be deleted.');
                 }
             });
+
+            updateDisabledOptions();
         }
 
         if (addBtnBottom) {
             addBtnBottom.addEventListener('click', () => {
                 createRow({ Quantity: '' });
+                updateDisabledOptions();
             });
         }
 
@@ -271,6 +424,38 @@
         } else {
             // Default 1 row as requested
             createRow({ Quantity: '' });
+        }
+        updateDisabledOptions();
+
+        // Form submission overall stock validation across all rows
+        const form = document.getElementById('material-issue-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const itemTotals = {};
+                const rows = container.querySelectorAll('.item-row');
+                
+                rows.forEach(r => {
+                    const sel = r.querySelector('.item-select');
+                    const qInput = r.querySelector('.qty-input');
+                    const itemId = sel ? sel.value : null;
+                    const qty = qInput ? (parseFloat(qInput.value) || 0) : 0;
+                    if (itemId) {
+                        itemTotals[itemId] = (itemTotals[itemId] || 0) + qty;
+                    }
+                });
+
+                for (const itemId in itemTotals) {
+                    const requested = itemTotals[itemId];
+                    const available = stockMap.hasOwnProperty(itemId) ? parseFloat(stockMap[itemId]) : 0;
+                    if (requested > available) {
+                        const itemObj = items.find(i => String(i.ID) === String(itemId));
+                        const itemName = itemObj ? itemObj.ItemName : 'Selected item';
+                        alert(`Total requested quantity for "${itemName}" (${requested}) exceeds available GRN stock (${available}). Please decrease the quantity.`);
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
         }
     });
 </script>

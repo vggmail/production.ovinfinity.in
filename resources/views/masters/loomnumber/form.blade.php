@@ -29,17 +29,17 @@
 
             <!-- Loom Number Input -->
             <div class="form-group">
-                <label for="LoomNumber">Loom Number</label>
-                <input type="text" id="LoomNumber" name="LoomNumber" value="{{ old('LoomNumber', $loomnumber->LoomNumber) }}" placeholder="Enter loom number (e.g. L-101)" required autofocus>
+                <label for="LoomNumber">Loom Number <span style="font-size: 0.8rem; color: #6b7280; font-weight: normal;">(Optional if Machine Name filled)</span></label>
+                <input type="text" id="LoomNumber" name="LoomNumber" value="{{ old('LoomNumber', $loomnumber->LoomNumber) }}" placeholder="Enter loom number (e.g. L-101)" autofocus>
                 @error('LoomNumber')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <!-- Machine Name Input (Optional) -->
+            <!-- Machine Name Input -->
             <div class="form-group">
-                <label for="MachineName">Machine Name</label>
-                <input type="text" id="MachineName" name="MachineName" value="{{ old('MachineName', $loomnumber->MachineName) }}" placeholder="Enter machine name (optional)">
+                <label for="MachineName">Machine Name <span style="font-size: 0.8rem; color: #6b7280; font-weight: normal;">(Optional if Loom Number filled)</span></label>
+                <input type="text" id="MachineName" name="MachineName" value="{{ old('MachineName', $loomnumber->MachineName) }}" placeholder="Enter machine name">
                 @error('MachineName')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

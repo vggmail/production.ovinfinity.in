@@ -94,7 +94,7 @@
                     render: (val, row) => row.technician_relation ? row.technician_relation.Name : '<span class="text-muted">-</span>'
                 },
                 { name: 'TotalItems', sortable: true },
-                { name: 'TotalQuantity', sortable: true },
+                { name: 'TotalQuantity', sortable: true, render: (val) => val ? parseInt(val) : 0 },
                 { 
                     name: 'Remarks', 
                     sortable: false,

@@ -78,10 +78,13 @@ class LoomNumberController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')],
-            'MachineName' => 'nullable|string|max:100',
+            'LoomNumber' => ['nullable', 'required_without:MachineName', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->whereNotNull('LoomNumber')],
+            'MachineName' => ['nullable', 'required_without:LoomNumber', 'string', 'max:100'],
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
+        ], [
+            'LoomNumber.required_without' => 'Either Loom Number or Machine Name must be filled.',
+            'MachineName.required_without' => 'Either Loom Number or Machine Name must be filled.',
         ]);
 
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;
@@ -105,10 +108,13 @@ class LoomNumberController extends Controller
         $loomnumber = LoomNumber::findOrFail($id);
 
         $validated = $request->validate([
-            'LoomNumber' => ['required', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->ignore($id, 'ID')],
-            'MachineName' => 'nullable|string|max:100',
+            'LoomNumber' => ['nullable', 'required_without:MachineName', 'string', 'max:50', Rule::unique('umloomnumber', 'LoomNumber')->ignore($id, 'ID')->whereNotNull('LoomNumber')],
+            'MachineName' => ['nullable', 'required_without:LoomNumber', 'string', 'max:100'],
             'LoomType' => 'required|integer|in:' . implode(',', array_keys(self::$loomTypes)),
             'IsActive' => 'nullable|boolean',
+        ], [
+            'LoomNumber.required_without' => 'Either Loom Number or Machine Name must be filled.',
+            'MachineName.required_without' => 'Either Loom Number or Machine Name must be filled.',
         ]);
 
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;

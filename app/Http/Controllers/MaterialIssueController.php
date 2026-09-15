@@ -86,7 +86,7 @@ class MaterialIssueController extends Controller
             'items.*.LoomNumber' => 'nullable|exists:umloomnumber,ID',
             'items.*.Department' => 'nullable|exists:umdepartment,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
-            'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Quantity' => 'required|integer|min:1',
         ], [
             'IssueNo.required' => 'Issue Number is required.',
             'IssueNo.unique' => 'Issue Number has already been taken.',
@@ -94,11 +94,40 @@ class MaterialIssueController extends Controller
             'items.min' => 'At least one item row must be added.',
             'items.*.ItemMaster.required' => 'Please select an item for all rows.',
             'items.*.Quantity.required' => 'Please enter a valid quantity.',
+            'items.*.Quantity.integer' => 'Quantity must be a whole integer without decimal points.',
+            'items.*.Quantity.min' => 'Quantity must be at least 1.',
         ]);
+
+        // Check for duplicate item selection
+        $itemIds = array_column($validated['items'], 'ItemMaster');
+        if (count($itemIds) !== count(array_unique($itemIds))) {
+            return back()->withInput()->withErrors([
+                'items' => 'The same item cannot be selected multiple times across rows.'
+            ]);
+        }
+
+        // Validate against available GRN stock map
+        $stockMap = $this->calculateStockMap();
+        $itemTotals = [];
+        foreach ($validated['items'] as $row) {
+            $itemId = $row['ItemMaster'];
+            $itemTotals[$itemId] = ($itemTotals[$itemId] ?? 0) + (int)$row['Quantity'];
+        }
+
+        foreach ($itemTotals as $itemId => $requestedQty) {
+            $availableStock = $stockMap[$itemId] ?? 0;
+            if ($requestedQty > $availableStock) {
+                $itemModel = ItemMaster::find($itemId);
+                $itemName = $itemModel ? $itemModel->ItemName : 'Selected item';
+                return back()->withInput()->withErrors([
+                    'items' => "Requested quantity for '{$itemName}' ({$requestedQty}) exceeds available GRN stock ({$availableStock}). Quantity cannot be increased beyond available stock."
+                ]);
+            }
+        }
 
         DB::transaction(function () use ($validated) {
             $totalItems = count($validated['items']);
-            $totalQuantity = array_sum(array_column($validated['items'], 'Quantity'));
+            $totalQuantity = (int) array_sum(array_column($validated['items'], 'Quantity'));
 
             $materialIssue = MaterialIssue::create([
                 'IssueNo' => $validated['IssueNo'],
@@ -118,7 +147,7 @@ class MaterialIssueController extends Controller
                     'LoomNumber' => $row['LoomNumber'] ?? null,
                     'Department' => $row['Department'] ?? null,
                     'ItemMaster' => $row['ItemMaster'],
-                    'Quantity' => $row['Quantity'],
+                    'Quantity' => (int) $row['Quantity'],
                     'IsActive' => 1,
                     'CreatedBy' => Auth::id() ?? 1,
                     'UpdatedBy' => Auth::id() ?? 1,
@@ -163,12 +192,39 @@ class MaterialIssueController extends Controller
             'items.*.LoomNumber' => 'nullable|exists:umloomnumber,ID',
             'items.*.Department' => 'nullable|exists:umdepartment,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
-            'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Quantity' => 'required|integer|min:1',
         ]);
+
+        // Check for duplicate item selection
+        $itemIds = array_column($validated['items'], 'ItemMaster');
+        if (count($itemIds) !== count(array_unique($itemIds))) {
+            return back()->withInput()->withErrors([
+                'items' => 'The same item cannot be selected multiple times across rows.'
+            ]);
+        }
+
+        // Validate against available GRN stock map (excluding current issue record)
+        $stockMap = $this->calculateStockMap($id);
+        $itemTotals = [];
+        foreach ($validated['items'] as $row) {
+            $itemId = $row['ItemMaster'];
+            $itemTotals[$itemId] = ($itemTotals[$itemId] ?? 0) + (int)$row['Quantity'];
+        }
+
+        foreach ($itemTotals as $itemId => $requestedQty) {
+            $availableStock = $stockMap[$itemId] ?? 0;
+            if ($requestedQty > $availableStock) {
+                $itemModel = ItemMaster::find($itemId);
+                $itemName = $itemModel ? $itemModel->ItemName : 'Selected item';
+                return back()->withInput()->withErrors([
+                    'items' => "Requested quantity for '{$itemName}' ({$requestedQty}) exceeds available GRN stock ({$availableStock}). Quantity cannot be increased beyond available stock."
+                ]);
+            }
+        }
 
         DB::transaction(function () use ($materialIssue, $validated) {
             $totalItems = count($validated['items']);
-            $totalQuantity = array_sum(array_column($validated['items'], 'Quantity'));
+            $totalQuantity = (int) array_sum(array_column($validated['items'], 'Quantity'));
 
             $materialIssue->update([
                 'IssueNo' => $validated['IssueNo'],
@@ -188,7 +244,7 @@ class MaterialIssueController extends Controller
                     'LoomNumber' => $row['LoomNumber'] ?? null,
                     'Department' => $row['Department'] ?? null,
                     'ItemMaster' => $row['ItemMaster'],
-                    'Quantity' => $row['Quantity'],
+                    'Quantity' => (int) $row['Quantity'],
                     'IsActive' => 1,
                     'CreatedBy' => Auth::id() ?? 1,
                     'UpdatedBy' => Auth::id() ?? 1,

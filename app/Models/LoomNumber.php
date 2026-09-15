@@ -26,4 +26,11 @@ class LoomNumber extends Model
         'CreatedOn' => 'datetime',
         'UpdatedOn' => 'datetime',
     ];
+
+    protected $appends = ['LoomTypeName'];
+
+    public function getLoomTypeNameAttribute()
+    {
+        return \App\Http\Controllers\LoomNumberController::$loomTypes[$this->LoomType] ?? '';
+    }
 }
