@@ -89,10 +89,11 @@
                 <table class="store-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
                     <thead>
                         <tr style="background: var(--bg-surface-hover, #f8fafc); border-bottom: 1px solid var(--border-color, #e2e8f0); text-align: left;">
-                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 25%;">Loom No. / Machine Name</th>
-                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 25%;">To Department</th>
-                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 30%;">Item</th>
-                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 16%;">Quantity (Show Available Stock Here)</th>
+                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 22%;">Loom No. / Machine Name</th>
+                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 22%;">To Department</th>
+                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 28%;">Item</th>
+                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 12%;">Available Stock</th>
+                            <th style="padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.85rem; width: 12%;">Quantity</th>
                             <th style="padding: 0.6rem 0.4rem; font-weight: 600; font-size: 0.85rem; width: 4%; text-align: center;"></th>
                         </tr>
                     </thead>
@@ -190,7 +191,7 @@
             const selectedLoom = data.LoomNumber || '';
             const selectedDept = data.Department || '';
             const selectedItem = data.ItemMaster || '';
-            const selectedQuantity = data.Quantity !== undefined && data.Quantity !== '' ? parseInt(data.Quantity) : (selectedItem && stockMap.hasOwnProperty(selectedItem) ? Math.floor(stockMap[selectedItem]) : '');
+            const selectedQuantity = data.Quantity !== undefined && data.Quantity !== '' ? parseInt(data.Quantity) : '';
 
             // Loom Options
             let loomOptionsHtml = '<option value="">-- Select Machine --</option>';
@@ -249,6 +250,9 @@
                     </select>
                 </td>
                 <td style="padding: 0.5rem 0.4rem;">
+                    <input type="text" class="form-control stock-display" readonly value="0" placeholder="0" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color, #d1d5db); border-radius: 6px; background-color: #f3f4f6; text-align: center; font-weight: 600; color: #374151;">
+                </td>
+                <td style="padding: 0.5rem 0.4rem;">
                     <input type="number" step="1" min="1" name="items[${index}][Quantity]" class="form-control qty-input" value="${selectedQuantity}" required placeholder="0" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color, #d1d5db); border-radius: 6px;">
                 </td>
                 <td style="padding: 0.5rem 0.4rem; text-align: center; vertical-align: middle;">
@@ -261,26 +265,23 @@
             const loomSelect = tr.querySelector('.loom-select');
             const deptSelect = tr.querySelector('.dept-select');
             const itemSelect = tr.querySelector('.item-select');
+            const stockDisplay = tr.querySelector('.stock-display');
             const qtyInput = tr.querySelector('.qty-input');
             const removeBtn = tr.querySelector('.btn-remove-row');
 
-            // Function to update stock limits and quantity on item change
-            function updateStockLimit(itemId, autoFillQuantity = false) {
+            // Function to update stock limits and stock display on item change
+            function updateStockLimit(itemId) {
                 if (itemId && stockMap.hasOwnProperty(itemId)) {
                     const availableStock = Math.floor(parseFloat(stockMap[itemId])) || 0;
                     qtyInput.max = availableStock;
                     qtyInput.setAttribute('data-max', availableStock);
-                    qtyInput.placeholder = `${availableStock}`;
-                    if (autoFillQuantity) {
-                        qtyInput.value = availableStock;
-                    }
+                    qtyInput.placeholder = `Max: ${availableStock}`;
+                    stockDisplay.value = availableStock;
                 } else {
                     qtyInput.removeAttribute('max');
                     qtyInput.removeAttribute('data-max');
                     qtyInput.placeholder = "0";
-                    if (autoFillQuantity) {
-                        qtyInput.value = '';
-                    }
+                    stockDisplay.value = "0";
                 }
             }
 
@@ -311,19 +312,19 @@
                     $(itemSelect).html(itemOptionsHtml);
                     if (hasCurrent && currentItemId) {
                         $(itemSelect).val(currentItemId).trigger('change.select2');
-                        updateStockLimit(currentItemId, false);
+                        updateStockLimit(currentItemId);
                     } else {
                         $(itemSelect).val('').trigger('change.select2');
-                        updateStockLimit('', true);
+                        updateStockLimit('');
                     }
                 } else {
                     itemSelect.innerHTML = itemOptionsHtml;
                     if (hasCurrent && currentItemId) {
                         itemSelect.value = currentItemId;
-                        updateStockLimit(currentItemId, false);
+                        updateStockLimit(currentItemId);
                     } else {
                         itemSelect.value = '';
-                        updateStockLimit('', true);
+                        updateStockLimit('');
                     }
                 }
                 updateDisabledOptions();
@@ -360,7 +361,7 @@
                 // Initial populate for items
                 populateItems(selectedDept, selectedItem);
                 if (selectedItem) {
-                    updateStockLimit(selectedItem, quantityVal === '');
+                    updateStockLimit(selectedItem);
                 }
 
                 // Re-filter items when department changes
@@ -370,16 +371,16 @@
                     updateDisabledOptions();
                 });
 
-                // Fill Available Stock in Quantity input box when Item is selected
+                // Display Available Stock in dedicated column when Item is selected
                 $(itemSelect).on('change select2:select select2:clear', function() {
                     const itemId = $(this).val();
-                    updateStockLimit(itemId, true);
+                    updateStockLimit(itemId);
                     updateDisabledOptions();
                 });
             } else {
                 populateItems(selectedDept, selectedItem);
                 if (selectedItem) {
-                    updateStockLimit(selectedItem, quantityVal === '');
+                    updateStockLimit(selectedItem);
                 }
 
                 deptSelect.addEventListener('change', function() {
@@ -389,7 +390,7 @@
 
                 itemSelect.addEventListener('change', function() {
                     const itemId = this.value;
-                    updateStockLimit(itemId, true);
+                    updateStockLimit(itemId);
                     updateDisabledOptions();
                 });
             }
