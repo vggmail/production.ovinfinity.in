@@ -23,6 +23,7 @@ class ItemMasterController extends Controller
                 $q->where('ItemName', 'like', "%{$search}%")
                   ->orWhere('PartNo', 'like', "%{$search}%")
                   ->orWhere('CatalogueNo', 'like', "%{$search}%")
+                  ->orWhere('Unit', 'like', "%{$search}%")
                   ->orWhere('HSNNo', 'like', "%{$search}%")
                   ->orWhere('RackNo', 'like', "%{$search}%")
                   ->orWhereHas('departmentRelation', function ($dq) use ($search) {
@@ -34,7 +35,7 @@ class ItemMasterController extends Controller
         $sortCol = $request->input('sort_col', 'ID');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'Department', 'HSNNo', 'GSTPercentage', 'RackNo', 'IsActive', 'CreatedOn', 'UpdatedOn'];
+        $allowedCols = ['ID', 'ItemName', 'PartNo', 'CatalogueNo', 'MinQuantity', 'Unit', 'Department', 'HSNNo', 'GSTPercentage', 'RackNo', 'IsActive', 'CreatedOn', 'UpdatedOn'];
         if (in_array($sortCol, $allowedCols)) {
             $query->orderBy($sortCol, $sortDir);
         } else {
@@ -67,6 +68,7 @@ class ItemMasterController extends Controller
             'PartNo' => 'nullable|string|max:100',
             'CatalogueNo' => 'nullable|string|max:100',
             'MinQuantity' => 'nullable|numeric|min:0',
+            'Unit' => 'nullable|string|max:50',
             'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
@@ -75,6 +77,7 @@ class ItemMasterController extends Controller
         ]);
 
         $validated['MinQuantity'] = $validated['MinQuantity'] ?? 0;
+        $validated['Unit'] = $validated['Unit'] ?? 'Not required';
         $validated['GSTPercentage'] = $validated['GSTPercentage'] ?? 0;
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;
         $validated['CreatedBy'] = Auth::id() ?? 1;
@@ -102,6 +105,7 @@ class ItemMasterController extends Controller
             'PartNo' => 'nullable|string|max:100',
             'CatalogueNo' => 'nullable|string|max:100',
             'MinQuantity' => 'nullable|numeric|min:0',
+            'Unit' => 'nullable|string|max:50',
             'Department' => 'nullable|integer|exists:umdepartment,ID',
             'HSNNo' => 'nullable|string|max:50',
             'GSTPercentage' => 'nullable|numeric|min:0|max:100',
@@ -110,6 +114,7 @@ class ItemMasterController extends Controller
         ]);
 
         $validated['MinQuantity'] = $validated['MinQuantity'] ?? 0;
+        $validated['Unit'] = $validated['Unit'] ?? 'Not required';
         $validated['GSTPercentage'] = $validated['GSTPercentage'] ?? 0;
         $validated['IsActive'] = $request->has('IsActive') ? 1 : 0;
         $validated['UpdatedBy'] = Auth::id() ?? 1;

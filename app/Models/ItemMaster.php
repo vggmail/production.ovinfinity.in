@@ -17,6 +17,7 @@ class ItemMaster extends Model
         'PartNo',
         'CatalogueNo',
         'MinQuantity',
+        'Unit',
         'Department',
         'HSNNo',
         'GSTPercentage',

@@ -28,8 +28,8 @@
             </div>
         </div>
 
-        <!-- Row 1: Item Name, Part No., Catlogue No., Minimum Quantity -->
-        <div class="form-grid-3">
+        <!-- Row 1: Item Name, Part No., Catlogue No., Minimum Quantity, Unit -->
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
             <div class="form-group">
                 <label for="ItemName" class="form-label-custom">Item Name <span class="required-star">*</span></label>
                 <input type="text" id="ItemName" name="ItemName" value="{{ old('ItemName', $item->ItemName) }}" required autofocus class="form-control-custom">
@@ -58,6 +58,20 @@
                 <label for="MinQuantity" class="form-label-custom">Minimum Quantity</label>
                 <input type="number" step="0.01" id="MinQuantity" name="MinQuantity" value="{{ old('MinQuantity', $item->MinQuantity) }}" class="form-control-custom">
                 @error('MinQuantity')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="Unit" class="form-label-custom">Unit</label>
+                <select id="Unit" name="Unit" class="form-control-custom">
+                    @foreach(['Not required', 'Mtr', 'Kg', 'Ltr', 'Ft'] as $unitOpt)
+                        <option value="{{ $unitOpt }}" {{ old('Unit', $item->Unit ?? 'Not required') == $unitOpt ? 'selected' : '' }}>
+                            {{ $unitOpt }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('Unit')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
