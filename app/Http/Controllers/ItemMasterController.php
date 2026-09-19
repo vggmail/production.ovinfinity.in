@@ -82,7 +82,7 @@ class ItemMasterController extends Controller
 
         ItemMaster::create($validated);
 
-        return redirect()->route('store.itemmaster.index')->with('success', 'Item created successfully.');
+        return redirect()->route('store.itemmaster.create')->with('success', 'Item created successfully.');
     }
 
     public function edit($id)

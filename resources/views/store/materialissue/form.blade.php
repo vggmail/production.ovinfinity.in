@@ -290,10 +290,7 @@
                 const currentItemId = initialItemId !== '' ? initialItemId : ($(itemSelect).val() || '');
                 let filteredItems = items;
                 if (deptId) {
-                    const deptItems = items.filter(item => String(item.Department) === String(deptId));
-                    if (deptItems.length > 0) {
-                        filteredItems = deptItems;
-                    }
+                    filteredItems = items.filter(item => String(item.Department) === String(deptId));
                 }
 
                 let itemOptionsHtml = '<option value="">-- Select Item (Search by Name, Part No, or Cat No) --</option>';

@@ -14,21 +14,20 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            ['name' => 'Loom Shed 1', 'code' => 'LS1'],
-            ['name' => 'Loom Shed 2', 'code' => 'LS2'],
-            ['name' => 'Folding', 'code' => 'FLD'],
-            ['name' => 'Sizing', 'code' => 'SIZ'],
-            ['name' => 'Warping', 'code' => 'WRP'],
-            ['name' => 'Yarn Store', 'code' => 'YRN'],
-            ['name' => 'Engineering / Maintenance', 'code' => 'ENG'],
+            ['name' => 'Tape Plant', 'code' => 'TP'],
+            ['name' => 'BCS', 'code' => 'BCS'],
+            ['name' => 'Printing', 'code' => 'PRN'],
+            ['name' => 'Stitching', 'code' => 'STCH'],
+            ['name' => 'Office', 'code' => 'OFF'],
+            ['name' => 'Compressor', 'code' => 'CMP'],
+            ['name' => 'Bale Press', 'code' => 'BP'],
             ['name' => 'Electrical', 'code' => 'ELE'],
-            ['name' => 'Quality / Inspection', 'code' => 'QTY'],
-            ['name' => 'Packing & Dispatch', 'code' => 'PACK'],
-            ['name' => 'Admin / Office', 'code' => 'ADM'],
         ];
 
+        $activeSlugs = [];
         foreach ($departments as $dept) {
             $slug = Str::slug($dept['name']);
+            $activeSlugs[] = $slug;
             
             Department::updateOrCreate(
                 ['Slug' => $slug],
@@ -41,5 +40,8 @@ class DepartmentSeeder extends Seeder
                 ]
             );
         }
+
+        // Deactivate old departments not in the updated list
+        Department::whereNotIn('Slug', $activeSlugs)->update(['IsActive' => 0]);
     }
 }

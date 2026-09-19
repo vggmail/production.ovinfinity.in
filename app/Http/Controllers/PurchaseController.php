@@ -108,7 +108,7 @@ class PurchaseController extends Controller
 
         InTransaction::create($validated);
 
-        return redirect()->route('inventories.purchase.index')->with('success', 'Purchase record created successfully.');
+        return redirect()->route('inventories.purchase.create')->with('success', 'Purchase record created successfully.');
     }
 
     public function edit($id)
