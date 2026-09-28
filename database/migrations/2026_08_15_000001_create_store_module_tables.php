@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('PartNo', 100)->nullable();
             $table->string('CatalogueNo', 100)->nullable();
             $table->decimal('MinQuantity', 12, 2)->default(0);
+            $table->string('Unit', 50)->default('Not required')->nullable();
             $table->string('HSNNo', 50)->nullable();
             $table->decimal('GSTPercentage', 5, 2)->default(0);
             $table->boolean('IsActive')->default(1);
