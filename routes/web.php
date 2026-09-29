@@ -36,6 +36,8 @@ use App\Http\Controllers\PIController;
 use App\Http\Controllers\GRNController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\MaterialIssueController;
+use App\Http\Controllers\DailyMaterialConsumptionReportController;
+use App\Http\Controllers\MonthlyMaterialConsumptionReportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -206,9 +208,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/daily-production', [DailyProductionReportController::class, 'index'])->name('daily_production.index');
         Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');
         Route::get('/daily-dispatch-transfer', [DailyDispatchTransferReportController::class, 'index'])->name('daily_dispatch_transfer.index');
+        Route::get('/daily-material-consumption', [DailyMaterialConsumptionReportController::class, 'index'])->name('daily_material_consumption.index');
+        Route::get('/monthly-material-consumption', [MonthlyMaterialConsumptionReportController::class, 'index'])->name('monthly_material_consumption.index');
     });
     // Alias route for backward compatibility
     Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');
+    Route::get('/material-consumption', [MonthlyMaterialConsumptionReportController::class, 'index'])->name('material_consumption.index');
+    Route::get('/daily-material-consumption', [DailyMaterialConsumptionReportController::class, 'index'])->name('daily_material_consumption.index');
+    Route::get('/monthly-material-consumption', [MonthlyMaterialConsumptionReportController::class, 'index'])->name('monthly_material_consumption.index');
 
     // Inventories Prefix
     Route::prefix('inventories')->name('inventories.')->group(function () {

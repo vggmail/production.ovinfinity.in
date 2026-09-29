@@ -1,12 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Production Net Weight & Meter Report')
+@section('title', 'Material Consumption Reports - Daily')
 
 @section('content')
 <div class="content-header report-header">
     <div class="content-title">
-        <h1>Production Net Weight & Meter Report</h1>
-        <p>Day-wise Actual Meter and Net Weight summary ({{ $dateTitle }})</p>
+        <h1>Material Consumption Reports</h1>
     </div>
     <div style="display: flex; gap: 0.5rem;">
         <button type="button" onclick="window.print()" class="btn-action-secondary" title="Print Report">
@@ -17,72 +16,99 @@
 
 <!-- Navigation Tabs (Monthly vs Daily) -->
 <div class="report-tabs">
-    <a href="{{ route('reports.monthly_production.index', array_filter(['inward' => $inward])) }}" 
+    <a href="{{ route('reports.monthly_material_consumption.index', array_filter(['department_id' => $departmentId, 'loom_id' => $loomId, 'item_id' => $itemId])) }}" 
        class="tab-item" 
        style="font-weight: 600; background: #f1f5f9; color: #475569; transition: all 0.2s;"
        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
         <span>📅</span> Monthly
     </a>
-    <a href="{{ route('reports.daily_production.index', array_filter(['inward' => $inward, 'from_date' => $fromDate, 'to_date' => $toDate])) }}" 
+    <a href="{{ route('reports.daily_material_consumption.index', array_filter(['from_date' => $fromDate, 'to_date' => $toDate, 'department_id' => $departmentId, 'loom_id' => $loomId, 'item_id' => $itemId])) }}" 
        class="tab-item active" 
        style="font-weight: 700; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
         <span>🗓️</span> Daily
     </a>
 </div>
 
+<!-- Filter Card (Common Class One-Line Filter) -->
 <div class="card report-filter-card">
-    <form method="GET" action="{{ route('reports.daily_production.index') }}" class="report-filter-form">
-        <!-- 1 From Date -->
+    <form method="GET" action="{{ route('reports.daily_material_consumption.index') }}" class="report-filter-form">
+        
+        <!-- From Date Filter -->
         <div class="form-group" style="flex: 1; min-width: 120px;">
             <label for="from_date">From Date</label>
             <input type="date" name="from_date" id="from_date" value="{{ $fromDate }}">
         </div>
 
-        <!-- 2 To Date -->
+        <!-- To Date Filter -->
         <div class="form-group" style="flex: 1; min-width: 120px;">
             <label for="to_date">To Date</label>
             <input type="date" name="to_date" id="to_date" value="{{ $toDate }}">
         </div>
 
-        <!-- 3 Inward Type -->
-        <div class="form-group" style="flex: 1.2; min-width: 150px;">
-            <label for="inward">Select List</label>
-            <select name="inward" id="inward">
-                <option value="all" {{ $inward == 'all' ? 'selected' : '' }}>All</option>
-                <option value="prod" {{ $inward == 'prod' || $inward == '1' || $inward == 'production' ? 'selected' : '' }}>Production</option>
-                <option value="purchase_lam" {{ $inward == 'purchase_lam' || $inward == '3' ? 'selected' : '' }}>Purchase - Laminate</option>
-                <option value="purchase" {{ $inward == 'purchase' || $inward == '2' ? 'selected' : '' }}>Purchase - Non Laminate</option>
+        <!-- Department Filter -->
+        <div class="form-group" style="flex: 1.2; min-width: 140px;">
+            <label for="department_id">Department</label>
+            <select name="department_id" id="department_id">
+                <option value="all" {{ $departmentId == 'all' || empty($departmentId) ? 'selected' : '' }}>All Department Name</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept->ID }}" {{ $departmentId == $dept->ID ? 'selected' : '' }}>
+                        {{ $dept->DepartmentName }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
-        <!-- Filter & Clear Buttons -->
+        <!-- Machine Name Filter -->
+        <div class="form-group" style="flex: 1.2; min-width: 140px;">
+            <label for="loom_id">Machine Name</label>
+            <select name="loom_id" id="loom_id">
+                <option value="all" {{ $loomId == 'all' || empty($loomId) ? 'selected' : '' }}>All Machine Name</option>
+                @foreach($looms as $loom)
+                    <option value="{{ $loom->ID }}" {{ $loomId == $loom->ID ? 'selected' : '' }}>
+                        {{ $loom->MachineName ? $loom->MachineName . ' (' . $loom->LoomNumber . ')' : 'Loom ' . $loom->LoomNumber }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Item Name Filter -->
+        <div class="form-group" style="flex: 1.2; min-width: 140px;">
+            <label for="item_id">Item Name</label>
+            <select name="item_id" id="item_id">
+                <option value="all" {{ $itemId == 'all' || empty($itemId) ? 'selected' : '' }}>All Item Name</option>
+                @foreach($items as $item)
+                    <option value="{{ $item->ID }}" {{ $itemId == $item->ID ? 'selected' : '' }}>
+                        {{ $item->ItemName }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Action Buttons -->
         <div style="display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0;">
             <button type="submit" class="btn-action">
                 Filter
             </button>
-            <a href="{{ route('reports.daily_production.index') }}" class="btn-action-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+            <a href="{{ route('reports.daily_material_consumption.index') }}" class="btn-action-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
                 Clear
             </a>
         </div>
     </form>
 </div>
 
-<!-- Report Table -->
+<!-- Compact Row-wise Table -->
 <div class="card report-table-card" style="max-width: 550px;">
-    <div class="report-table-title">
-        Daily Production Net Weight & Meter Report
-    </div>
     <table class="report-compact-table">
         <thead>
             <tr style="background-color: #3b6598; color: #ffffff;">
-                <th style="text-align: left; width: 180px;">
-                    Production Entry Date 🔻
+                <th style="text-align: left; width: 40%;">
+                    Month /Day 🔻
                 </th>
-                <th style="text-align: right; width: 160px;">
-                    Actual Meter
+                <th style="text-align: right; width: 30%;">
+                    Qty
                 </th>
-                <th style="text-align: right; width: 160px;">
-                    Net Weight
+                <th style="text-align: right; width: 30%;">
+                    Value
                 </th>
             </tr>
         </thead>
@@ -93,16 +119,16 @@
                         {{ $row['date_label'] }}
                     </td>
                     <td style="background-color: #ffffff; color: #0f172a;">
-                        {{ number_format($row['actual_meter'], 0) }}
+                        {{ number_format($row['qty'], 0) }}
                     </td>
                     <td style="background-color: #ffffff; color: #0f172a;">
-                        {{ number_format($row['net_weight'], 1) }}
+                        {{ number_format($row['value'], 2) }}
                     </td>
                 </tr>
             @empty
                 <tr>
                     <td colspan="3" style="text-align: center; padding: 1.5rem !important; color: var(--text-secondary);">
-                        No production records found for the selected criteria.
+                        No material consumption records found for the selected criteria.
                     </td>
                 </tr>
             @endforelse
@@ -114,10 +140,10 @@
                     Grand Total
                 </td>
                 <td>
-                    {{ number_format($grandTotals['actual_meter'], 0) }}
+                    {{ number_format($grandTotals['qty'], 0) }}
                 </td>
                 <td style="background-color: #f1f5f9;">
-                    {{ number_format($grandTotals['net_weight'], 1) }}
+                    {{ number_format($grandTotals['value'], 2) }}
                 </td>
             </tr>
         </tfoot>

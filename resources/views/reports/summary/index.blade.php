@@ -3,10 +3,9 @@
 @section('title', 'Summary Report')
 
 @section('content')
-<div class="content-header" style="margin-bottom: 1rem;">
+<div class="content-header" style="margin-bottom: 0.5rem;">
     <div class="content-title">
         <h1>Summary Report</h1>
-        <p>Stock summary report for remaining non-transferred and non-dispatched inventory</p>
     </div>
     <div>
         <button type="button" onclick="window.print()" class="btn-action-secondary" title="Print Report">
@@ -15,7 +14,7 @@
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 1.5rem;">
+<div class="card" style="margin-bottom: 0.5rem;">
     <form method="GET" action="{{ route('reports.summary.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.5rem; justify-content: space-between;">
         <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;">
             <!-- PROD Filter -->

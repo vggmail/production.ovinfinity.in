@@ -99,17 +99,32 @@
                 localStorage.setItem('sidebar_collapsed', 'false');
             }
 
-            const item = event.currentTarget.closest('.has-submenu');
-            item.classList.toggle('open');
-            const submenu = item.querySelector('.sidebar-submenu');
-            const arrow = item.querySelector('.submenu-arrow');
-            
-            if (item.classList.contains('open')) {
-                submenu.style.display = 'flex';
-                arrow.textContent = '▼';
+            const currentItem = event.currentTarget.closest('.has-submenu');
+            const willOpen = !currentItem.classList.contains('open');
+
+            // Auto close all other submenus (only one main menu open at a time)
+            document.querySelectorAll('.sidebar-item.has-submenu').forEach(item => {
+                if (item !== currentItem) {
+                    item.classList.remove('open');
+                    const sub = item.querySelector('.sidebar-submenu');
+                    const arr = item.querySelector('.submenu-arrow');
+                    if (sub) sub.style.display = 'none';
+                    if (arr) arr.textContent = '▶';
+                }
+            });
+
+            // Toggle current clicked menu
+            const submenu = currentItem.querySelector('.sidebar-submenu');
+            const arrow = currentItem.querySelector('.submenu-arrow');
+
+            if (willOpen) {
+                currentItem.classList.add('open');
+                if (submenu) submenu.style.display = 'flex';
+                if (arrow) arrow.textContent = '▼';
             } else {
-                submenu.style.display = 'none';
-                arrow.textContent = '▶';
+                currentItem.classList.remove('open');
+                if (submenu) submenu.style.display = 'none';
+                if (arrow) arrow.textContent = '▶';
             }
         }
     </script>

@@ -154,6 +154,11 @@
                         <span>📅</span> <span class="menu-text">Dispatch/Transfer</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.daily_material_consumption.*') || request()->routeIs('reports.monthly_material_consumption.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.monthly_material_consumption.index') }}" title="Material Consumption">
+                        <span>🧪</span> <span class="menu-text">Material Consumption</span>
+                    </a>
+                </li>
             </ul>
         </li>
 

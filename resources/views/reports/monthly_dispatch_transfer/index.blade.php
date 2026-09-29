@@ -30,7 +30,7 @@
     </a>
 </div>
 
-<div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+<div class="card" style="margin-bottom: 0.5rem; padding: 1rem 1.25rem;">
     <form method="GET" action="{{ route('reports.monthly_dispatch_transfer.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.25rem;">
         <!-- Month Range - From Month -->
         <div class="form-group" style="min-width: 160px;">
