@@ -14,13 +14,14 @@
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 0.5rem;">
-    <form method="GET" action="{{ route('reports.summary.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.5rem; justify-content: space-between;">
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;">
+<div class="card report-filter-card">
+    <h3 class="filter-header-title">Filter Header Section</h3>
+    <form method="GET" action="{{ route('reports.summary.index') }}" class="report-filter-form" style="justify-content: space-between;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-end;">
             <!-- PROD Filter -->
             <div class="form-group" style="min-width: 140px;">
-                <label for="prod" style="font-weight: 700; color: #1e3a8a;">PROD</label>
-                <select name="prod" id="prod" onchange="this.form.submit()" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600;">
+                <label for="prod">PROD</label>
+                <select name="prod" id="prod" onchange="this.form.submit()">
                     <option value="all" {{ $prod == 'all' ? 'selected' : '' }}>(All)</option>
                     <option value="1" {{ $prod == '1' ? 'selected' : '' }}>Production</option>
                     <option value="2" {{ $prod == '2' ? 'selected' : '' }}>Purchase</option>
@@ -29,18 +30,18 @@
 
             <!-- Status Filter -->
             <div class="form-group" style="min-width: 120px;">
-                <label for="status" style="font-weight: 700; color: #1e3a8a;">status</label>
-                <select name="status" id="status" onchange="this.form.submit()" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600;">
+                <label for="status">Status</label>
+                <select name="status" id="status" onchange="this.form.submit()">
                     <option value="active" {{ $status == 'active' ? 'selected' : '' }}>b (Active)</option>
                     <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All</option>
                 </select>
             </div>
         </div>
 
-        <!-- DATE Filter Box matching mockup header -->
-        <div style="display: flex; align-items: center; border: 2px solid #000; padding: 4px 12px; background: #ffffff; border-radius: 4px; gap: 1rem;">
-            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;">DATE</span>
-            <input type="date" name="date" value="{{ $targetDate }}" onchange="this.form.submit()" style="border: 1px solid #ccc; padding: 4px 8px; font-weight: 700; font-size: 1rem; width: auto;">
+        <!-- DATE Filter Box -->
+        <div class="form-group" style="min-width: 160px;">
+            <label for="date">DATE</label>
+            <input type="date" name="date" id="date" value="{{ $targetDate }}" onchange="this.form.submit()">
         </div>
     </form>
 </div>

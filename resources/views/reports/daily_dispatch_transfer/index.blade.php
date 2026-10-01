@@ -16,38 +16,36 @@
 </div>
 
 <!-- Navigation Tabs (Monthly vs Daily) -->
-<div class="report-tabs" style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--card-border, #cbd5e1); padding-bottom: 0.5rem;">
+<div class="report-tabs">
     <a href="{{ route('reports.monthly_dispatch_transfer.index', array_filter(['inward' => $inward])) }}" 
-       class="tab-item" 
-       style="padding: 0.55rem 1.25rem; font-weight: 600; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #f1f5f9; color: #475569; transition: all 0.2s;"
-       onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+       class="tab-item">
         <span>📅</span> Monthly
     </a>
     <a href="{{ route('reports.daily_dispatch_transfer.index', array_filter(['inward' => $inward, 'from_date' => $fromDate, 'to_date' => $toDate])) }}" 
-       class="tab-item active" 
-       style="padding: 0.55rem 1.25rem; font-weight: 700; font-size: 0.92rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
+       class="tab-item active">
         <span>🗓️</span> Daily
     </a>
 </div>
 
-<div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
-    <form method="GET" action="{{ route('reports.daily_dispatch_transfer.index') }}" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.25rem;">
+<div class="card report-filter-card">
+    <h3 class="filter-header-title">Filter Header Section</h3>
+    <form method="GET" action="{{ route('reports.daily_dispatch_transfer.index') }}" class="report-filter-form">
         <!-- 1 From Date -->
         <div class="form-group" style="min-width: 150px;">
-            <label for="from_date" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">From Date</label>
-            <input type="date" name="from_date" id="from_date" value="{{ $fromDate }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
+            <label for="from_date">From Date</label>
+            <input type="date" name="from_date" id="from_date" value="{{ $fromDate }}">
         </div>
 
         <!-- 2 To Date -->
         <div class="form-group" style="min-width: 150px;">
-            <label for="to_date" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">To Date</label>
-            <input type="date" name="to_date" id="to_date" value="{{ $toDate }}" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
+            <label for="to_date">To Date</label>
+            <input type="date" name="to_date" id="to_date" value="{{ $toDate }}">
         </div>
 
         <!-- 3 Inward Type -->
         <div class="form-group" style="min-width: 200px;">
-            <label for="inward" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 4px;">Inward Type</label>
-            <select name="inward" id="inward" style="border: 2px solid #3b82f6; background-color: #f0f9ff; font-weight: 600; padding: 6px 10px; border-radius: 6px; width: 100%;">
+            <label for="inward">Inward Type</label>
+            <select name="inward" id="inward">
                 <option value="all" {{ $inward == 'all' ? 'selected' : '' }}>All</option>
                 <option value="prod" {{ $inward == 'prod' || $inward == '1' || $inward == 'production' ? 'selected' : '' }}>Production</option>
                 <option value="purchase_lam" {{ $inward == 'purchase_lam' || $inward == '3' ? 'selected' : '' }}>Purchase - Laminate</option>
@@ -57,10 +55,10 @@
 
         <!-- Submit & Clear Buttons -->
         <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button type="submit" class="btn-action" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
+            <button type="submit" class="btn-action">
                 Filter
             </button>
-            <a href="{{ route('reports.daily_dispatch_transfer.index') }}" class="btn-action-secondary" style="padding: 0.55rem 1rem; font-size: 0.85rem; text-decoration: none;">
+            <a href="{{ route('reports.daily_dispatch_transfer.index') }}" class="btn-action-secondary" style="text-decoration: none;">
                 Clear
             </a>
         </div>

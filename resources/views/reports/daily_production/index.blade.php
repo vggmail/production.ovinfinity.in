@@ -18,19 +18,17 @@
 <!-- Navigation Tabs (Monthly vs Daily) -->
 <div class="report-tabs">
     <a href="{{ route('reports.monthly_production.index', array_filter(['inward' => $inward])) }}" 
-       class="tab-item" 
-       style="font-weight: 600; background: #f1f5f9; color: #475569; transition: all 0.2s;"
-       onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+       class="tab-item">
         <span>📅</span> Monthly
     </a>
     <a href="{{ route('reports.daily_production.index', array_filter(['inward' => $inward, 'from_date' => $fromDate, 'to_date' => $toDate])) }}" 
-       class="tab-item active" 
-       style="font-weight: 700; background: #3b82f6; color: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
+       class="tab-item active">
         <span>🗓️</span> Daily
     </a>
 </div>
 
 <div class="card report-filter-card">
+    <h3 class="filter-header-title">Filter Header Section</h3>
     <form method="GET" action="{{ route('reports.daily_production.index') }}" class="report-filter-form">
         <!-- 1 From Date -->
         <div class="form-group" style="flex: 1; min-width: 120px;">
@@ -60,7 +58,7 @@
             <button type="submit" class="btn-action">
                 Filter
             </button>
-            <a href="{{ route('reports.daily_production.index') }}" class="btn-action-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+            <a href="{{ route('reports.daily_production.index') }}" class="btn-action-secondary" style="text-decoration: none;">
                 Clear
             </a>
         </div>
