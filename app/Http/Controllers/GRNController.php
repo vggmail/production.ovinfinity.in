@@ -213,7 +213,7 @@ class GRNController extends Controller
                     }
                 }
 
-                $rate = ($existingChild && isset($existingChild->Rate)) ? (float)$existingChild->Rate : (float)($child->BasicRate ?? 0);
+                $rate = ($existingChild && isset($existingChild->Rate)) ? (float)$existingChild->Rate : (float)($child->NetRate ?: ($child->BasicRate ?? 0));
                 $gstRate = ($existingChild && isset($existingChild->GSTRate)) ? (float)$existingChild->GSTRate : (float)($child->GSTRate ?? 0);
 
                 $items[] = [

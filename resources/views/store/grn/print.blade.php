@@ -265,8 +265,8 @@
                 @endphp
                 @forelse($grn->children as $index => $row)
                     @php
-                        $rate = (float)($row->piChildRelation->BasicRate ?? 0);
-                        $amount = $row->Quantity * $rate;
+                        $rate = (float)($row->Rate ?? ($row->piChildRelation->NetRate ?: ($row->piChildRelation->BasicRate ?? 0)));
+                        $amount = (float)($row->Amount ?? ($row->Quantity * $rate));
                         $totalQty += $row->Quantity;
                         $totalAmount += $amount;
                     @endphp
