@@ -38,6 +38,7 @@ use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\MaterialIssueController;
 use App\Http\Controllers\DailyMaterialConsumptionReportController;
 use App\Http\Controllers\MonthlyMaterialConsumptionReportController;
+use App\Http\Controllers\PIVsGRNReportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -210,6 +211,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/daily-dispatch-transfer', [DailyDispatchTransferReportController::class, 'index'])->name('daily_dispatch_transfer.index');
         Route::get('/daily-material-consumption', [DailyMaterialConsumptionReportController::class, 'index'])->name('daily_material_consumption.index');
         Route::get('/monthly-material-consumption', [MonthlyMaterialConsumptionReportController::class, 'index'])->name('monthly_material_consumption.index');
+        Route::get('/pi-vs-grn', [PIVsGRNReportController::class, 'index'])->name('pi_vs_grn.index');
+        Route::get('/pi-vs-grn/filter-options', [PIVsGRNReportController::class, 'filterOptions'])->name('pi_vs_grn.filterOptions');
     });
     // Alias route for backward compatibility
     Route::get('/monthly-dispatch-transfer', [MonthlyDispatchTransferReportController::class, 'index'])->name('monthly_dispatch_transfer.index');

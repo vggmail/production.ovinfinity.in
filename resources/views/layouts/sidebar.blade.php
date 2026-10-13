@@ -159,6 +159,11 @@
                         <span>🧪</span> <span class="menu-text">Material Consumption</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.pi_vs_grn.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.pi_vs_grn.index') }}" title="PI Vs Goods Received">
+                        <span>📥</span> <span class="menu-text">PI Vs Goods Received</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
