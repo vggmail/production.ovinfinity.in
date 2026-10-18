@@ -164,6 +164,11 @@
                         <span>📥</span> <span class="menu-text">PI Vs Goods Received</span>
                     </a>
                 </li>
+                <li class="sidebar-subitem {{ request()->routeIs('reports.current_stock.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.current_stock.index') }}" title="Current Stock Report">
+                        <span>📦</span> <span class="menu-text">Current Stock Report</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
