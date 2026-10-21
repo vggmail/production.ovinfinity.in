@@ -100,7 +100,7 @@
                 <select id="select-mrl-entry" class="form-control select2-mrl-entry" multiple style="width: 100%;">
                     @foreach ($mrlEntries as $mrl)
                         <option value="{{ $mrl->ID }}" {{ in_array($mrl->ID, $selectedMrls) ? 'selected' : '' }}>
-                            MRL #{{ $mrl->ID }} (Date: {{ is_string($mrl->EntryDate) ? substr($mrl->EntryDate, 0, 10) : ($mrl->EntryDate ? $mrl->EntryDate->format('Y-m-d') : '') }} | Items: {{ $mrl->TotalItems }})
+                            MRL #{{ $mrl->ID }} (Date: {{ $mrl->EntryDate ? date('d/m/y', strtotime($mrl->EntryDate)) : '-' }} | Items: {{ $mrl->TotalItems }})
                         </option>
                     @endforeach
                 </select>

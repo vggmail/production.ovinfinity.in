@@ -124,8 +124,8 @@ class DailyDispatchTransferReportController extends Controller
             $transferNw = isset($transferDaily[$dateStr]) ? (float)$transferDaily[$dateStr]->total_transfer_nw : 0;
             $rowTotal = $dispatchNw + $transferNw;
 
-            // Format date e.g. "7/1/2026", "7/2/2026" matching mockup
-            $dateLabel = date('n/j/Y', strtotime($dateStr));
+            // Format date as DD/MM/YY
+            $dateLabel = date('d/m/y', strtotime($dateStr));
 
             $rows[] = [
                 'raw_date' => $dateStr,
@@ -146,9 +146,9 @@ class DailyDispatchTransferReportController extends Controller
             'grand_total' => $overallGrandTotal,
         ];
 
-        // Readable date title e.g. "01/07/2026 to 31/07/2026" or "July 2026"
+        // Readable date title e.g. "01/07/26 to 31/07/26" or "July 2026"
         if ($fromDate && $toDate && (date('Y-m', strtotime($fromDate)) !== date('Y-m', strtotime($toDate)) || $fromDate !== date('Y-m-01', strtotime($fromDate)) || $toDate !== date('Y-m-t', strtotime($toDate)))) {
-            $monthTitle = date('d/m/Y', strtotime($fromDate)) . ' to ' . date('d/m/Y', strtotime($toDate));
+            $monthTitle = date('d/m/y', strtotime($fromDate)) . ' to ' . date('d/m/y', strtotime($toDate));
         } else {
             $monthTitle = date('F Y', strtotime($fromDate ?: ($dispatchMonth . '-01')));
         }

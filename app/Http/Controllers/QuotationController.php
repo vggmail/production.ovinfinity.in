@@ -86,7 +86,7 @@ class QuotationController extends Controller
 
         $mrlItems = [];
         foreach ($mrlEntries as $mrl) {
-            $entryDateFormatted = is_string($mrl->EntryDate) ? substr($mrl->EntryDate, 0, 10) : $mrl->EntryDate->format('Y-m-d');
+            $entryDateFormatted = $mrl->EntryDate ? date('d/m/y', strtotime($mrl->EntryDate)) : '-';
             foreach ($mrl->children as $child) {
                 $itemMaster = $child->itemMasterRelation;
                 $mrlItems[] = [

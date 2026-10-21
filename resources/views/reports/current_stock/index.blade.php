@@ -4,7 +4,6 @@
 
 @section('styles')
 <style>
-    /* Filter Bar Section */
     .stock-filter-card {
         background: #ffffff;
         border: 1px solid #cbd5e1;
@@ -46,9 +45,36 @@
         outline: none;
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
     }
-    .select2-container {
-        width: 100% !important;
+    /* Select2 — multi-select (department) */
+    .select2-container { width: 100% !important; }
+    .select2-container .select2-selection--multiple {
+        min-height: 38px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        background-color: #ffffff !important;
+        padding: 2px 6px !important;
     }
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 2px rgba(79,70,229,0.15) !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #4f46e5 !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 4px !important;
+        font-size: 0.78rem !important;
+        padding: 2px 6px !important;
+        margin: 2px 3px 2px 0 !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #c7d2fe !important;
+        margin-right: 4px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #fff !important;
+    }
+    /* Select2 — single-select (item / status) */
     .select2-container .select2-selection--single {
         height: 38px !important;
         border: 1px solid #cbd5e1 !important;
@@ -71,13 +97,11 @@
     .select2-dropdown {
         border: 1px solid #cbd5e1 !important;
         border-radius: 6px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
         font-size: 0.875rem !important;
         z-index: 9999 !important;
     }
-    .select2-search--dropdown {
-        padding: 6px 8px !important;
-    }
+    .select2-search--dropdown { padding: 6px 8px !important; }
     .select2-search--dropdown .select2-search__field {
         border: 1px solid #cbd5e1 !important;
         border-radius: 4px !important;
@@ -87,16 +111,13 @@
         width: 100% !important;
         box-sizing: border-box !important;
     }
-    .select2-results__option {
-        padding: 6px 10px !important;
-        font-size: 0.85rem !important;
-    }
+    .select2-results__option { padding: 6px 10px !important; font-size: 0.85rem !important; }
     .select2-results__option--highlighted[aria-selected] {
         background-color: #2b547e !important;
         color: #ffffff !important;
     }
 
-    /* Report Table Styling */
+    /* Report Table */
     .current-stock-table-card {
         background: #ffffff;
         border: 2px solid #2b547e;
@@ -123,7 +144,6 @@
         vertical-align: middle;
         font-size: 0.875rem;
     }
-
     .current-stock-table td {
         padding: 8px 12px;
         border: 1px solid #cbd5e1;
@@ -131,12 +151,8 @@
         vertical-align: middle;
         background-color: #ffffff;
     }
-    .current-stock-table tbody tr:nth-child(even) td {
-        background-color: #f8fafc;
-    }
-    .current-stock-table tbody tr:hover td {
-        background-color: #f1f5f9;
-    }
+    .current-stock-table tbody tr:nth-child(even) td { background-color: #f8fafc; }
+    .current-stock-table tbody tr:hover td { background-color: #f1f5f9; }
 
     /* Badges */
     .stock-badge {
@@ -148,44 +164,16 @@
         text-align: center;
         letter-spacing: 0.3px;
     }
-    .badge-in-stock {
-        background-color: #dcfce7;
-        color: #15803d;
-        border: 1px solid #86efac;
-    }
-    .badge-low-stock {
-        background-color: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fcd34d;
-    }
-    .badge-out-of-stock {
-        background-color: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fca5a5;
-    }
+    .badge-in-stock  { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-low-stock { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-out-of-stock { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-    /* Print rules */
     @media print {
-        .top-bar, .sidebar, .report-header .btn-action, .report-header .btn-action-secondary, .stock-filter-card, .stock-kpi-container {
-            display: none !important;
-        }
-        .main-content {
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        .current-stock-table-card {
-            border: 1px solid #000 !important;
-            box-shadow: none !important;
-        }
-        .current-stock-table th {
-            color: #000 !important;
-            background: #e2e8f0 !important;
-            border: 1px solid #666 !important;
-        }
-        .current-stock-table td {
-            border: 1px solid #999 !important;
-            color: #000 !important;
-        }
+        .top-bar, .sidebar, .report-header .btn-action, .report-header .btn-action-secondary, .stock-filter-card, .stock-kpi-container { display: none !important; }
+        .main-content { margin: 0 !important; padding: 0 !important; }
+        .current-stock-table-card { border: 1px solid #000 !important; box-shadow: none !important; }
+        .current-stock-table th { color: #000 !important; background: #e2e8f0 !important; border: 1px solid #666 !important; }
+        .current-stock-table td { border: 1px solid #999 !important; color: #000 !important; }
     }
 </style>
 @endsection
@@ -202,60 +190,61 @@
     </div>
 </div>
 
-<!-- Filter Section matching mockup -->
+<!-- Filter Section -->
 <div class="stock-filter-card">
-    <form method="GET" action="{{ route('reports.current_stock.index') }}" class="stock-filter-row">
-        <!-- 1. Department Dropdown -->
-        <div class="filter-item" style="flex: 1.2; min-width: 180px;">
+    <form method="GET" action="{{ route('reports.current_stock.index') }}" class="stock-filter-row" id="stock-filter-form">
+
+        <!-- 1. Department Multi-Select -->
+        <div class="filter-item" style="flex: 1.4; min-width: 200px;">
             <label for="department_id">Department</label>
-            <select name="department_id" id="department_id">
-                <option value="all">-- All Departments --</option>
+            @php
+                $selectedDepts = is_array($departmentId)
+                    ? $departmentId
+                    : ((!empty($departmentId) && $departmentId !== 'all') ? [$departmentId] : []);
+            @endphp
+            <select name="department_id[]" id="department_id" multiple="multiple" style="width:100%;">
                 @foreach($departments as $dept)
-                    <option value="{{ $dept->ID }}" {{ $departmentId == $dept->ID ? 'selected' : '' }}>
+                    <option value="{{ $dept->ID }}" {{ in_array($dept->ID, $selectedDepts) ? 'selected' : '' }}>
                         {{ $dept->DepartmentName }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <!-- 2. Cascading Item Name / PART No / Catalogue No Dropdown -->
-        <div class="filter-item" style="flex: 2; min-width: 280px;">
+        <!-- 2. Item Name type-to-search -->
+        <div class="filter-item" style="flex: 1.8; min-width: 260px;">
             <label for="item_id">Item Name - PART No - Catalogue No</label>
-            <select name="item_id" id="item_id">
+            <select name="item_id" id="item_id" style="width:100%;">
                 <option value="all">-- All Items --</option>
             </select>
         </div>
 
-        <!-- Status Filter (Hidden on frontend UI) -->
-        <div class="filter-item" style="display: none;">
+        <!-- 3. Status Filter (visible) -->
+        <div class="filter-item" style="flex: 1; min-width: 150px;">
             <label for="status">Stock Status</label>
-            <select name="status" id="status">
-                <option value="all" {{ $statusFilter == 'all' ? 'selected' : '' }}>All Status</option>
-                <option value="in_stock" {{ $statusFilter == 'in_stock' ? 'selected' : '' }}>In Stock</option>
-                <option value="low_stock" {{ $statusFilter == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
+            <select name="status" id="status" style="width:100%;">
+                <option value="all"      {{ $statusFilter == 'all'       ? 'selected' : '' }}>All Status</option>
+                <option value="in_stock" {{ $statusFilter == 'in_stock'  ? 'selected' : '' }}>In Stock</option>
+                <option value="low_stock"{{ $statusFilter == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
             </select>
         </div>
 
         <!-- Actions -->
         <div style="display: flex; gap: 0.5rem; align-items: flex-end; padding-bottom: 1px;">
-            <button type="submit" class="btn-action" style="height: 38px;">
-                🔍 Filter
-            </button>
-            <a href="{{ route('reports.current_stock.index') }}" class="btn-action-secondary" style="height: 38px; text-decoration: none;">
-                Clear
-            </a>
+            <button type="submit" class="btn-action" style="height: 38px;">🔍 Filter</button>
+            <a href="{{ route('reports.current_stock.index') }}" class="btn-action-secondary" style="height: 38px; text-decoration: none;">Clear</a>
         </div>
     </form>
 </div>
 
-<!-- Main Data Table matching mockup columns -->
+<!-- Main Data Table -->
 <div class="current-stock-table-card">
     <div style="padding: 0.65rem 1rem; background: #ffffff; border-bottom: 2px solid #2b547e; display: flex; justify-content: space-between; align-items: center;">
         <span style="font-weight: 700; color: #1e293b; font-size: 1rem;">
             Showing {{ count($rows) }} items
         </span>
         <span style="font-size: 0.85rem; color: #64748b;">
-            📅 As of: <strong>{{ now()->format('d M Y, h:i A') }}</strong>
+            📅 As of: <strong>{{ now()->format('d/m/y') }}</strong>
         </span>
     </div>
 
@@ -275,9 +264,7 @@
             <tbody>
                 @forelse($rows as $index => $row)
                     <tr>
-                        <td style="text-align: center; color: #64748b; font-weight: 600;">
-                            {{ $index + 1 }}
-                        </td>
+                        <td style="text-align: center; color: #64748b; font-weight: 600;">{{ $index + 1 }}</td>
                         <td style="text-align: left; color: #0f172a;">
                             <span style="font-weight: 600;">{{ $row['item_name'] }}</span>
                             @if(!empty($row['part_no']))
@@ -302,18 +289,12 @@
                         <td style="text-align: right; font-weight: 600; color: #0f172a;">
                             ₹{{ number_format($row['current_stock_val'], 2) }}
                             @if($row['rate'] > 0)
-                                <div style="font-size: 0.725rem; color: #94a3b8; font-weight: normal;">
-                                    @ ₹{{ number_format($row['rate'], 2) }}
-                                </div>
+                                <div style="font-size: 0.725rem; color: #94a3b8; font-weight: normal;">@ ₹{{ number_format($row['rate'], 2) }}</div>
                             @endif
                         </td>
-                        <td style="text-align: center; font-weight: 600; color: #475569;">
-                            {{ $row['age'] }}
-                        </td>
+                        <td style="text-align: center; font-weight: 600; color: #475569;">{{ $row['age'] }}</td>
                         <td style="text-align: center;">
-                            <span class="stock-badge {{ $row['status_class'] }}">
-                                {{ $row['status_label'] }}
-                            </span>
+                            <span class="stock-badge {{ $row['status_class'] }}">{{ $row['status_label'] }}</span>
                         </td>
                     </tr>
                 @empty
@@ -329,18 +310,10 @@
             @if(count($rows) > 0)
                 <tfoot>
                     <tr style="background-color: #f1f5f9; font-weight: 700; color: #0f172a; border-top: 2px solid #2b547e;">
-                        <td colspan="2" style="padding: 10px 12px; text-align: right; font-size: 0.95rem; border: 1px solid #cbd5e1;">
-                            Grand Total:
-                        </td>
-                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; color: #475569;">
-                            {{ number_format($grandTotals['min_qty'], 2) }}
-                        </td>
-                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; font-size: 1rem; color: #0f172a;">
-                            {{ number_format($grandTotals['current_stock_qty'], 2) }}
-                        </td>
-                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; font-size: 1rem; color: #0f172a;">
-                            ₹{{ number_format($grandTotals['current_stock_val'], 2) }}
-                        </td>
+                        <td colspan="2" style="padding: 10px 12px; text-align: right; font-size: 0.95rem; border: 1px solid #cbd5e1;">Grand Total:</td>
+                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; color: #475569;">{{ number_format($grandTotals['min_qty'], 2) }}</td>
+                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; font-size: 1rem; color: #0f172a;">{{ number_format($grandTotals['current_stock_qty'], 2) }}</td>
+                        <td style="padding: 10px 12px; text-align: right; border: 1px solid #cbd5e1; font-size: 1rem; color: #0f172a;">₹{{ number_format($grandTotals['current_stock_val'], 2) }}</td>
                         <td colspan="2" style="border: 1px solid #cbd5e1; background-color: #f1f5f9;"></td>
                     </tr>
                 </tfoot>
@@ -353,73 +326,58 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.select2 === 'undefined') return;
+
     const allItems = @json($allItems);
-    const selectedDeptId = "{{ $departmentId }}";
-    const selectedItemId = "{{ $itemId }}";
 
-    const deptSelect = document.getElementById('department_id');
-    const itemSelect = document.getElementById('item_id');
+    @php
+        $selectedDeptsJs = is_array($departmentId)
+            ? $departmentId
+            : ((!empty($departmentId) && $departmentId !== 'all') ? [$departmentId] : []);
+    @endphp
+    const selectedDeptIds = @json($selectedDeptsJs);
+    const selectedItemId  = "{{ $itemId }}";
+    const itemSelect      = document.getElementById('item_id');
 
-    function populateItems(deptId, initialItemId) {
+    // ── Populate item dropdown filtered by selected dept IDs ──────────────
+    function populateItems(deptIds, initialItemId) {
         let filtered = allItems;
-        if (deptId && deptId !== 'all') {
-            filtered = allItems.filter(item => String(item.Department) === String(deptId));
+        if (deptIds && deptIds.length > 0) {
+            filtered = allItems.filter(item => deptIds.map(String).includes(String(item.Department)));
         }
 
-        let optionsHtml = '<option value="all">-- All Items (Type to search) --</option>';
+        let html = '<option value="all">-- All Items (Type to search) --</option>';
         let hasSelected = false;
-
         filtered.forEach(item => {
             let label = item.ItemName;
-            if (item.PartNo) label += ' - ' + item.PartNo;
+            if (item.PartNo)      label += ' - ' + item.PartNo;
             if (item.CatalogueNo) label += ' - ' + item.CatalogueNo;
-
             const isSel = String(item.ID) === String(initialItemId);
             if (isSel) hasSelected = true;
-
-            optionsHtml += `<option value="${item.ID}" ${isSel ? 'selected' : ''}>${label}</option>`;
+            html += `<option value="${item.ID}" ${isSel ? 'selected' : ''}>${label}</option>`;
         });
 
-        // Destroy previous select2 instance if active
-        if (typeof $.fn.select2 !== 'undefined' && $(itemSelect).hasClass('select2-hidden-accessible')) {
-            $(itemSelect).select2('destroy');
-        }
+        if ($(itemSelect).hasClass('select2-hidden-accessible')) $(itemSelect).select2('destroy');
+        itemSelect.innerHTML = html;
+        itemSelect.value = (hasSelected && initialItemId && initialItemId !== 'all') ? initialItemId : 'all';
 
-        itemSelect.innerHTML = optionsHtml;
-
-        if (hasSelected && initialItemId && initialItemId !== 'all') {
-            itemSelect.value = initialItemId;
-        } else {
-            itemSelect.value = 'all';
-        }
-
-        // Initialize Select2 with live search
-        if (typeof $.fn.select2 !== 'undefined') {
-            $(itemSelect).select2({
-                placeholder: '-- All Items (Type to search) --',
-                width: '100%'
-            });
-        }
+        $(itemSelect).select2({ placeholder: '-- All Items (Type to search) --', allowClear: true, width: '100%' });
     }
 
-    // Initialize Select2 on Department dropdown
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('#department_id').select2({
-            placeholder: '-- All Departments (Type to search) --',
-            width: '100%'
-        });
-
-        $('#department_id').on('change select2:select', function() {
-            populateItems($(this).val(), '');
-        });
-    } else {
-        deptSelect.addEventListener('change', function() {
-            populateItems(this.value, '');
-        });
+    // ── Department — multi-select ─────────────────────────────────────────
+    $('#department_id').select2({ placeholder: '-- All Departments --', allowClear: true, width: '100%' });
+    if (selectedDeptIds.length > 0) {
+        $('#department_id').val(selectedDeptIds.map(String)).trigger('change.select2');
     }
+    $('#department_id').on('change', function() {
+        populateItems($(this).val() || [], '');
+    });
 
-    // Populate and initialize Item Select2 on initial load
-    populateItems(selectedDeptId, selectedItemId);
+    // ── Status — single select, no search ────────────────────────────────
+    $('#status').select2({ placeholder: '-- All Status --', minimumResultsForSearch: Infinity, width: '100%' });
+
+    // ── Initial item load ────────────────────────────────────────────────
+    populateItems(selectedDeptIds, selectedItemId);
 });
 </script>
 @endsection

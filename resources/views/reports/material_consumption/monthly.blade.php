@@ -16,11 +16,11 @@
 
 <!-- Navigation Tabs (Monthly vs Daily) -->
 <div class="report-tabs">
-    <a href="{{ route('reports.monthly_material_consumption.index', array_filter(['from_month' => $fromMonth, 'to_month' => $toMonth, 'department_id' => $departmentId, 'loom_id' => $loomId, 'item_id' => $itemId])) }}" 
+    <a href="{{ route('reports.monthly_material_consumption.index', array_filter(['from_month' => $fromMonth, 'to_month' => $toMonth, 'loom_id' => $loomId, 'item_id' => $itemId])) }}"
        class="tab-item active">
         <span>📅</span> Monthly
     </a>
-    <a href="{{ route('reports.daily_material_consumption.index', array_filter(['department_id' => $departmentId, 'loom_id' => $loomId, 'item_id' => $itemId])) }}" 
+    <a href="{{ route('reports.daily_material_consumption.index', array_filter(['loom_id' => $loomId, 'item_id' => $itemId])) }}"
        class="tab-item">
         <span>🗓️</span> Daily
     </a>
@@ -30,7 +30,7 @@
 <div class="card report-filter-card">
     <h3 class="filter-header-title">Filter Header Section</h3>
     <form method="GET" action="{{ route('reports.monthly_material_consumption.index') }}" class="report-filter-form">
-        
+
         <!-- From Month Filter -->
         <div class="form-group" style="flex: 1; min-width: 120px;">
             <label for="from_month">From Month</label>
@@ -43,13 +43,15 @@
             <input type="month" name="to_month" id="to_month" value="{{ $toMonth }}">
         </div>
 
-        <!-- Department Filter -->
-        <div class="form-group" style="flex: 1.2; min-width: 140px;">
+        <!-- Department Filter — multi-select -->
+        <div class="form-group" style="flex: 1.4; min-width: 160px;">
             <label for="department_id">Department</label>
-            <select name="department_id" id="department_id">
-                <option value="all" {{ $departmentId == 'all' || empty($departmentId) ? 'selected' : '' }}>All Department Name</option>
+            @php
+                $selectedDepts = is_array($departmentId) ? $departmentId : ((!empty($departmentId) && $departmentId !== 'all') ? [$departmentId] : []);
+            @endphp
+            <select name="department_id[]" id="department_id" multiple="multiple" style="width:100%;">
                 @foreach($departments as $dept)
-                    <option value="{{ $dept->ID }}" {{ $departmentId == $dept->ID ? 'selected' : '' }}>
+                    <option value="{{ $dept->ID }}" {{ in_array($dept->ID, $selectedDepts) ? 'selected' : '' }}>
                         {{ $dept->DepartmentName }}
                     </option>
                 @endforeach
@@ -59,7 +61,7 @@
         <!-- Machine Name Filter -->
         <div class="form-group" style="flex: 1.2; min-width: 140px;">
             <label for="loom_id">Machine Name</label>
-            <select name="loom_id" id="loom_id">
+            <select name="loom_id" id="loom_id" style="width:100%;">
                 <option value="all" {{ $loomId == 'all' || empty($loomId) ? 'selected' : '' }}>All Machine Name</option>
                 @foreach($looms as $loom)
                     <option value="{{ $loom->ID }}" {{ $loomId == $loom->ID ? 'selected' : '' }}>
@@ -69,11 +71,11 @@
             </select>
         </div>
 
-        <!-- Item Name Filter -->
-        <div class="form-group" style="flex: 1.2; min-width: 140px;">
+        <!-- Item Name Filter — Select2 type-to-search -->
+        <div class="form-group" style="flex: 1.6; min-width: 180px;">
             <label for="item_id">Item Name</label>
-            <select name="item_id" id="item_id">
-                <option value="all" {{ $itemId == 'all' || empty($itemId) ? 'selected' : '' }}>All Item Name</option>
+            <select name="item_id" id="item_id" style="width:100%;">
+                <option value="all" {{ $itemId == 'all' || empty($itemId) ? 'selected' : '' }}>-- All Items --</option>
                 @foreach($items as $item)
                     <option value="{{ $item->ID }}" {{ $itemId == $item->ID ? 'selected' : '' }}>
                         {{ $item->ItemName }}
@@ -151,35 +153,74 @@
 
 <style>
     @media print {
-        @page {
-            size: auto;
-            margin: 8mm;
-        }
-        body {
-            background: #ffffff !important;
-            color: #000000 !important;
-        }
-        .sidebar, .top-bar, .content-header button, form, .btn-action-secondary, .report-tabs {
-            display: none !important;
-        }
-        .main-content {
-            margin-left: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-        }
-        .card {
-            box-shadow: none !important;
-            border: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            max-width: 100% !important;
-        }
-        table {
-            width: 100% !important;
-            border: 1px solid #000000 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
+        @page { size: auto; margin: 8mm; }
+        body { background: #ffffff !important; color: #000000 !important; }
+        .sidebar, .top-bar, .content-header button, form, .btn-action-secondary, .report-tabs { display: none !important; }
+        .main-content { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+        .card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+        table { width: 100% !important; border: 1px solid #000000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+    /* Select2 multi-select pills */
+    .select2-container .select2-selection--multiple {
+        min-height: 34px !important;
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
+        background: #fff !important;
+        padding: 2px 4px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #3b6598 !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 3px !important;
+        font-size: 0.78rem !important;
+        padding: 1px 6px !important;
+        margin: 2px 3px 2px 0 !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #c7d2fe !important;
+        margin-right: 4px !important;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #3b6598 !important;
+        box-shadow: 0 0 0 2px rgba(59,101,152,0.18) !important;
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.select2 === 'undefined') return;
+
+    @php
+        $selectedDeptsJs = is_array($departmentId) ? $departmentId : ((!empty($departmentId) && $departmentId !== 'all') ? [$departmentId] : []);
+    @endphp
+
+    // Department — multi-select with pills
+    $('#department_id').select2({
+        placeholder: '-- All Departments --',
+        allowClear: true,
+        width: '100%'
+    });
+    const preselectedDepts = @json($selectedDeptsJs);
+    if (preselectedDepts.length > 0) {
+        $('#department_id').val(preselectedDepts.map(String)).trigger('change.select2');
+    }
+
+    // Machine Name — searchable single select
+    $('#loom_id').select2({
+        placeholder: 'All Machine Name',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Item Name — type to search
+    $('#item_id').select2({
+        placeholder: '-- Type to search item --',
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
 @endsection

@@ -19,7 +19,7 @@
     <form method="GET" action="{{ route('reports.pi_vs_grn.index') }}" class="report-filter-form" style="display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: flex-end;">
         <!-- 1 From Date -->
         <div class="form-group" style="flex: 1; min-width: 130px;">
-            <label for="from_date" style="font-weight: 600; font-size: 0.25rem; margin-bottom: 4px; display: block;">From Date</label>
+            <label for="from_date" style="font-weight: 600; font-size: 0.825rem; margin-bottom: 4px; display: block;">From Date</label>
             <input type="date" name="from_date" id="from_date" value="{{ $fromDate }}" class="form-control" style="width: 100%; padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px;">
         </div>
 
@@ -55,11 +55,11 @@
             </select>
         </div>
 
-        <!-- 5 Item Name -->
-        <div class="form-group" style="flex: 1.2; min-width: 160px;">
+        <!-- 5 Item Name - Select2 searchable -->
+        <div class="form-group" style="flex: 1.5; min-width: 180px;">
             <label for="item_id" style="font-weight: 600; font-size: 0.825rem; margin-bottom: 4px; display: block;">Item Name</label>
-            <select name="item_id" id="item_id" class="form-control" style="width: 100%; padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px;">
-                <option value="">All Items</option>
+            <select name="item_id" id="item_id" class="form-control" style="width: 100%;">
+                <option value="">-- All Items --</option>
                 @foreach($items as $item)
                     <option value="{{ $item->ID }}" {{ $itemId == $item->ID ? 'selected' : '' }}>
                         {{ $item->ItemName }}
@@ -174,12 +174,37 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const supplierSelect = document.getElementById('supplier_id');
-    const piSelect = document.getElementById('pi_id');
-    const itemSelect = document.getElementById('item_id');
+    const piSelect      = document.getElementById('pi_id');
+    const itemSelect    = document.getElementById('item_id');
 
+    // ── Initialize Select2 on all filter dropdowns ──────────────────────────
+    if (typeof $.fn.select2 !== 'undefined') {
+        $('#supplier_id').select2({
+            placeholder: 'All Suppliers',
+            allowClear: true,
+            width: '100%'
+        });
+        $('#pi_id').select2({
+            placeholder: 'All PIs',
+            allowClear: true,
+            width: '100%'
+        });
+        $('#item_id').select2({
+            placeholder: '-- Type to search item --',
+            allowClear: true,
+            width: '100%'
+        });
+        $('#status').select2({
+            placeholder: 'All',
+            minimumResultsForSearch: Infinity,
+            width: '100%'
+        });
+    }
+
+    // ── AJAX: rebuild PI & Item options when Supplier / PI changes ──────────
     async function updateFilters(source) {
-        const supplierId = supplierSelect ? supplierSelect.value : '';
-        const piId = piSelect ? piSelect.value : '';
+        const supplierId = supplierSelect ? $(supplierSelect).val() : '';
+        const piId       = piSelect       ? $(piSelect).val()       : '';
 
         try {
             const url = `{{ route('reports.pi_vs_grn.filterOptions') }}?supplier_id=${encodeURIComponent(supplierId)}&pi_id=${encodeURIComponent(piId)}`;
@@ -187,8 +212,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
+                // Rebuild PI dropdown
                 if (source === 'supplier' && piSelect) {
-                    const currentPi = piSelect.value;
+                    const currentPi = $(piSelect).val();
+                    if (typeof $.fn.select2 !== 'undefined') $(piSelect).select2('destroy');
                     piSelect.innerHTML = '<option value="">All PIs</option>';
                     data.pis.forEach(pi => {
                         const opt = document.createElement('option');
@@ -197,11 +224,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (pi.ID == currentPi) opt.selected = true;
                         piSelect.appendChild(opt);
                     });
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(piSelect).select2({ placeholder: 'All PIs', allowClear: true, width: '100%' });
+                    }
                 }
 
+                // Rebuild Item dropdown
                 if (itemSelect) {
-                    const currentItem = itemSelect.value;
-                    itemSelect.innerHTML = '<option value="">All Items</option>';
+                    const currentItem = $(itemSelect).val();
+                    if (typeof $.fn.select2 !== 'undefined') $(itemSelect).select2('destroy');
+                    itemSelect.innerHTML = '<option value="">-- All Items --</option>';
                     data.items.forEach(item => {
                         const opt = document.createElement('option');
                         opt.value = item.ID;
@@ -209,6 +241,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (item.ID == currentItem) opt.selected = true;
                         itemSelect.appendChild(opt);
                     });
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(itemSelect).select2({ placeholder: '-- Type to search item --', allowClear: true, width: '100%' });
+                    }
                 }
             }
         } catch (err) {
@@ -216,11 +251,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (supplierSelect) {
-        supplierSelect.addEventListener('change', () => updateFilters('supplier'));
-    }
-    if (piSelect) {
-        piSelect.addEventListener('change', () => updateFilters('pi'));
+    // Use Select2 change event so it fires correctly
+    if (typeof $.fn.select2 !== 'undefined') {
+        $('#supplier_id').on('change', () => updateFilters('supplier'));
+        $('#pi_id').on('change',       () => updateFilters('pi'));
+    } else {
+        if (supplierSelect) supplierSelect.addEventListener('change', () => updateFilters('supplier'));
+        if (piSelect)       piSelect.addEventListener('change',       () => updateFilters('pi'));
     }
 });
 </script>

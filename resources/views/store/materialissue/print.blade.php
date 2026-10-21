@@ -104,7 +104,7 @@
         </div>
         <div class="info-item">
             <label>Issue Date</label>
-            <span>{{ $materialIssue->IssueDate ? date('d/m/Y', strtotime($materialIssue->IssueDate)) : '-' }}</span>
+            <span>{{ $materialIssue->IssueDate ? date('d/m/y', strtotime($materialIssue->IssueDate)) : '-' }}</span>
         </div>
         <div class="info-item">
             <label>Technician / Person</label>

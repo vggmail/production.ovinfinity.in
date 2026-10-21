@@ -251,12 +251,12 @@
             <div class="info-card">
                 <div class="info-card-title">Quotation Details</div>
                 <div class="info-row"><span class="info-label">Quotation No:</span><span class="info-value">{{ $quotation->QuotationNumber }}</span></div>
-                <div class="info-row"><span class="info-label">Date:</span><span class="info-value">{{ is_string($quotation->QuotationDate) ? date('d/m/Y', strtotime($quotation->QuotationDate)) : $quotation->QuotationDate->format('d/m/Y') }}</span></div>
+                <div class="info-row"><span class="info-label">Date:</span><span class="info-value">{{ is_string($quotation->QuotationDate) ? date('d/m/y', strtotime($quotation->QuotationDate)) : $quotation->QuotationDate->format('d/m/y') }}</span></div>
                 @if($quotation->FromDate && $quotation->ToDate)
                     <div class="info-row">
                         <span class="info-label">MRL Range:</span>
                         <span class="info-value">
-                            {{ date('d/m/Y', strtotime($quotation->FromDate)) }} to {{ date('d/m/Y', strtotime($quotation->ToDate)) }}
+                            {{ date('d/m/y', strtotime($quotation->FromDate)) }} to {{ date('d/m/y', strtotime($quotation->ToDate)) }}
                         </span>
                     </div>
                 @endif

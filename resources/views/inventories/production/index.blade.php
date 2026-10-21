@@ -330,13 +330,13 @@
         document.getElementById('btn-modal-close').addEventListener('click', closeResultModal);
 
         function formatDate(val) {
-            if (!val) return '';
+            if (!val || val === '-') return '-';
             const d = new Date(val);
             if (isNaN(d.getTime())) return val;
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
+            const year = String(d.getFullYear()).slice(-2);
+            return `${day}/${month}/${year}`;
         }
 
         function updateSelectionBadge() {

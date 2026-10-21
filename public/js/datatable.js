@@ -1,3 +1,13 @@
+window.formatDate = function(val) {
+    if (!val || val === '-') return '-';
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return val;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
+};
+
 class DynamicDataTable {
     constructor(elementId, config) {
         this.table = document.getElementById(elementId);

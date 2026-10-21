@@ -159,7 +159,7 @@ class ProductionController extends Controller
             $item->RollSizeName = $item->rollSizeRelation ? $item->rollSizeRelation->RollSize : ($item->RollSize ?? '-');
             $item->FabricColorName = $item->fabricColorRelation ? $item->fabricColorRelation->FabricColor : ($item->FabricColor ?? '-');
             $item->LoomNumberValue = $item->loomNumberRelation ? $item->loomNumberRelation->LoomNumber : ($item->LoomNumber ?? '-');
-            $item->EntryDateFormatted = $item->EntryDate ? date('d-m-Y', strtotime($item->EntryDate)) : '-';
+            $item->EntryDateFormatted = $item->EntryDate ? date('d/m/y', strtotime($item->EntryDate)) : '-';
 
             if (isset($dispatches[$item->ID])) {
                 $disp = $dispatches[$item->ID];

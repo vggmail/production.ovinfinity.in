@@ -64,12 +64,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         function formatDate(val) {
-            if (!val) return '-';
+            if (!val || val === '-') return '-';
             const d = new Date(val);
             if (isNaN(d.getTime())) return val;
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
+            const year = String(d.getFullYear()).slice(-2);
             return `${day}/${month}/${year}`;
         }
 
@@ -120,7 +120,7 @@
                     render: (val) => `<span style="font-weight: 600; color: #4338ca;">${val}</span>`
                 },
                 { name: 'TotalItemsCount', sortable: false },
-                { name: 'TotalQty', sortable: false, render: (val) => `<strong>${parseFloat(val || 0).toFixed(2)}</strong>` },
+                { name: 'TotalQty', sortable: false, render: (val) => `<strong>${Math.round(parseFloat(val || 0))}</strong>` },
             ],
             actions: (row) => {
                 const editUrl = "{{ route('store.grn.edit', ':id') }}".replace(':id', row.ID);

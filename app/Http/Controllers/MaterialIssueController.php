@@ -98,12 +98,21 @@ class MaterialIssueController extends Controller
             'items.*.Quantity.min' => 'Quantity must be at least 1.',
         ]);
 
-        // Check for duplicate item selection
-        $itemIds = array_column($validated['items'], 'ItemMaster');
-        if (count($itemIds) !== count(array_unique($itemIds))) {
-            return back()->withInput()->withErrors([
-                'items' => 'The same item cannot be selected multiple times across rows.'
-            ]);
+        // Check for duplicate item selection for the same Loom and Department
+        $seenCombinations = [];
+        foreach ($validated['items'] as $row) {
+            $loom = $row['LoomNumber'] ?? '';
+            $dept = $row['Department'] ?? '';
+            $itemId = $row['ItemMaster'];
+            $key = "{$loom}_{$dept}_{$itemId}";
+            if (isset($seenCombinations[$key])) {
+                $itemModel = ItemMaster::find($itemId);
+                $itemName = $itemModel ? $itemModel->ItemName : 'Selected item';
+                return back()->withInput()->withErrors([
+                    'items' => "The item '{$itemName}' cannot be selected multiple times for the same Loom and Department."
+                ]);
+            }
+            $seenCombinations[$key] = true;
         }
 
         // Validate against available GRN stock map
@@ -195,12 +204,21 @@ class MaterialIssueController extends Controller
             'items.*.Quantity' => 'required|integer|min:1',
         ]);
 
-        // Check for duplicate item selection
-        $itemIds = array_column($validated['items'], 'ItemMaster');
-        if (count($itemIds) !== count(array_unique($itemIds))) {
-            return back()->withInput()->withErrors([
-                'items' => 'The same item cannot be selected multiple times across rows.'
-            ]);
+        // Check for duplicate item selection for the same Loom and Department
+        $seenCombinations = [];
+        foreach ($validated['items'] as $row) {
+            $loom = $row['LoomNumber'] ?? '';
+            $dept = $row['Department'] ?? '';
+            $itemId = $row['ItemMaster'];
+            $key = "{$loom}_{$dept}_{$itemId}";
+            if (isset($seenCombinations[$key])) {
+                $itemModel = ItemMaster::find($itemId);
+                $itemName = $itemModel ? $itemModel->ItemName : 'Selected item';
+                return back()->withInput()->withErrors([
+                    'items' => "The item '{$itemName}' cannot be selected multiple times for the same Loom and Department."
+                ]);
+            }
+            $seenCombinations[$key] = true;
         }
 
         // Validate against available GRN stock map (excluding current issue record)

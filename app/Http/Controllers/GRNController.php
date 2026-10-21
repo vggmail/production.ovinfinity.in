@@ -84,8 +84,10 @@ class GRNController extends Controller
         $grn->GRNNumber = 'GRN-' . $year . '-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
 
         $suppliers = Supplier::where('IsActive', 1)->orderBy('SupplierName', 'asc')->get();
+        $selectedPiIds = [];
+        $pis = collect();
 
-        return view('store.grn.form', compact('grn', 'suppliers'));
+        return view('store.grn.form', compact('grn', 'suppliers', 'selectedPiIds', 'pis'));
     }
 
     public function fetchPIs(Request $request)
@@ -196,21 +198,26 @@ class GRNController extends Controller
                     })
                     ->sum('Quantity');
 
-                $orderedQty = (float)$child->Quantity;
+                $orderedQty = (int)$child->Quantity;
+                $alreadyReceived = (int)$alreadyReceived;
                 $pendingQty = max(0, $orderedQty - $alreadyReceived);
 
-                // Default Qty Received in form
+                // Default Qty Received in form (whole number, no decimals)
                 $initialQtyReceived = $pendingQty;
                 $existingChild = null;
 
-                // If editing existing GRN, check if this line item has existing Qty in current GRN
+                // If editing existing GRN, only show what has been saved!
                 if ($currentGrnId) {
                     $existingChild = GRNChild::where('GRN', $currentGrnId)
                         ->where('PIChild', $child->ID)
                         ->first();
-                    if ($existingChild) {
-                        $initialQtyReceived = (float)$existingChild->Quantity;
+                    
+                    if (!$existingChild) {
+                        // Skip items that were deleted or not saved in this GRN
+                        continue;
                     }
+
+                    $initialQtyReceived = (int)$existingChild->Quantity;
                 }
 
                 $rate = ($existingChild && isset($existingChild->Rate)) ? (float)$existingChild->Rate : (float)($child->NetRate ?: ($child->BasicRate ?? 0));
@@ -255,7 +262,7 @@ class GRNController extends Controller
             'items.*.PI' => 'required|exists:inpi,ID',
             'items.*.PIChild' => 'required|exists:inpichild,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
-            'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Quantity' => 'required|integer|min:1',
             'items.*.Rate' => 'nullable|numeric',
             'items.*.GSTRate' => 'nullable|numeric',
         ], [
@@ -281,7 +288,7 @@ class GRNController extends Controller
             $totalGSTAmount = 0;
 
             foreach ($request->input('items', []) as $row) {
-                $qty = (float)($row['Quantity'] ?? 0);
+                $qty = (int)($row['Quantity'] ?? 0);
                 if ($qty <= 0) continue;
                 $rate = (float)($row['Rate'] ?? 0);
                 $gstRate = (float)($row['GSTRate'] ?? 0);
@@ -349,7 +356,12 @@ class GRNController extends Controller
         // Selected PIs array
         $selectedPiIds = !empty($grn->PINumbers) ? json_decode($grn->PINumbers, true) : [];
 
-        return view('store.grn.form', compact('grn', 'suppliers', 'selectedPiIds'));
+        // Preload PIs for this supplier so the select options are available immediately
+        $pis = $grn->Supplier 
+            ? PI::where('Supplier', $grn->Supplier)->where('IsActive', 1)->orderBy('ID', 'desc')->get() 
+            : collect();
+
+        return view('store.grn.form', compact('grn', 'suppliers', 'selectedPiIds', 'pis'));
     }
 
     public function update(Request $request, $id)
@@ -368,7 +380,7 @@ class GRNController extends Controller
             'items.*.PI' => 'required|exists:inpi,ID',
             'items.*.PIChild' => 'required|exists:inpichild,ID',
             'items.*.ItemMaster' => 'required|exists:umitemmaster,ID',
-            'items.*.Quantity' => 'required|numeric|min:0.01',
+            'items.*.Quantity' => 'required|integer|min:1',
             'items.*.Rate' => 'nullable|numeric',
             'items.*.GSTRate' => 'nullable|numeric',
         ], [
@@ -384,7 +396,7 @@ class GRNController extends Controller
             $totalGSTAmount = 0;
 
             foreach ($request->input('items', []) as $row) {
-                $qty = (float)($row['Quantity'] ?? 0);
+                $qty = (int)($row['Quantity'] ?? 0);
                 if ($qty <= 0) continue;
                 $rate = (float)($row['Rate'] ?? 0);
                 $gstRate = (float)($row['GSTRate'] ?? 0);

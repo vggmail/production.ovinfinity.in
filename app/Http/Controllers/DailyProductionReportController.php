@@ -85,8 +85,8 @@ class DailyProductionReportController extends Controller
             $actualMeter = (float)$item->total_actual_meter;
             $netWeight = (float)$item->total_net_weight;
 
-            // Format date as n/j/Y matching user Excel layout e.g. "7/1/2026"
-            $dateLabel = date('n/j/Y', strtotime($item->entry_date));
+            // Format date as DD/MM/YY
+            $dateLabel = date('d/m/y', strtotime($item->entry_date));
 
             $rows[] = [
                 'raw_date' => $item->entry_date,
@@ -104,9 +104,9 @@ class DailyProductionReportController extends Controller
             'net_weight' => $grandTotalNetWeight,
         ];
 
-        // Readable date title e.g. "01/07/2026 to 31/07/2026" or "July 2026"
+        // Readable date title e.g. "01/07/26 to 31/07/26" or "July 2026"
         if ($fromDate && $toDate && (date('Y-m', strtotime($fromDate)) !== date('Y-m', strtotime($toDate)) || $fromDate !== date('Y-m-01', strtotime($fromDate)) || $toDate !== date('Y-m-t', strtotime($toDate)))) {
-            $dateTitle = date('d/m/Y', strtotime($fromDate)) . ' to ' . date('d/m/Y', strtotime($toDate));
+            $dateTitle = date('d/m/y', strtotime($fromDate)) . ' to ' . date('d/m/y', strtotime($toDate));
         } else {
             $dateTitle = date('F Y', strtotime($fromDate ?: ($prodMonth . '-01')));
         }

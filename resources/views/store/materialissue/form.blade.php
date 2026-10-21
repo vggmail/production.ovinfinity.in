@@ -153,26 +153,56 @@
         }
 
         function updateDisabledOptions() {
-            const selects = Array.from(container.querySelectorAll('.item-select'));
-            const selectedValues = selects
-                .map(s => s.value || $(s).val())
-                .filter(val => val !== '' && val !== null && val !== undefined);
+            const rows = Array.from(container.querySelectorAll('.item-row'));
 
-            selects.forEach(select => {
-                const currentValue = select.value || $(select).val();
-                const options = select.querySelectorAll('option');
+            // Map all rows with their loom, department, and item selections
+            const rowDataList = rows.map(r => {
+                const loomEl = r.querySelector('.loom-select');
+                const deptEl = r.querySelector('.dept-select');
+                const itemEl = r.querySelector('.item-select');
 
+                const loom = loomEl ? String($(loomEl).val() || '').trim() : '';
+                const dept = deptEl ? String($(deptEl).val() || '').trim() : '';
+                const item = itemEl ? String($(itemEl).val() || '').trim() : '';
+
+                return {
+                    row: r,
+                    itemEl,
+                    loom,
+                    dept,
+                    item
+                };
+            });
+
+            // For each row, disable options that are already selected in another row
+            // where Loom No and Department are the same
+            rowDataList.forEach(current => {
+                if (!current.itemEl) return;
+
+                const disabledItemIds = new Set();
+                rowDataList.forEach(other => {
+                    if (other.row === current.row) return;
+                    if (!other.item) return;
+
+                    // If loom no and department is the same
+                    if (other.loom === current.loom && other.dept === current.dept) {
+                        disabledItemIds.add(String(other.item));
+                    }
+                });
+
+                const options = current.itemEl.querySelectorAll('option');
                 options.forEach(option => {
                     if (!option.value) return; // Do not disable placeholder
-                    if (selectedValues.includes(option.value) && String(option.value) !== String(currentValue)) {
+                    // Disable if selected in another row with the same Loom No and Department
+                    if (disabledItemIds.has(String(option.value)) && String(option.value) !== String(current.item)) {
                         option.disabled = true;
                     } else {
                         option.disabled = false;
                     }
                 });
 
-                if (typeof $.fn.select2 !== 'undefined' && $(select).hasClass("select2-hidden-accessible")) {
-                    $(select).select2({
+                if (typeof $.fn.select2 !== 'undefined' && $(current.itemEl).hasClass("select2-hidden-accessible")) {
+                    $(current.itemEl).select2({
                         placeholder: '-- Select Item (Search by Name, Part No, or Cat No) --',
                         width: '100%',
                         allowClear: true
@@ -349,6 +379,37 @@
             qtyInput.addEventListener('input', validateQuantityInput);
             qtyInput.addEventListener('change', validateQuantityInput);
 
+            function onLoomChange() {
+                const curLoom = String($(loomSelect).val() || '').trim();
+                const curDept = String($(deptSelect).val() || '').trim();
+                const curItem = String($(itemSelect).val() || '').trim();
+
+                if (curItem) {
+                    let conflict = false;
+                    container.querySelectorAll('.item-row').forEach(otherRow => {
+                        if (otherRow === tr) return;
+                        const otherLoom = String($(otherRow.querySelector('.loom-select')).val() || '').trim();
+                        const otherDept = String($(otherRow.querySelector('.dept-select')).val() || '').trim();
+                        const otherItem = String($(otherRow.querySelector('.item-select')).val() || '').trim();
+
+                        if (otherItem === curItem && otherLoom === curLoom && otherDept === curDept) {
+                            conflict = true;
+                        }
+                    });
+
+                    if (conflict) {
+                        alert('This item is already selected for the same Loom and Department in another row.');
+                        if (typeof $.fn.select2 !== 'undefined' && $(itemSelect).hasClass("select2-hidden-accessible")) {
+                            $(itemSelect).val('').trigger('change.select2');
+                        } else {
+                            itemSelect.value = '';
+                        }
+                        updateStockLimit('');
+                    }
+                }
+                updateDisabledOptions();
+            }
+
             // Initialize Select2 on selects
             if (typeof $.fn.select2 !== 'undefined') {
                 $(loomSelect).select2({ placeholder: '-- Select Machine --', width: '100%', allowClear: true });
@@ -360,6 +421,11 @@
                 if (selectedItem) {
                     updateStockLimit(selectedItem);
                 }
+
+                // Handle loom change
+                $(loomSelect).on('change select2:select select2:clear', function() {
+                    onLoomChange();
+                });
 
                 // Re-filter items when department changes
                 $(deptSelect).on('change select2:select select2:clear', function() {
@@ -379,6 +445,10 @@
                 if (selectedItem) {
                     updateStockLimit(selectedItem);
                 }
+
+                loomSelect.addEventListener('change', function() {
+                    onLoomChange();
+                });
 
                 deptSelect.addEventListener('change', function() {
                     populateItems(this.value, '');
@@ -425,12 +495,42 @@
         }
         updateDisabledOptions();
 
-        // Form submission overall stock validation across all rows
+        // Form submission duplicate and stock validation across all rows
         const form = document.getElementById('material-issue-form');
         if (form) {
             form.addEventListener('submit', function(e) {
-                const itemTotals = {};
                 const rows = container.querySelectorAll('.item-row');
+
+                // 1. Check for duplicate item selection for the same Loom and Department
+                const seenCombinations = new Set();
+                let hasDuplicate = false;
+                let duplicateItemName = '';
+
+                rows.forEach(r => {
+                    const lVal = String($(r.querySelector('.loom-select')).val() || '').trim();
+                    const dVal = String($(r.querySelector('.dept-select')).val() || '').trim();
+                    const itemEl = r.querySelector('.item-select');
+                    const iVal = String($(itemEl).val() || '').trim();
+
+                    if (iVal) {
+                        const key = `${lVal}_${dVal}_${iVal}`;
+                        if (seenCombinations.has(key)) {
+                            hasDuplicate = true;
+                            const itemObj = items.find(i => String(i.ID) === String(iVal));
+                            duplicateItemName = itemObj ? itemObj.ItemName : 'Selected item';
+                        }
+                        seenCombinations.add(key);
+                    }
+                });
+
+                if (hasDuplicate) {
+                    alert(`The item "${duplicateItemName}" cannot be selected multiple times for the same Loom and Department.`);
+                    e.preventDefault();
+                    return false;
+                }
+
+                // 2. Validate total requested quantity across all rows against available GRN stock
+                const itemTotals = {};
                 
                 rows.forEach(r => {
                     const sel = r.querySelector('.item-select');

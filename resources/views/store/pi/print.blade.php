@@ -254,7 +254,7 @@
                 <div class="info-card-title">Document Reference</div>
                 <div class="info-row"><span class="info-label">Invoice Entry No:</span><span class="info-value">{{ $pi->InvoiceEntryNo }}</span></div>
                 <div class="info-row"><span class="info-label">PI Number:</span><span class="info-value">{{ $pi->PINumber }}</span></div>
-                <div class="info-row"><span class="info-label">Date:</span><span class="info-value">{{ is_string($pi->PIDate) ? date('d/m/Y', strtotime($pi->PIDate)) : $pi->PIDate->format('d/m/Y') }}</span></div>
+                <div class="info-row"><span class="info-label">Date:</span><span class="info-value">{{ is_string($pi->PIDate) ? date('d/m/y', strtotime($pi->PIDate)) : $pi->PIDate->format('d/m/y') }}</span></div>
             </div>
         </div>
 

@@ -53,9 +53,9 @@ class DispatchController extends Controller
         $data->getCollection()->transform(function ($item) {
             $item->PartyNameValue = $item->partyRelation ? $item->partyRelation->PartyName : ($item->PartyName ?? '-');
             $item->DispatchType = $item->DispatchType ?? 'Dispatch';
-            $item->EntryDateFormatted = $item->EntryDate ? date('n/j/Y g:i:s A', strtotime($item->EntryDate)) : '-';
-            $item->CreatedOnFormatted = $item->CreatedOn ? date('d-m-Y', strtotime($item->CreatedOn)) : '-';
-            $item->UpdatedOnFormatted = $item->UpdatedOn ? date('d-m-Y', strtotime($item->UpdatedOn)) : '-';
+            $item->EntryDateFormatted = $item->EntryDate ? date('d/m/y', strtotime($item->EntryDate)) : '-';
+            $item->CreatedOnFormatted = $item->CreatedOn ? date('d/m/y', strtotime($item->CreatedOn)) : '-';
+            $item->UpdatedOnFormatted = $item->UpdatedOn ? date('d/m/y', strtotime($item->UpdatedOn)) : '-';
             return $item;
         });
 

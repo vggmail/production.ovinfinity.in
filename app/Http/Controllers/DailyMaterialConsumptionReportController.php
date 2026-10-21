@@ -112,8 +112,8 @@ class DailyMaterialConsumptionReportController extends Controller
         $grandTotalValue = 0;
 
         foreach ($dailyAggregated as $dateStr => $data) {
-            // Format date matching mockup e.g. "9/1/2026" or "01/09/2026"
-            $dateLabel = date('n/j/Y', strtotime($dateStr));
+            // Format date as DD/MM/YY
+            $dateLabel = date('d/m/y', strtotime($dateStr));
 
             $rows[] = [
                 'raw_date' => $dateStr,
@@ -132,7 +132,7 @@ class DailyMaterialConsumptionReportController extends Controller
         ];
 
         // Format date title range
-        $dateTitle = date('d/m/Y', strtotime($fromDate)) . ' to ' . date('d/m/Y', strtotime($toDate));
+        $dateTitle = date('d/m/y', strtotime($fromDate)) . ' to ' . date('d/m/y', strtotime($toDate));
 
         return view('reports.material_consumption.daily', compact(
             'rows',

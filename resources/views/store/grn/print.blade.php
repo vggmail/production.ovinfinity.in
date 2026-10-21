@@ -241,7 +241,7 @@
             <div class="info-card">
                 <div class="info-card-title">GRN Reference</div>
                 <div class="info-row"><span class="info-label">GRN No:</span><span class="info-value">{{ $grn->GRNNumber }}</span></div>
-                <div class="info-row"><span class="info-label">Invoice Date:</span><span class="info-value">{{ is_string($grn->GRNDate) ? date('d/m/Y', strtotime($grn->GRNDate)) : $grn->GRNDate->format('d/m/Y') }}</span></div>
+                <div class="info-row"><span class="info-label">Invoice Date:</span><span class="info-value">{{ is_string($grn->GRNDate) ? date('d/m/y', strtotime($grn->GRNDate)) : $grn->GRNDate->format('d/m/y') }}</span></div>
                 <div class="info-row"><span class="info-label">PI Reference(s):</span><span class="info-value" style="color:#2563eb;">{{ $piNumbersString ?: 'N/A' }}</span></div>
             </div>
         </div>
@@ -276,7 +276,7 @@
                             {{ $row->itemMasterRelation->ItemName ?? 'Unknown Item' }}
                         </td>
                         <td style="text-align: right; font-weight: 700; color: #059669;">
-                            {{ number_format($row->Quantity, 2) }}
+                            {{ number_format($row->Quantity, 0) }}
                         </td>
                         <td style="text-align: right; color: #475569;">
                             ₹ {{ number_format($rate, 2) }}
@@ -298,7 +298,7 @@
                 <tfoot>
                     <tr style="background-color: #f1f5f9; font-weight: 700;">
                         <td colspan="2" style="text-align: right; color: #1e293b;">Total:</td>
-                        <td style="text-align: right; color: #059669;">{{ number_format($totalQty, 2) }}</td>
+                        <td style="text-align: right; color: #059669;">{{ number_format($totalQty, 0) }}</td>
                         <td></td>
                         <td style="text-align: right; color: #1e3a8a;">₹ {{ number_format($totalAmount, 2) }}</td>
                         <td></td>

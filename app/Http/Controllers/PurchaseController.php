@@ -65,7 +65,7 @@ class PurchaseController extends Controller
             $item->RollSizeName = $item->rollSizeRelation ? $item->rollSizeRelation->RollSize : ($item->RollSize ?? '-');
             $item->FabricColorName = $item->fabricColorRelation ? $item->fabricColorRelation->FabricColor : ($item->FabricColor ?? '-');
             $item->LaminationName = ($item->Lamination == 1) ? 'Laminate' : (($item->Lamination === 0) ? 'Unlaminate' : '-');
-            $item->EntryDateFormatted = $item->EntryDate ? date('d-m-Y', strtotime($item->EntryDate)) : '-';
+            $item->EntryDateFormatted = $item->EntryDate ? date('d/m/y', strtotime($item->EntryDate)) : '-';
             return $item;
         });
 

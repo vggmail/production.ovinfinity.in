@@ -88,7 +88,13 @@
                     PI No. <span style="color: #ef4444;">*</span>
                 </label>
                 <select id="PINumbers" name="PINumbers[]" class="form-control @error('PINumbers') is-invalid @enderror" multiple="multiple" required style="font-size: 0.85rem; width: 100%;">
-                    <!-- Dynamic options loaded via AJAX -->
+                    @if(isset($pis) && $pis->count() > 0)
+                        @foreach($pis as $pi)
+                            <option value="{{ $pi->ID }}" {{ in_array($pi->ID, old('PINumbers', $selectedPiIds ?? [])) ? 'selected' : '' }}>
+                                {{ $pi->PINumber }}
+                            </option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -123,11 +129,107 @@
                     </tr>
                 </thead>
                 <tbody id="itemsTableBody">
-                    <tr id="emptyRow">
-                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
-                            Select a Supplier and PI No. to load items.
-                        </td>
-                    </tr>
+                    @php
+                        $oldItems = old('items');
+                    @endphp
+
+                    @if (!empty($oldItems))
+                        @foreach ($oldItems as $index => $item)
+                            @php
+                                $qty = (int)($item['Quantity'] ?? 0);
+                                $rate = (float)($item['Rate'] ?? 0);
+                                $gstRate = (float)($item['GSTRate'] ?? 0);
+                                $amount = $qty * $rate;
+                                $gstAmount = $amount * ($gstRate / 100);
+                                $itemName = $item['ItemName'] ?? ('Item #' . ($item['ItemMaster'] ?? ''));
+                                $rackNo = $item['RackNo'] ?? 'N/A';
+                            @endphp
+                            <tr class="item-row" style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][PI]" value="{{ $item['PI'] ?? '' }}">
+                                    <input type="hidden" name="items[{{ $index }}][PIChild]" value="{{ $item['PIChild'] ?? '' }}">
+                                    <input type="hidden" name="items[{{ $index }}][ItemMaster]" value="{{ $item['ItemMaster'] ?? '' }}">
+                                    <input type="hidden" name="items[{{ $index }}][ItemName]" value="{{ $itemName }}">
+                                    <input type="hidden" name="items[{{ $index }}][RackNo]" value="{{ $rackNo }}">
+                                    <input type="text" class="form-control" value="{{ $itemName }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="number" step="1" min="1" name="items[{{ $index }}][Quantity]" class="form-control qty-input" value="{{ $qty }}" required style="font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][Rate]" value="{{ number_format($rate, 2, '.', '') }}">
+                                    <input type="text" class="form-control rate-input" value="{{ number_format($rate, 2, '.', '') }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control amount-input" value="{{ number_format($amount, 2, '.', '') }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][GSTRate]" value="{{ number_format($gstRate, 2, '.', '') }}">
+                                    <input type="text" class="form-control gst-rate-input" value="{{ number_format($gstRate, 2, '.', '') }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control gst-amount-input" value="{{ number_format($gstAmount, 2, '.', '') }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #d97706; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control" value="{{ $rackNo }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem; text-align: center; vertical-align: middle;">
+                                    <button type="button" class="btn-delete-row" style="background:none; border:none; color:#ef4444; font-size:0.95rem; cursor:pointer;" title="Remove row">🗑️</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @elseif ($grn->exists && $grn->children->count() > 0)
+                        @foreach ($grn->children as $index => $child)
+                            @php
+                                $itemMaster = $child->itemMasterRelation;
+                                $rateVal = number_format($child->Rate ?? 0, 2, '.', '');
+                                $gstRateVal = number_format($child->GSTRate ?? 0, 2, '.', '');
+                                $amtVal = number_format($child->Amount ?? 0, 2, '.', '');
+                                $gstAmtVal = number_format($child->GSTAmount ?? 0, 2, '.', '');
+                                $itemName = $itemMaster->ItemName ?? 'Unknown Item';
+                                $rackNo = $itemMaster->RackNo ?? 'N/A';
+                            @endphp
+                            <tr class="item-row" style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][PI]" value="{{ $child->PI }}">
+                                    <input type="hidden" name="items[{{ $index }}][PIChild]" value="{{ $child->PIChild }}">
+                                    <input type="hidden" name="items[{{ $index }}][ItemMaster]" value="{{ $child->ItemMaster }}">
+                                    <input type="hidden" name="items[{{ $index }}][ItemName]" value="{{ $itemName }}">
+                                    <input type="hidden" name="items[{{ $index }}][RackNo]" value="{{ $rackNo }}">
+                                    <input type="text" class="form-control" value="{{ $itemName }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="number" step="1" min="1" name="items[{{ $index }}][Quantity]" class="form-control qty-input" value="{{ (int)$child->Quantity }}" required style="font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][Rate]" value="{{ $rateVal }}">
+                                    <input type="text" class="form-control rate-input" value="{{ $rateVal }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control amount-input" value="{{ $amtVal }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="hidden" name="items[{{ $index }}][GSTRate]" value="{{ $gstRateVal }}">
+                                    <input type="text" class="form-control gst-rate-input" value="{{ $gstRateVal }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control gst-amount-input" value="{{ $gstAmtVal }}" readonly style="background-color: #f8fafc; font-weight: 600; color: #d97706; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem;">
+                                    <input type="text" class="form-control" value="{{ $rackNo }}" readonly style="background-color: #f8fafc; color: #64748b; font-size: 0.85rem;">
+                                </td>
+                                <td style="padding: 0.4rem; text-align: center; vertical-align: middle;">
+                                    <button type="button" class="btn-delete-row" style="background:none; border:none; color:#ef4444; font-size:0.95rem; cursor:pointer;" title="Remove row">🗑️</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr id="emptyRow">
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
+                                Select a Supplier and PI No. to load items.
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -176,7 +278,7 @@
 <script>
     $(document).ready(function () {
         const currentGrnId = $('#current_grn_id').val();
-        const preselectedPiIds = @json($selectedPiIds ?? []);
+        let isInitialLoad = Boolean(currentGrnId);
 
         // Initialize Select2 matching PI form
         $('#Supplier').select2({
@@ -193,6 +295,10 @@
 
         // Supplier Change -> Fetch Pending PIs
         $('#Supplier').on('change', function () {
+            if (isInitialLoad) {
+                return;
+            }
+
             const supplierId = $(this).val();
             const piSelect = $('#PINumbers');
             piSelect.empty();
@@ -223,13 +329,7 @@
                             const option = new Option(pi.pi_number, pi.id, false, false);
                             piSelect.append(option);
                         });
-
-                        // If editing, set preselected PIs
-                        if (preselectedPiIds && preselectedPiIds.length > 0) {
-                            piSelect.val(preselectedPiIds).trigger('change');
-                        } else {
-                            piSelect.trigger('change.select2');
-                        }
+                        piSelect.trigger('change.select2');
                     }
                 },
                 error: function (err) {
@@ -240,6 +340,10 @@
 
         // PI Numbers Change -> Fetch Items
         $('#PINumbers').on('change', function () {
+            if (isInitialLoad) {
+                return;
+            }
+
             const selectedPiIds = $(this).val();
             const tableBody = $('#itemsTableBody');
 
@@ -269,7 +373,7 @@
                             tableBody.html(`
                                 <tr id="emptyRow">
                                     <td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.85rem;">
-                                        No pending items found for the selected PI(s).
+                                        No items found for the selected PI(s).
                                     </td>
                                 </tr>
                             `);
@@ -278,6 +382,7 @@
                         }
 
                         res.data.forEach(function (item, index) {
+                            const qtyVal = Math.round(parseFloat(item.qty_received || 0));
                             const rateVal = parseFloat(item.rate || 0).toFixed(2);
                             const gstRateVal = parseFloat(item.gst_rate || 0).toFixed(2);
 
@@ -287,10 +392,12 @@
                                         <input type="hidden" name="items[${index}][PI]" value="${item.pi_id}">
                                         <input type="hidden" name="items[${index}][PIChild]" value="${item.pi_child_id}">
                                         <input type="hidden" name="items[${index}][ItemMaster]" value="${item.item_id}">
+                                        <input type="hidden" name="items[${index}][ItemName]" value="${escapeHtml(item.item_name)}">
+                                        <input type="hidden" name="items[${index}][RackNo]" value="${escapeHtml(item.rack_no || 'N/A')}">
                                         <input type="text" class="form-control" value="${escapeHtml(item.item_name)}" readonly style="background-color: #f8fafc; font-weight: 600; color: #1e293b; font-size: 0.85rem;">
                                     </td>
                                     <td style="padding: 0.4rem;">
-                                        <input type="number" step="0.01" min="0" name="items[${index}][Quantity]" class="form-control qty-input" value="${item.qty_received}" required style="font-size: 0.85rem;">
+                                        <input type="number" step="1" min="1" name="items[${index}][Quantity]" class="form-control qty-input" value="${qtyVal}" required style="font-size: 0.85rem;">
                                     </td>
                                     <td style="padding: 0.4rem;">
                                         <input type="hidden" name="items[${index}][Rate]" value="${rateVal}">
@@ -326,14 +433,30 @@
             });
         });
 
+        // Restrict quantity to integers only (no decimal points)
+        $(document).on('keydown', '.qty-input', function (e) {
+            if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '-') {
+                e.preventDefault();
+            }
+        });
+
         // Delegate Quantity and GST Rate input changes
-        $(document).on('input', '.qty-input, .gst-rate-input', function () {
+        $(document).on('input change', '.qty-input', function () {
+            let val = $(this).val();
+            if (val && val.includes('.')) {
+                $(this).val(Math.floor(parseFloat(val)) || 1);
+            }
+            calculateTotals();
+        });
+
+        $(document).on('input', '.gst-rate-input', function () {
             calculateTotals();
         });
 
         // Delegate Row Delete
         $(document).on('click', '.btn-delete-row', function () {
             $(this).closest('tr').remove();
+            reindexRows();
             if ($('#itemsTableBody tr.item-row').length === 0) {
                 $('#itemsTableBody').html(`
                     <tr id="emptyRow">
@@ -345,6 +468,17 @@
             }
             calculateTotals();
         });
+
+        function reindexRows() {
+            $('#itemsTableBody tr.item-row').each(function (idx) {
+                $(this).find('input, select').each(function () {
+                    const name = $(this).attr('name');
+                    if (name) {
+                        $(this).attr('name', name.replace(/items\[\d+\]/, `items[${idx}]`));
+                    }
+                });
+            });
+        }
 
         // Clear Form Button
         $('#btnClear').on('click', function () {
@@ -370,7 +504,7 @@
             let grandTotal = 0;
 
             $('.item-row').each(function () {
-                const qty = parseFloat($(this).find('.qty-input').val()) || 0;
+                const qty = parseInt($(this).find('.qty-input').val(), 10) || 0;
                 const rate = parseFloat($(this).find('.rate-input').val()) || 0;
                 const gstRate = parseFloat($(this).find('.gst-rate-input').val()) || 0;
 
@@ -401,9 +535,10 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Trigger Supplier load if editing
-        if ($('#Supplier').val()) {
-            $('#Supplier').trigger('change');
+        // In edit mode: calculate totals for pre-rendered rows and finish initial load
+        if (isInitialLoad) {
+            calculateTotals();
+            isInitialLoad = false;
         }
     });
 </script>
