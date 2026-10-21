@@ -130,7 +130,16 @@ class CurrentStockReportController extends Controller
             ->where('IsActive', 1);
 
         if (!empty($departmentId) && $departmentId !== 'all') {
-            $itemQuery->where('Department', $departmentId);
+            if (is_array($departmentId)) {
+                $cleanDepts = array_filter($departmentId, function ($v) {
+                    return !empty($v) && $v !== 'all';
+                });
+                if (!empty($cleanDepts)) {
+                    $itemQuery->whereIn('Department', $cleanDepts);
+                }
+            } else {
+                $itemQuery->where('Department', $departmentId);
+            }
         }
 
         if (!empty($itemId) && $itemId !== 'all') {
@@ -239,8 +248,8 @@ class CurrentStockReportController extends Controller
                 $age = '-';
             }
 
-            // Status determination: In Stock vs Low Stock
-            if ($currentStock > $minQty) {
+            // Status determination: In Stock vs Low Stock (current stock >= min qty and > 0 is In Stock; below min qty is Low Stock)
+            if ($currentStock > 0 && $currentStock >= $minQty) {
                 $statusKey = 'in_stock';
                 $statusLabel = 'In Stock';
                 $statusBadgeClass = 'badge-in-stock';

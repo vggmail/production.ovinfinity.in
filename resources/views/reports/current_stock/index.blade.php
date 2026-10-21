@@ -280,7 +280,7 @@
                                 <span style="font-size: 0.75rem; color: #94a3b8;">{{ $row['unit'] }}</span>
                             @endif
                         </td>
-                        <td style="text-align: right; font-weight: 700; font-size: 0.95rem; color: {{ $row['current_stock_qty'] <= 0 ? '#dc2626' : ($row['current_stock_qty'] <= $row['min_qty'] ? '#d97706' : '#15803d') }};">
+                        <td style="text-align: right; font-weight: 700; font-size: 0.95rem; color: {{ $row['current_stock_qty'] <= 0 ? '#dc2626' : ($row['current_stock_qty'] < $row['min_qty'] ? '#d97706' : '#15803d') }};">
                             {{ number_format($row['current_stock_qty'], 2) }}
                             @if(!empty($row['unit']) && strtolower(trim($row['unit'])) !== 'not required')
                                 <span style="font-size: 0.75rem; color: #94a3b8;">{{ $row['unit'] }}</span>
