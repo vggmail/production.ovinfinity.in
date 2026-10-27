@@ -38,6 +38,7 @@ use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\MaterialIssueController;
 use App\Http\Controllers\DailyMaterialConsumptionReportController;
 use App\Http\Controllers\MonthlyMaterialConsumptionReportController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PIVsGRNReportController;
 use App\Http\Controllers\CurrentStockReportController;
 
@@ -123,15 +124,7 @@ Route::get('/seed', fn() => redirect()->route('seed.run'));
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard', [
-            'partiesCount' => \App\Models\Party::count(),
-            'suppliersCount' => \App\Models\Supplier::count(),
-            'rollSizesCount' => \App\Models\RollSize::count(),
-            'loomsCount' => \App\Models\LoomNumber::count(),
-            'colorsCount' => \App\Models\FabricColor::count(),
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile Settings
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
