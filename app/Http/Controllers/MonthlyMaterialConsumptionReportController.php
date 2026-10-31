@@ -56,9 +56,21 @@ class MonthlyMaterialConsumptionReportController extends Controller
             }
         }
 
+        $cleanDepts = [];
+        if (!empty($departmentId) && $departmentId !== 'all') {
+            if (is_array($departmentId)) {
+                $cleanDepts = array_values(array_filter($departmentId, function ($v) {
+                    return !empty($v) && $v !== 'all';
+                }));
+            } else {
+                $cleanDepts = [$departmentId];
+            }
+        }
+
         // Query Material Issue Child joined with Header
         $query = DB::table('inmaterialissuechild as ic')
             ->join('inmaterialissue as i', 'ic.MaterialIssue', '=', 'i.ID')
+            ->leftJoin('umitemmaster as im', 'ic.ItemMaster', '=', 'im.ID')
             ->where(function ($q) {
                 $q->whereNull('ic.IsActive')->orWhere('ic.IsActive', 1);
             })
@@ -73,8 +85,17 @@ class MonthlyMaterialConsumptionReportController extends Controller
             $query->whereRaw("DATE_FORMAT(i.IssueDate, '%Y-%m') <= ?", [$toMonth]);
         }
 
-        if (!empty($departmentId) && $departmentId !== 'all') {
-            $query->where('ic.Department', $departmentId);
+        if (!empty($cleanDepts)) {
+            $query->where(function ($q) use ($cleanDepts) {
+                $q->whereIn('ic.Department', $cleanDepts)
+                  ->orWhere(function ($sub) use ($cleanDepts) {
+                      $sub->where(function ($nc) {
+                          $nc->whereNull('ic.Department')
+                             ->orWhere('ic.Department', 0)
+                             ->orWhere('ic.Department', '');
+                      })->whereIn('im.Department', $cleanDepts);
+                  });
+            });
         }
 
         if (!empty($loomId) && $loomId !== 'all') {

@@ -36,6 +36,8 @@ use App\Http\Controllers\PIController;
 use App\Http\Controllers\GRNController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\MaterialIssueController;
+use App\Http\Controllers\RepairIssueController;
+use App\Http\Controllers\RepairReturnController;
 use App\Http\Controllers\DailyMaterialConsumptionReportController;
 use App\Http\Controllers\MonthlyMaterialConsumptionReportController;
 use App\Http\Controllers\DashboardController;
@@ -193,6 +195,28 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/materialissue/{id}', [MaterialIssueController::class, 'update'])->name('materialissue.update');
         Route::delete('/materialissue/{id}', [MaterialIssueController::class, 'destroy'])->name('materialissue.destroy');
         Route::get('/materialissue/{id}/print', [MaterialIssueController::class, 'print'])->name('materialissue.print');
+    });
+
+    // Repair Module Prefix
+    Route::prefix('repair')->name('repair.')->group(function () {
+        // Repair Material Issue
+        Route::get('/issue', [RepairIssueController::class, 'index'])->name('issue.index');
+        Route::get('/issue/data', [RepairIssueController::class, 'data'])->name('issue.data');
+        Route::get('/issue/create', [RepairIssueController::class, 'create'])->name('issue.create');
+        Route::post('/issue', [RepairIssueController::class, 'store'])->name('issue.store');
+        Route::get('/issue/{id}/edit', [RepairIssueController::class, 'edit'])->name('issue.edit');
+        Route::put('/issue/{id}', [RepairIssueController::class, 'update'])->name('issue.update');
+        Route::delete('/issue/{id}', [RepairIssueController::class, 'destroy'])->name('issue.destroy');
+
+        // Repair Material Return
+        Route::get('/return', [RepairReturnController::class, 'index'])->name('return.index');
+        Route::get('/return/data', [RepairReturnController::class, 'data'])->name('return.data');
+        Route::get('/return/create', [RepairReturnController::class, 'create'])->name('return.create');
+        Route::get('/return/fetch-repair-details', [RepairReturnController::class, 'fetchRepairDetails'])->name('return.fetchRepairDetails');
+        Route::post('/return', [RepairReturnController::class, 'store'])->name('return.store');
+        Route::get('/return/{id}/edit', [RepairReturnController::class, 'edit'])->name('return.edit');
+        Route::put('/return/{id}', [RepairReturnController::class, 'update'])->name('return.update');
+        Route::delete('/return/{id}', [RepairReturnController::class, 'destroy'])->name('return.destroy');
     });
 
 

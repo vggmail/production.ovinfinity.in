@@ -26,7 +26,7 @@
             <span>entries</span>
         </div>
         <div class="datatable-search">
-            <input type="text" id="dt-search" placeholder="Search by issue no, date, technician or remarks...">
+            <input type="text" id="dt-search" placeholder="Search by issue no, date, department, technician or remarks...">
         </div>
     </div>
 
@@ -36,6 +36,7 @@
                 <tr>
                     <th data-column="IssueNo" style="width: 140px;">Issue No</th>
                     <th data-column="IssueDate" style="width: 110px;">Issue Date</th>
+                    <th style="min-width: 140px;">Department</th>
                     <th style="min-width: 160px;">Technician / Person</th>
                     <th data-column="TotalItems" style="width: 100px;">Total Items</th>
                     <th data-column="TotalQuantity" style="width: 120px;">Total Qty</th>
@@ -87,6 +88,16 @@
                     name: 'IssueDate', 
                     sortable: true,
                     render: (val) => formatDate(val)
+                },
+                { 
+                    name: 'Department', 
+                    sortable: false,
+                    render: (val, row) => {
+                        if (row.departments && row.departments.length > 0) {
+                            return row.departments.map(d => `<span class="badge" style="display: inline-block; padding: 2px 7px; font-size: 0.8rem; background: #e0e7ff; color: #3730a3; border-radius: 4px; margin: 1px 2px; font-weight: 500;">${d}</span>`).join(' ');
+                        }
+                        return '<span class="text-muted">-</span>';
+                    }
                 },
                 { 
                     name: 'Technician', 

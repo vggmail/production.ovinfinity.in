@@ -33,6 +33,10 @@ class MaterialIssue extends Model
         'UpdatedOn' => 'datetime',
     ];
 
+    protected $appends = [
+        'departments',
+    ];
+
     public function technicianRelation()
     {
         return $this->belongsTo(Technician::class, 'Technician', 'ID');
@@ -41,5 +45,23 @@ class MaterialIssue extends Model
     public function children()
     {
         return $this->hasMany(MaterialIssueChild::class, 'MaterialIssue', 'ID');
+    }
+
+    public function getDepartmentsAttribute()
+    {
+        if (!$this->relationLoaded('children')) {
+            return [];
+        }
+
+        $names = [];
+        foreach ($this->children as $child) {
+            if ($child->departmentRelation && $child->departmentRelation->DepartmentName) {
+                $names[] = $child->departmentRelation->DepartmentName;
+            } elseif ($child->itemMasterRelation && $child->itemMasterRelation->departmentRelation && $child->itemMasterRelation->departmentRelation->DepartmentName) {
+                $names[] = $child->itemMasterRelation->departmentRelation->DepartmentName;
+            }
+        }
+
+        return array_values(array_unique(array_filter($names)));
     }
 }

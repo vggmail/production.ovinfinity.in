@@ -52,27 +52,96 @@
         border: 1px solid #cbd5e1 !important;
         border-radius: 6px !important;
         background-color: #ffffff !important;
-        padding: 2px 6px !important;
+        padding: 2px 28px 2px 6px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        position: relative !important;
     }
     .select2-container--default.select2-container--focus .select2-selection--multiple {
         border-color: #4f46e5 !important;
         box-shadow: 0 0 0 2px rgba(79,70,229,0.15) !important;
     }
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        display: inline-flex !important;
+        align-items: center !important;
+        position: relative !important;
         background-color: #4f46e5 !important;
-        color: #fff !important;
+        color: #ffffff !important;
         border: none !important;
         border-radius: 4px !important;
-        font-size: 0.78rem !important;
-        padding: 2px 6px !important;
-        margin: 2px 3px 2px 0 !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        padding: 2px 8px 2px 6px !important;
+        margin: 2px 4px 2px 0 !important;
+        line-height: 1.4 !important;
     }
     .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-        color: #c7d2fe !important;
-        margin-right: 4px !important;
+        position: static !important;
+        float: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        border: none !important;
+        border-right: none !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        cursor: pointer !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        margin: 0 5px 0 0 !important;
+        line-height: 1 !important;
+        outline: none !important;
     }
     .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-        color: #fff !important;
+        color: #ffffff !important;
+        background: transparent !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+        padding: 0 !important;
+        color: #ffffff !important;
+    }
+    .select2-container .select2-search--inline {
+        display: inline-flex !important;
+        align-items: center !important;
+        margin: 2px 0 !important;
+    }
+    .select2-container--default .select2-search--inline .select2-search__field,
+    .select2-search--inline .select2-search__field {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 2px 4px !important;
+        margin: 0 !important;
+        height: auto !important;
+        min-height: unset !important;
+        width: auto !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__clear {
+        position: absolute !important;
+        right: 8px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        padding: 0 2px !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        color: #94a3b8 !important;
+        cursor: pointer !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__clear:hover {
+        color: #ef4444 !important;
     }
     /* Select2 — single-select (item / status) */
     .select2-container .select2-selection--single {

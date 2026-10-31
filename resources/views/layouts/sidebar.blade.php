@@ -131,6 +131,27 @@
             </ul>
         </li>
 
+        <li class="sidebar-item has-submenu {{ request()->routeIs('repair.*') ? 'open' : '' }}">
+            <a href="#" onclick="toggleSubmenu(event)" class="submenu-toggle" title="Repair">
+                <span style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span>🔧</span> <span class="menu-text">Repair</span>
+                </span>
+                <span class="submenu-arrow">{{ request()->routeIs('repair.*') ? '▼' : '▶' }}</span>
+            </a>
+            <ul class="sidebar-submenu" style="display: {{ request()->routeIs('repair.*') ? 'flex' : 'none' }};">
+                <li class="sidebar-subitem {{ request()->routeIs('repair.issue.*') ? 'active' : '' }}">
+                    <a href="{{ route('repair.issue.index') }}" title="Repair Material Issue">
+                        <span>📤</span> <span class="menu-text">Repair Material Issue</span>
+                    </a>
+                </li>
+                <li class="sidebar-subitem {{ request()->routeIs('repair.return.*') ? 'active' : '' }}">
+                    <a href="{{ route('repair.return.index') }}" title="Repair Material Return">
+                        <span>📥</span> <span class="menu-text">Repair Material Return</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <li class="sidebar-item has-submenu {{ request()->routeIs('reports.*') ? 'open' : '' }}">
             <a href="#" onclick="toggleSubmenu(event)" class="submenu-toggle" title="Reports">
                 <span style="display: flex; align-items: center; gap: 0.75rem;">

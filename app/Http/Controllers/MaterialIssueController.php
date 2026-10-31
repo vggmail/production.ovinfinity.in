@@ -23,7 +23,11 @@ class MaterialIssueController extends Controller
 
     public function data(Request $request)
     {
-        $query = MaterialIssue::with(['technicianRelation']);
+        $query = MaterialIssue::with([
+            'technicianRelation',
+            'children.departmentRelation',
+            'children.itemMasterRelation.departmentRelation'
+        ]);
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -32,6 +36,12 @@ class MaterialIssueController extends Controller
                   ->orWhere('Remarks', 'like', "%{$search}%")
                   ->orWhereHas('technicianRelation', function ($t) use ($search) {
                       $t->where('Name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('children.departmentRelation', function ($d) use ($search) {
+                      $d->where('DepartmentName', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('children.itemMasterRelation.departmentRelation', function ($d) use ($search) {
+                      $d->where('DepartmentName', 'like', "%{$search}%");
                   });
             });
         }
