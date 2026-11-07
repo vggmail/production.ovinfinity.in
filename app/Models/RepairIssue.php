@@ -50,4 +50,9 @@ class RepairIssue extends Model
     {
         return $this->hasMany(RepairReturn::class, 'RepairIssue', 'ID');
     }
+
+    public function activeReturns()
+    {
+        return $this->hasMany(RepairReturn::class, 'RepairIssue', 'ID')->where('IsActive', 1);
+    }
 }

@@ -215,11 +215,11 @@ class RepairIssueController extends Controller
     {
         $repairIssue = RepairIssue::findOrFail($id);
 
-        // Prevent delete if return entry exists
-        if ($repairIssue->returns()->count() > 0) {
+        // Prevent delete if active return entry exists
+        if ($repairIssue->returns()->where('IsActive', 1)->count() > 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete this Repair Issue because a Repair Return has already been recorded against it.'
+                'message' => 'Cannot delete this Repair Issue because an active Repair Return has already been recorded against it.'
             ], 422);
         }
 
